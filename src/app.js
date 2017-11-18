@@ -14,6 +14,14 @@ app.use(express.static(__dirname + '/public_html'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 
+app.get('/', function(req, res) {
+  res.send('Please provide a task ID like /mytask-id');
+});
+
+app.get('/ping', function(req, res) {
+  res.send('pong');
+});
+
 app.get('/:task_id', function(req, res) {
   const task_id = req.params.task_id;
   res.render('index', {
