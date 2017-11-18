@@ -1,0 +1,25 @@
+{
+  "name": "mesos-task-exec-web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clems4ever/mesos-task-exec-web.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/clems4ever/mesos-task-exec-web/issues"
+  },
+  "homepage": "https://github.com/clems4ever/mesos-task-exec-web#readme",
+  "dependencies": {
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "express-ws": "^3.0.0",
+    "node-pty": "^0.7.3"
+  }
+}
