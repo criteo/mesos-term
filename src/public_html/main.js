@@ -34,6 +34,15 @@
   }
   
   function runRealTerminal() {
+    var timerId = 0; 
+    function keepAlive() { 
+        var timeout = 20000;  
+        if (socket.readyState == socket.OPEN) {  
+            socket.send('');  
+        }  
+        timerId = setTimeout(keepAlive, timeout);  
+    }  
+    keepAlive();
     term.attach(socket);
     term._initialized = true;
   }
