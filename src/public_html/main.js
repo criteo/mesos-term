@@ -21,7 +21,10 @@
         cols = initialGeometry.cols,
         rows = initialGeometry.rows;
   
-    fetch('/terminals/' + task_id, {method: 'POST'}).then(function (res) {
+    fetch('/terminals/' + task_id, {
+      method: 'POST',
+      credentials: "same-origin"
+    }).then(function (res) {
       res.text().then(function (pid) {
         window.pid = pid;
         socketURL += pid;
