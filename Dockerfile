@@ -1,4 +1,4 @@
-FROM node:8.9.1
+FROM node:8.9.1-slim
 
 RUN apt-get update
 RUN apt-get install -y python3 python3-pip
@@ -6,6 +6,7 @@ RUN apt-get install -y python3 python3-pip
 WORKDIR /usr/app
 
 ADD package.json package.json
+ADD package-lock.json package-lock.json
 RUN npm install
 
 ADD scripts/entrypoint.sh /entrypoint.sh
