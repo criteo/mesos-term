@@ -1,4 +1,4 @@
-FROM node:8.9.1-slim
+FROM node:8.9.1
 
 RUN apt-get update
 RUN apt-get install -y python3 python3-pip
