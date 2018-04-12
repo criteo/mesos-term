@@ -14,7 +14,7 @@ var logs = {};
 var ownersByTaskId = {};
 var ownersByPid = {};
 
-var DEBUG_ALLOWED_TO_KEY = 'DEBUG_ALLOWED_TO';
+var DEBUG_ALLOWED_TO_KEY = 'DEBUG_GRANTED_TO';
 var MESOS_TASK_EXEC_DIR = getOrExit('MESOS_TASK_EXEC_DIR');
 var SESSION_SECRET = getOrExit('SESSION_SECRET');
 var LDAP_URL = getOrExit('LDAP_URL');
