@@ -1,6 +1,7 @@
 sudo: false
 language: bash
-service: docker
+services:
+- docker
 script:
 - ./scripts/deploy_dockerhub.sh
 before_deploy:
