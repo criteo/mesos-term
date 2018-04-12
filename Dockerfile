@@ -12,10 +12,10 @@ RUN npm install
 ADD scripts/entrypoint.sh /entrypoint.sh
 ADD src src
 
-ADD https://github.com/clems4ever/mesos-task-exec/archive/v0.3.1.tar.gz .
-RUN tar xzvf v0.3.1.tar.gz -C /tmp && cd /tmp/mesos-task-exec-0.3.1 && pip3 install -r requirements.yml
+ADD https://github.com/clems4ever/mesos-task-exec/archive/v0.4.1.tar.gz .
+RUN tar xzvf v0.4.1.tar.gz -C /tmp && cd /tmp/mesos-task-exec-0.4.1 && pip3 install -r requirements.yml
 
-ENV MESOS_TASK_EXEC_PATH=/tmp/mesos-task-exec-0.3.1/src/app.py
+ENV MESOS_TASK_EXEC_DIR=/tmp/mesos-task-exec-0.4.1/src
 ENV MESOS_MASTER_URL=http://localhost:5050
 
 CMD ["/entrypoint.sh"]

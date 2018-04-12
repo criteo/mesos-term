@@ -8,8 +8,20 @@ var passport = require('passport');
 var LdapStrategy = require('passport-ldapauth');
 var basicAuth = require('basic-auth');
 var session = require('express-session')
+var exec = require('child_process').exec;
 var terminals = {};
 var logs = {};
+var ownersByTaskId = {};
+var ownersByPid = {};
+
+var DEBUG_ALLOWED_TO_KEY = 'DEBUG_ALLOWED_TO';
+var MESOS_TASK_EXEC_DIR = getOrExit('MESOS_TASK_EXEC_DIR');
+var SESSION_SECRET = getOrExit('SESSION_SECRET');
+var LDAP_URL = getOrExit('LDAP_URL');
+var LDAP_BASE_DN = getOrExit('LDAP_BASE_DN');
+var LDAP_USER = getOrExit('LDAP_USER');
+var LDAP_PASSWORD = getOrExit('LDAP_PASSWORD');
+var ADMINS = process.env['ADMINS'] || ''
 
 function getOrExit(var_name) {
   var v = process.env[var_name];
@@ -37,34 +49,44 @@ function intersection(array1, array2) {
   });
 }
 
-function isUserAllowed(groups) {
-   return function(req, res, next) {
-     if(!groups || intersection(req.user.memberOf, groups).length > 0)
-       next();
-     else {
-       console.error('User "%s" is not in authorized groups', req.user.cn);
-       res.status(403);
-       res.send('Unauthorized');
-     }
-   } 
+function isUserAllowedToDebug(req, res, next) {
+  const admins = (ADMINS != '') ? ADMINS.split(',') : [];
+  let allowed = [];
+  if(req.params.task_id) {
+    allowed = admins.concat(ownersByTaskId[req.params.task_id]);
+  } else {
+    allowed = admins.concat(ownersByPid[req.params.pid]);
+  }
+
+  const groups = req.user.memberOf.map(m => m.match(/^CN=([a-zA-Z0-9_-]+)/m)[1]);
+  const userCN = req.user.cn;
+  if((groups && intersection(groups, allowed).length > 0) ||
+     intersection([req.user.cn], allowed).length > 0)
+    next();
+  else {
+    console.error('User "%s" is not in authorized to debug', req.user.cn);
+    res.status(403);
+    res.send('Unauthorized');
+  }
 }
 
-var MESOS_TASK_EXEC_PATH = getOrExit('MESOS_TASK_EXEC_PATH');
-var SESSION_SECRET = getOrExit('SESSION_SECRET');
-var LDAP_URL = getOrExit('LDAP_URL');
-var LDAP_BASE_DN = getOrExit('LDAP_BASE_DN');
-var LDAP_USER = getOrExit('LDAP_USER');
-var LDAP_PASSWORD = getOrExit('LDAP_PASSWORD');
-var LDAP_ALLOWED_GROUPS = process.env['LDAP_ALLOWED_GROUPS']
-var allowed_groups;
+function getTaskLabels(taskId, fn) {
+  exec(`python3 ${MESOS_TASK_EXEC_DIR}/get_task_info.py ${taskId}`,
+    function(err, stdout, stderr) {
+    if(err) {
+      fn(err);
+      return;
+    }
+    const info = JSON.parse(stdout);
+    const labels = ('labels' in info) ? info['labels'] : [];
+    const labelsDict = {}
+    for(var i = 0; i < labels.length; ++i) {
+      labelsDict[labels[i]['key']] = labels[i]['value'];
+    }
+    fn(undefined, labelsDict);
+  });
+}
 
-if(!LDAP_ALLOWED_GROUPS) {
-  console.log('All users are allowed to connect to containers');
-}
-else {
-  allowed_groups = LDAP_ALLOWED_GROUPS.split(';');
-  console.log('Only users from following groups can log in containers:\n%s', allowed_groups.join("\n"));
-}
 
 var OPTS = {
   server: {
@@ -79,13 +101,12 @@ var OPTS = {
 
 
 passport.use(new LdapStrategy(OPTS));
-app.use(express.static(__dirname + '/public_html'));
+app.use('/static', express.static(__dirname + '/public_html'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use(passport.initialize());
 app.use(protectWithBasicAuth);
 app.use(passport.authenticate('ldapauth', {session: true}));
-app.use(isUserAllowed(allowed_groups));
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
@@ -115,27 +136,44 @@ app.get('/:task_id', function(req, res) {
   }
 
   const task_id = req.params.task_id;
-  console.log('User "%s" has requested a session in container "%s"', req.user.cn, task_id);
-  res.render('index', {
-    task_id: task_id
+  getTaskLabels(task_id, function(err, labels) {
+    if(err) {
+      res.send('Internal error');
+      console.error('Error while retrieving task labels %s', err);
+      next();
+      return;
+    }
+    if(DEBUG_ALLOWED_TO_KEY in labels) {
+      ownersByTaskId[task_id] = labels[DEBUG_ALLOWED_TO_KEY].split(',');
+    }
+    isUserAllowedToDebug(req, res, function() {
+      console.log('User "%s" has requested a session in container "%s"',
+        req.user.cn, task_id);
+      res.render('index', {
+        task_id: task_id
+      });
+    });
   });
 });
 
-app.post('/terminals/:task_id', function(req, res) {
+app.post('/terminals/:task_id', isUserAllowedToDebug, function(req, res) {
   const task_id = req.params.task_id;
   if(!task_id) {
     res.send('You must provide a valid task id.');
     return;
   }
-  const term = pty.spawn('python3', [MESOS_TASK_EXEC_PATH, task_id], {
-        name: 'mesos-task-exec',
-        cwd: process.env.PWD,
-        env: process.env
-      });
+
+  const term = pty.spawn('python3',
+    [MESOS_TASK_EXEC_DIR + '/exec.py', task_id], {
+    name: 'mesos-task-exec',
+    cwd: process.env.PWD,
+    env: process.env
+  });
 
   console.log('User "%s" has opened a session in container "%s" (pid=%s)', req.user.cn, task_id, term.pid);
   terminals[term.pid] = term;
   logs[term.pid] = '';
+  ownersByPid[term.pid] = ownersByTaskId[task_id];
   term.on('data', function(data) {
     logs[term.pid] += data;
   });
@@ -143,7 +181,7 @@ app.post('/terminals/:task_id', function(req, res) {
   res.end();
 });
 
-app.post('/terminals/:pid/size', function (req, res) {
+app.post('/terminals/:pid/size', isUserAllowedToDebug, function (req, res) {
   var pid = parseInt(req.params.pid),
       cols = parseInt(req.query.cols),
       rows = parseInt(req.query.rows),
@@ -154,7 +192,11 @@ app.post('/terminals/:pid/size', function (req, res) {
   res.end();
 });
 
-app.ws('/terminals/:pid', function (ws, req) {
+function wsIsUserAllowedToDebug(ws, req, next) {
+  isUserAllowedToDebug(req, undefined, next);
+}
+
+app.ws('/terminals/:pid', wsIsUserAllowedToDebug, function (ws, req) {
   var term = terminals[parseInt(req.params.pid)];
   console.log('User "%s" is connected to terminal %s', req.user.cn, term.pid);
   ws.send(logs[term.pid]);
