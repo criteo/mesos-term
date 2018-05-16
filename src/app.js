@@ -26,7 +26,7 @@ var ADMINS = process.env['ADMINS'] || ''
 function getOrExit(var_name) {
   var v = process.env[var_name];
   if(v) return v;
- 
+
   console.log(`${var_name} env var must be provided`);
   process.exit(1);
 }
@@ -140,7 +140,6 @@ app.get('/:task_id', function(req, res) {
     if(err) {
       res.send('Internal error');
       console.error('Error while retrieving task labels %s', err);
-      next();
       return;
     }
     if(DEBUG_ALLOWED_TO_KEY in labels) {
