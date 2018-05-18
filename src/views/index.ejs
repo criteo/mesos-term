@@ -2,30 +2,24 @@
 <html>
     <head>
         <title><%= task_id %></title>
+        <link rel="stylesheet" href="/static/bootstrap.min.css" />
         <link rel="stylesheet" href="/static/xterm.css" />
         <link rel="stylesheet" href="/static/style.css" />
-        <script src="/static/xterm.js" ></script>
-        <script src="/static/addons/attach/attach.js" ></script>
-        <script src="/static/addons/fit/fit.js" ></script>
-        <script src="/static/addons/fullscreen/fullscreen.js" ></script>
         <link rel="shortcut icon" href="/static/ico/favicon.ico">
     </head>
     <body>
         <div class="container">
-          <pre class="header">
-  __  __                       _______                  
- |  \/  |                     |__   __|                 
- | \  / | ___  ___  ___  ___     | | ___ _ __ _ __ ___  
- | |\/| |/ _ \/ __|/ _ \/ __|    | |/ _ \ '__| '_ ` _ \ 
- | |  | |  __/\__ \ (_) \__ \    | |  __/ |  | | | | | |
- |_|  |_|\___||___/\___/|___/    |_|\___|_|  |_| |_| |_|
-          </pre>
+          <nav class="navbar navbar-light bg-light">
+            <a class="navbar-brand" href="#">Mesos Term </a>
+          </nav>
           <div id="terminal-container" data-taskid="<%= task_id %>"></div>
         </div>
-        <script
-          src="https://code.jquery.com/jquery-3.2.1.min.js"
-          integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-          crossorigin="anonymous"></script>
+        <script src="static/jquery-3.3.1.min.js"></script>
+        <script src="static/bootstrap.bundle.min.js"></script>
+        <script src="static/xterm.js" ></script>
+        <script src="static/addons/attach/attach.js" ></script>
+        <script src="static/addons/fit/fit.js" ></script>
+        <script src="static/addons/fullscreen/fullscreen.js" ></script>
         <script src="static/main.js"></script>
     </body>
 </html>
