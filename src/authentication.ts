@@ -3,7 +3,7 @@ import passport = require('passport');
 import LdapStrategy = require('passport-ldapauth');
 import basicAuth = require('basic-auth');
 
-import { ADMINS, LDAP_URL, LDAP_USER, LDAP_PASSWORD, LDAP_BASE_DN } from './env_vars';
+import { env } from './env_vars';
 
 function protectWithBasicAuth(
   req: Express.Request,
@@ -23,12 +23,12 @@ function protectWithBasicAuth(
 
 
 export default function(app: Express.Application) {
-  const OPTS = {
+  const options = {
     server: {
-      url: LDAP_URL,
-      bindDN: LDAP_USER,
-      bindCredentials: LDAP_PASSWORD,
-      searchBase: LDAP_BASE_DN,
+      url: env.LDAP_URL,
+      bindDN: env.LDAP_USER,
+      bindCredentials: env.LDAP_PASSWORD,
+      searchBase: env.LDAP_BASE_DN,
       searchFilter: '(&(cn={{username}})(objectClass=user))'
     },
     credentialsLookup: basicAuth
@@ -46,5 +46,5 @@ export default function(app: Express.Application) {
   app.use(protectWithBasicAuth);
   app.use(passport.authenticate('ldapauth', {session: true}));
 
-  passport.use(new LdapStrategy(OPTS));
+  passport.use(new LdapStrategy(options));
 }

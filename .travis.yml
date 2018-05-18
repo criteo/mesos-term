@@ -3,6 +3,7 @@ language: bash
 services:
 - docker
 script:
+- ./scripts/test.sh
 - ./scripts/build.sh
 - ./scripts/deploy_dockerhub.sh
 before_deploy:

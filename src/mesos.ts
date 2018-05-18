@@ -1,14 +1,19 @@
 import child_process = require('child_process');
-import { MESOS_TASK_EXEC_DIR } from './env_vars';
+import { env } from './env_vars';
 
 type Labels = {[key: string]: string};
 type MesosLabels = {[key: string]: { key: string, value: string }};
 
-export function getTaskLabels(
-  taskId: string,
-  fn: (err: Error, labels?: Labels) => void) {
+export interface TaskInfo {
+  labels: Labels;
+  user: string;
+}
 
-  child_process.exec(`python3 ${MESOS_TASK_EXEC_DIR}/get_task_info.py ${taskId}`,
+export function getTaskInfo(
+  taskId: string,
+  fn: (err: Error, info?: TaskInfo) => void) {
+
+  child_process.exec(`python3 ${env.MESOS_TASK_EXEC_DIR}/get_task_info.py ${taskId}`,
     function(err, stdout, stderr) {
     if (err) {
       fn(err);
@@ -16,10 +21,17 @@ export function getTaskLabels(
     }
     const info = JSON.parse(stdout);
     const labels = ('labels' in info) ? info['labels'] : [];
+    const user = ('user' in info) ? info['user'] : undefined;
     const labelsDict: Labels = {};
+
     for (let i = 0; i < labels.length; ++i) {
       labelsDict[labels[i]['key']] = labels[i]['value'];
     }
-    fn(undefined, labelsDict);
+
+    const task_info = {
+      labels: labelsDict,
+      user: user
+    };
+    fn(undefined, task_info);
   });
 }

@@ -2,7 +2,7 @@ import Express = require('express');
 import NodePty = require('node-pty');
 import * as Ws from 'ws';
 
-import { MESOS_TASK_EXEC_DIR } from '../env_vars';
+import { env } from '../env_vars';
 import { getOwnersByTaskId, getOwnersByPid } from '../express_helpers';
 
 const terminals: {[pid: number]: NodePty.IPty} = {};
@@ -16,7 +16,7 @@ export function requestTerminal(req: Express.Request, res: Express.Response) {
   }
 
   const term = NodePty.spawn('python3',
-    [MESOS_TASK_EXEC_DIR + '/exec.py', task_id], {
+    [env.MESOS_TASK_EXEC_DIR + '/exec.py', task_id], {
     name: 'mesos-task-exec',
     cwd: process.env.PWD,
     env: process.env

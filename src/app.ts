@@ -4,7 +4,7 @@ import os = require('os');
 import path = require('path');
 import session = require('express-session');
 
-import { SESSION_SECRET } from './env_vars';
+import { env } from './env_vars';
 
 import index from './controllers/index';
 import ping from './controllers/ping';
@@ -23,7 +23,7 @@ app.use('/static', Express.static(__dirname + '/public_html'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use(session({
-  secret: SESSION_SECRET,
+  secret: env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
 }));
