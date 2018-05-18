@@ -10,7 +10,7 @@ ADD package-lock.json package-lock.json
 RUN npm install
 
 ADD scripts/entrypoint.sh /entrypoint.sh
-ADD src src
+ADD dist dist
 
 ADD https://github.com/clems4ever/mesos-task-exec/archive/v0.4.1.tar.gz .
 RUN tar xzvf v0.4.1.tar.gz -C /tmp && cd /tmp/mesos-task-exec-0.4.1 && pip3 install -r requirements.yml

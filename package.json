@@ -4,7 +4,10 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "exit 0"
+    "test": "exit 0",
+    "lint": "./node_modules/.bin/tslint -c tslint.json -p tsconfig.json",
+    "compile": "./node_modules/.bin/tsc -p tsconfig.json",
+    "dist": "cp -r src/views src/public_html dist"
   },
   "repository": {
     "type": "git",
@@ -22,8 +25,21 @@
     "express": "^4.16.2",
     "express-session": "^1.15.6",
     "express-ws": "^3.0.0",
-    "node-pty": "^0.7.3",
+    "node-pty": "^0.7.4",
     "passport": "^0.4.0",
     "passport-ldapauth": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/basic-auth": "^1.1.2",
+    "@types/express": "^4.11.1",
+    "@types/express-session": "^1.15.8",
+    "@types/express-ws": "^3.0.0",
+    "@types/node": "^10.1.1",
+    "mocha": "^5.1.1",
+    "node-ts": "^2.1.2",
+    "tsc": "^1.20150623.0",
+    "tslint": "^5.10.0",
+    "tslint-eslint-rules": "^5.3.1",
+    "typescript": "^2.8.3"
   }
 }

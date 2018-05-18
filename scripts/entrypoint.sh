@@ -2,4 +2,4 @@
 
 export PORT=${PORT0:-3000}
 
-node src/app.js
+node dist/app.js
