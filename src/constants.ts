@@ -1,0 +1,1 @@
+export const DEBUG_ALLOWED_TO_KEY = 'DEBUG_GRANTED_TO';
