@@ -3,7 +3,7 @@ import NodePty = require('node-pty');
 import * as Ws from 'ws';
 
 import { env } from '../env_vars';
-import { getOwnersByTaskId, getOwnersByPid } from '../express_helpers';
+import { getOwnersByTaskId, getOwnersByPid, getLogger } from '../express_helpers';
 
 const terminals: {[pid: number]: NodePty.IPty} = {};
 const logs: {[pid: number]: string} = {};
@@ -11,9 +11,10 @@ const logs: {[pid: number]: string} = {};
 export function requestTerminal(req: Express.Request, res: Express.Response) {
   const task_id = req.params.task_id;
   if (!task_id) {
-    res.send('You must provide a valid task id.');
+    res.send('You must provide a task id.');
     return;
   }
+
 
   const term = NodePty.spawn('python3',
     [env.MESOS_TASK_EXEC_DIR + '/exec.py', task_id], {
@@ -22,8 +23,8 @@ export function requestTerminal(req: Express.Request, res: Express.Response) {
     env: process.env
   });
 
-  console.log('User "%s" has opened a session in container "%s" (pid=%s)',
-    'anonymous', task_id, term.pid);
+  getLogger(req).open(req, task_id, term.pid);
+
   terminals[term.pid] = term;
   logs[term.pid] = '';
   const ownersByPid = getOwnersByPid(req);
@@ -37,19 +38,19 @@ export function requestTerminal(req: Express.Request, res: Express.Response) {
 }
 
 export function resizeTerminal(req: Express.Request, res: Express.Response) {
-  const pid = parseInt(req.params.pid),
-      cols = parseInt(req.query.cols),
-      rows = parseInt(req.query.rows),
-      term = terminals[pid];
+  const pid = parseInt(req.params.pid);
+  const cols = parseInt(req.query.cols);
+  const rows = parseInt(req.query.rows);
+  const term = terminals[pid];
 
   term.resize(cols, rows);
-  console.log('Resized terminal ' + pid + ' to ' + cols + ' cols and ' + rows + ' rows.');
+  getLogger(req).resizeTerminal(pid, cols, rows);
   res.end();
 }
 
 export function connectTerminal(ws: Ws, req: Express.Request) {
   const term = terminals[parseInt(req.params.pid)];
-  console.log('User "%s" is connected to terminal %s', 'anonymous', term.pid);
+  getLogger(req).connect(req, term.pid);
   ws.send(logs[term.pid]);
 
   term.on('data', function(data) {
@@ -63,7 +64,7 @@ export function connectTerminal(ws: Ws, req: Express.Request) {
   });
 
   term.on('exit', function() {
-    console.log('Connection to nested container has been closed.');
+    getLogger(req).connectionClosed(term.pid);
     ws.close();
   });
 
@@ -73,7 +74,7 @@ export function connectTerminal(ws: Ws, req: Express.Request) {
 
   ws.on('close', function () {
     term.kill();
-    console.log('User "%s" is diconnected from terminal %s', 'anonymous', term.pid);
+    getLogger(req).disconnect(req, term.pid);
     // Clean things up
     delete terminals[term.pid];
     delete logs[term.pid];
