@@ -27,7 +27,10 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
 }));
-authentication(app);
+
+if (env.AUTHORIZATIONS_ENABLED) {
+  authentication(app);
+}
 
 // ROUTES
 

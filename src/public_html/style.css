@@ -2,23 +2,109 @@ body, html {
   margin: 0;
   padding: 0;
   background-color: black;
+  overflow: hidden;
 }
 
-.header {
-  color: white;
-  text-align: center;
-  height: 105px;
-  border-bottom: 1px #aaa solid;
-  margin: 0;
-}
-
-.container {
-  position: fixed;
+.term {
+  position: absolute;
   width: 100%;
-  height: 100%;
+  height: 99%;
 }
 
 #terminal-container {
   width: 100%;
-  padding: 5px 0px;
+  height: 100%;
+}
+
+#terminal-container .terminal {
+  padding-bottom: 4px;
+}
+
+.status-bar {
+  background-color: #3a3a7d;
+  position: absolute;
+  bottom: 0px;
+  color: white;
+  width: 100%;
+  height: 25px;
+  font-weight: bold;
+}
+
+.status-bar div {
+  display: inline-block;
+  height: 25px;
+  padding: 0px 8px;
+}
+
+.status-bar div span {
+  display: table-cell;
+  height: 25px;
+  vertical-align: middle;
+}
+
+.status-bar .icon {
+  margin-right: 6px;
+}
+
+.status-bar .brand {
+  float: right;
+  background-color: #282846;
+}
+
+.status-bar .brand a {
+  color: white;
+  text-decoration: none;
+}
+
+.status-bar .brand a:hover {
+  color: #cccccc;
+}
+
+.connection-closed-splash {
+  width: 300px;
+  height: 100px;
+  background: #ff0000de;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -150px;
+  margin-top: -50px;
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+  font-size: 1.3em;
+  display: none;
+}
+
+.connection-closed-splash span {
+  display: table-cell;
+  height: 100px;
+  vertical-align: middle;
+}
+
+.connection-closed-splash .icon {
+  width: 64px;
+  height: 64px;
+  float: left;
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }

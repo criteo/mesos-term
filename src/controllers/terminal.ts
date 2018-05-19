@@ -23,7 +23,7 @@ export function requestTerminal(req: Express.Request, res: Express.Response) {
   });
 
   console.log('User "%s" has opened a session in container "%s" (pid=%s)',
-    req.user.cn, task_id, term.pid);
+    'anonymous', task_id, term.pid);
   terminals[term.pid] = term;
   logs[term.pid] = '';
   const ownersByPid = getOwnersByPid(req);
@@ -49,7 +49,7 @@ export function resizeTerminal(req: Express.Request, res: Express.Response) {
 
 export function connectTerminal(ws: Ws, req: Express.Request) {
   const term = terminals[parseInt(req.params.pid)];
-  console.log('User "%s" is connected to terminal %s', req.user.cn, term.pid);
+  console.log('User "%s" is connected to terminal %s', 'anonymous', term.pid);
   ws.send(logs[term.pid]);
 
   term.on('data', function(data) {
@@ -61,12 +61,19 @@ export function connectTerminal(ws: Ws, req: Express.Request) {
       // The WebSocket is not open, ignore
     }
   });
+
+  term.on('exit', function() {
+    console.log('Connection to nested container has been closed.');
+    ws.close();
+  });
+
   ws.on('message', function(msg: string) {
     term.write(msg);
   });
+
   ws.on('close', function () {
     term.kill();
-    console.log('User "%s" is diconnected from terminal %s', req.user.cn, term.pid);
+    console.log('User "%s" is diconnected from terminal %s', 'anonymous', term.pid);
     // Clean things up
     delete terminals[term.pid];
     delete logs[term.pid];

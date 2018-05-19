@@ -2,24 +2,31 @@
 <html>
     <head>
         <title><%= task_id %></title>
-        <link rel="stylesheet" href="/static/bootstrap.min.css" />
         <link rel="stylesheet" href="/static/xterm.css" />
         <link rel="stylesheet" href="/static/style.css" />
         <link rel="shortcut icon" href="/static/ico/favicon.ico">
     </head>
     <body>
-        <div class="container">
-          <nav class="navbar navbar-light bg-light">
-            <a class="navbar-brand" href="#">Mesos Term </a>
-          </nav>
+        <div class="term">
           <div id="terminal-container" data-taskid="<%= task_id %>"></div>
         </div>
+        <div class="status-bar">
+          <div><span><i class="fas fa-user icon"></i><%= user %></span></div>
+          <div><span><i class="fas fa-chevron-circle-right icon"></i><%= task_id %></span></div>
+          <div class="brand"><span><a href="https://github.com/clems4ever/mesos-term" target="_blank"><i class="fab fa-github icon"></i>MesosTerm</a></span></div>
+        </div>
+        <div class="connection-closed-splash">
+          <span>
+            <i class="fas fa-times-circle icon"></i>
+            Connection has been closed. The container probably stopped...
+          </span>
+        </div>
+
+        <script src="static/fontawesome-all.min.js"></script>
         <script src="static/jquery-3.3.1.min.js"></script>
-        <script src="static/bootstrap.bundle.min.js"></script>
         <script src="static/xterm.js" ></script>
         <script src="static/addons/attach/attach.js" ></script>
         <script src="static/addons/fit/fit.js" ></script>
-        <script src="static/addons/fullscreen/fullscreen.js" ></script>
         <script src="static/main.js"></script>
     </body>
 </html>

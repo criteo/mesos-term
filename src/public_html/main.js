@@ -5,6 +5,14 @@
       socket,
       pid;
   
+  function resize() {
+    term.fit();
+    const terminal = $('.terminal');
+    statusBarHeight = parseInt($(window).height() - terminal.height() - 2);
+    $('.status-bar').css('height', statusBarHeight);
+    $('.status-bar div').css('height', statusBarHeight);
+    $('.status-bar div span').css('height', statusBarHeight);
+  }
   
   function createTerminal(terminalContainer, task_id) {
     while (terminalContainer.children.length) {
@@ -15,8 +23,8 @@
     socketURL = protocol + location.hostname + ((location.port) ? (':' + location.port) : '') + '/terminals/';
   
     term.open(terminalContainer, true);
-    term.fit();
-  
+    resize();
+
     var initialGeometry = term.proposeGeometry(),
         cols = initialGeometry.cols,
         rows = initialGeometry.rows;
@@ -30,10 +38,18 @@
         socketURL += pid;
         socket = new WebSocket(socketURL);
         socket.onopen = runRealTerminal;
-        // socket.onclose = runFakeTerminal;
-        // socket.onerror = runFakeTerminal;
+        socket.onclose = onSocketClose;
+        socket.onerror = onSocketError;
       });
     });
+  }
+
+  function onSocketClose() {
+    $('.connection-closed-splash').show();
+  }
+
+  function onSocketError() {
+    console.log('socket error');
   }
   
   function runRealTerminal() {
@@ -53,8 +69,7 @@
   $(document).ready(function() {
     var terminalContainer = $('#terminal-container').get(0);
     const taskId = terminalContainer.getAttribute('data-taskid');
-    const container = $('#terminal-container').parent();
-    $('#terminal-container').css('height', parseInt(container.height()) - 105);
     createTerminal(terminalContainer, taskId);
+    $(window).resize(resize);
   });
 })()

@@ -23,6 +23,12 @@ export function isUserAllowedToDebug(
   next: Express.NextFunction) {
 
   const env = getEnv(req);
+
+  if (!env.AUTHORIZATIONS_ENABLED) {
+    next();
+    return;
+  }
+
   const ownersByTaskId = getOwnersByTaskId(req);
   const ownersByPid = getOwnersByTaskId(req);
   const task_id = req.params.task_id;
