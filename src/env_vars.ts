@@ -19,7 +19,7 @@ export interface EnvVars {
   AUTHORIZATIONS_ENABLED: boolean;
 }
 
-const authorizations_enabled = process.env['AUTHORIZATIONS_ENABLED'] === 'true';
+const authorizations_enabled = (process.env['LDAP_URL']) ? true : false;
 
 export const env: EnvVars = {
   MESOS_TASK_EXEC_DIR: getOrExit('MESOS_TASK_EXEC_DIR'),

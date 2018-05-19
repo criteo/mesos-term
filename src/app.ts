@@ -29,6 +29,7 @@ app.use(session({
 }));
 
 if (env.AUTHORIZATIONS_ENABLED) {
+  console.log('Authorizations are enabled.');
   setup(app, new AuthenticatedLogger());
   authentication(app);
 
@@ -38,6 +39,7 @@ if (env.AUTHORIZATIONS_ENABLED) {
   (app as any).ws('/terminals/:pid', wsIsUserAllowedToDebug, connectTerminal);
 }
 else {
+  console.log('Authorizations are disabled.');
   setup(app, new AnonymousLogger());
 
   app.get('/:task_id', GetTaskId.anonymous);

@@ -9,11 +9,21 @@ function intersection(array1: string[], array2: string[]) {
   });
 }
 
+function extractUserGroupName(groups: string[]): string[] {
+  if (!groups) {
+    return [];
+  }
+
+  return groups.map((m: string) => {
+    const matches = m.match(/^(CN|cn)=([a-zA-Z0-9_-]+)/m);
+    return (matches.length > 1) ? matches[2] : undefined;
+  }).filter(m => m !== undefined);
+}
+
 export function isUserInAdminGroups(req: Express.Request): boolean {
   const env = getEnv(req);
   const adminGroups = (env.ADMINS != '') ? env.ADMINS.split(',') : [];
-  const groups = req.user.memberOf.map((m: string) => m.match(/^CN=([a-zA-Z0-9_-]+)/m)[1]);
-
+  const groups = extractUserGroupName(req.user.memberOf);
   return groups && intersection(groups, adminGroups).length > 0;
 }
 
@@ -37,8 +47,10 @@ export function isUserAllowedToDebug(
       ? adminGroups.concat(ownersByPid[req.params.pid])
       : adminGroups);
 
-  const groups = req.user.memberOf.map((m: string) => m.match(/^CN=([a-zA-Z0-9_-]+)/m)[1]);
+  const groups = extractUserGroupName(req.user.memberOf);
   const userCN = req.user.cn;
+
+  console.log(req.user.cn, allowed);
 
   if ((groups && intersection(groups, allowed).length > 0) ||
      intersection([req.user.cn], allowed).length > 0)
@@ -46,7 +58,7 @@ export function isUserAllowedToDebug(
   else {
     console.error('User "%s" is not in authorized to debug', req.user.cn);
     res.status(403);
-    res.send('Unauthorized');
+    res.send('Unauthorized access to container');
   }
 }
 

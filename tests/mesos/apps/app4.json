@@ -1,0 +1,15 @@
+{
+  "id": "/app4",
+  "cmd": "env && sleep 3600",
+  "cpus": 1,
+  "mem": 128,
+  "disk": 0,
+  "instances": 1,
+  "portDefinitions": [
+    {
+      "port": 10000,
+      "name": "default",
+      "protocol": "tcp"
+    }
+  ]
+}

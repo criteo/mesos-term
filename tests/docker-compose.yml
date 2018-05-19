@@ -33,7 +33,9 @@ services:
 
 
   mesos-slave:
-    image: mesosphere/mesos-slave:1.4.1
+    build:
+      context: mesos
+      dockerfile: Dockerfile.slave
     privileged: true
     hostname: localhost
     ports:
@@ -87,6 +89,27 @@ services:
       - MARATHON_ZK=zk://zookeeper:2181/marathon
       - MARATHON_MASTER=zk://zookeeper:2181/mesos
       - LIBPROCESS_IP=172.16.121.5
+
+  openldap:
+    image: clems4ever/openldap
+    ports:
+      - "389:389"
+    environment:
+      - SLAPD_ORGANISATION=MyCompany
+      - SLAPD_DOMAIN=example.com
+      - SLAPD_PASSWORD=password
+      - SLAPD_CONFIG_PASSWORD=password
+      - SLAPD_ADDITIONAL_MODULES=memberof
+      - SLAPD_ADDITIONAL_SCHEMAS=openldap
+      - SLAPD_FORCE_RECONFIGURE=true
+
+  openldap-admin:
+    image: osixia/phpldapadmin:0.6.11
+    ports:
+      - 9090:80
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - PHPLDAPADMIN_HTTPS=false
 
 networks:
   mesos_command_modules_net:

@@ -17,7 +17,7 @@ function protectWithBasicAuth(
   else {
     res.status(401);
     res.header('WWW-Authenticate', 'Basic realm="must be authenticated"');
-    res.send('Unauthorized');
+    res.send('Unauthenticated');
   }
 }
 
@@ -29,7 +29,8 @@ export default function(app: Express.Application) {
       bindDN: env.LDAP_USER,
       bindCredentials: env.LDAP_PASSWORD,
       searchBase: env.LDAP_BASE_DN,
-      searchFilter: '(&(cn={{username}})(objectClass=user))'
+      searchFilter: 'cn={{username}}',
+      searchAttributes: ['memberof', 'cn']
     },
     credentialsLookup: basicAuth
   };
