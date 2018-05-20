@@ -13,7 +13,25 @@ body, html {
 .term {
   position: absolute;
   width: 100%;
-  height: 99%;
+  height: 90%;
+}
+
+@media screen and (min-height: 320px) {
+  .term {
+    height: 96%;
+  }
+}
+
+@media screen and (min-height: 480px) {
+  .term {
+    height: 98%;
+  }
+}
+
+@media screen and (min-height: 960px) {
+  .term {
+    height: 99%;
+  }
 }
 
 #terminal-container {
