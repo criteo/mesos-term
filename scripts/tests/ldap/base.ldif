@@ -50,8 +50,14 @@ userpassword: {CRYPT}$6$rounds=500000$jgiCMRyGXzoqpxS3$w2pJeZnnH8bwW3zzvoMWtTRfQ
 
 dn: cn=dev,ou=groups,dc=example,dc=com
 cn: dev
-member: cn=john,ou=users,dc=example,dc=com
 member: cn=bob,ou=users,dc=example,dc=com
+member: cn=james,ou=users,dc=example,dc=com
+objectclass: groupOfNames
+objectclass: top
+
+dn: cn=users,ou=groups,dc=example,dc=com
+cn: users
+member: cn=james,ou=users,dc=example,dc=com
 objectclass: groupOfNames
 objectclass: top
 

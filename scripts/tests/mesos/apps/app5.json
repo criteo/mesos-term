@@ -6,6 +6,9 @@
   "disk": 0,
   "instances": 1,
   "user": "root",
+  "labels": {
+    "DEBUG_GRANTED_TO": "harry,bob"
+  },
   "portDefinitions": [
     {
       "port": 10000,

@@ -11,7 +11,7 @@ import ping from './controllers/ping';
 import GetTaskId = require('./controllers/get_task_id');
 import { connectTerminal, requestTerminal, resizeTerminal } from './controllers/terminal';
 
-import { setup, getOwnersByTaskId, getOwnersByPid } from './express_helpers';
+import { setup } from './express_helpers';
 import { isUserAllowedToDebug, wsIsUserAllowedToDebug } from './authorizations';
 import authentication from './authentication';
 import { AuthenticatedLogger, AnonymousLogger } from './logger';

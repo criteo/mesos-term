@@ -1,16 +1,19 @@
 import Request = require('request-promise');
+import errors = require('request-promise/errors');
 import Bluebird = require('bluebird');
 import webdriver = require('selenium-webdriver');
 import helpers = require('./helpers');
 
 export function AssertReplyWith(req: Request.Options, statusCode: number): Bluebird<void> {
   req.resolveWithFullResponse = true;
-  return Request(req).then(function(res) {
+  return Request(req)
+    .then(function(res) {
       return (res.statusCode == statusCode)
         ? Bluebird.resolve()
         : Bluebird.reject(new Error(
           `Bad status code ${res.statusCode} (expected ${statusCode})`));
-    }).catch(function(res) {
+    })
+    .catch(errors.StatusCodeError, function(res) {
       return (res.statusCode == statusCode)
         ? Bluebird.resolve()
         : Bluebird.reject(new Error(

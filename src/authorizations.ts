@@ -1,7 +1,8 @@
 import Express = require('express');
 import * as Ws from 'ws';
+import Util = require('util');
 
-import { getOwnersByTaskId, getOwnersByPid, getEnv } from './express_helpers';
+import { getAdminsByTaskId, getTaskIdByPid, getUserByTaskId, getEnv } from './express_helpers';
 
 function intersection(array1: string[], array2: string[]) {
   return array1.filter(function(n) {
@@ -9,9 +10,13 @@ function intersection(array1: string[], array2: string[]) {
   });
 }
 
-function extractUserGroupName(groups: string[]): string[] {
+function extractUserGroupNames(groups: string[]): string[] {
   if (!groups) {
     return [];
+  }
+
+  if (typeof groups === 'string') {
+    groups = [groups];
   }
 
   return groups.map((m: string) => {
@@ -20,11 +25,16 @@ function extractUserGroupName(groups: string[]): string[] {
   }).filter(m => m !== undefined);
 }
 
-export function isUserInAdminGroups(req: Express.Request): boolean {
+export function isUserAdmin(req: Express.Request): boolean {
   const env = getEnv(req);
-  const adminGroups = (env.ADMINS != '') ? env.ADMINS.split(',') : [];
-  const groups = extractUserGroupName(req.user.memberOf);
-  return groups && intersection(groups, adminGroups).length > 0;
+  const admins = (env.ADMINS != '') ? env.ADMINS.split(',') : [];
+  const userAndGroups = [req.user.cn].concat(extractUserGroupNames(req.user.memberOf));
+  return userAndGroups && intersection(userAndGroups, admins).length > 0;
+}
+
+function sendError(res: Express.Response, msg: string, ...args: string[]) {
+    console.log(msg, args);
+    res.send(Util.format(msg, args));
 }
 
 export function isUserAllowedToDebug(
@@ -32,33 +42,59 @@ export function isUserAllowedToDebug(
   res: Express.Response,
   next: Express.NextFunction) {
 
+  let taskId = req.params.task_id;
+  if (!taskId) {
+    const pid = req.params.pid;
+    const taskIdByPid = getTaskIdByPid(req);
+    taskId = taskIdByPid[pid];
+  }
+
+  if (!taskId) {
+    const pid = (req.params.pid) ? req.params.pid : 'unknown';
+    sendError(res, 'Cannot find taskId related to PID %s', pid);
+    return;
+  }
+
+  // ensure non admin users cannot log into root containers
+  if (!isUserAdmin(req)) {
+    const userByTaskId = getUserByTaskId(req);
+    const userOfTaskId = userByTaskId[taskId];
+    if (!userOfTaskId || userOfTaskId === 'root') {
+      console.log('Cannot log into root container %s', taskId);
+      res.status(403);
+      res.send('Cannot log into a root container, please contact an administrator.');
+      return;
+    }
+  }
+
   const env = getEnv(req);
+  const adminGroupsAndUsers = (env.ADMINS != '') ? env.ADMINS.split(',') : [];
 
-  const ownersByTaskId = getOwnersByTaskId(req);
-  const ownersByPid = getOwnersByTaskId(req);
-  const task_id = req.params.task_id;
+  const adminsByTaskId = getAdminsByTaskId(req);
+  const adminsOfTaskId = adminsByTaskId[taskId];
+  const allowedUsersAndGroups = (adminsOfTaskId)
+    ? adminGroupsAndUsers.concat(adminsOfTaskId)
+    : adminGroupsAndUsers;
 
-  const adminGroups = (env.ADMINS != '') ? env.ADMINS.split(',') : [];
-  const allowed = (task_id)
-    ? ((ownersByTaskId[task_id])
-      ? adminGroups.concat(ownersByTaskId[task_id])
-      : adminGroups)
-    : ((ownersByPid[req.params.pid])
-      ? adminGroups.concat(ownersByPid[req.params.pid])
-      : adminGroups);
+  const userGroups = extractUserGroupNames(req.user.memberOf);
+  const usernameAndUserGroups = [req.user.cn].concat(userGroups);
 
-  const groups = extractUserGroupName(req.user.memberOf);
-  const userCN = req.user.cn;
+  if (!userGroups) {
+    sendError(res, 'Cannot retrieve groups of user "%s".', req.user.cn);
+    return;
+  }
 
-  console.log(req.user.cn, allowed);
+  if (!usernameAndUserGroups) {
+    sendError(res, 'Cannot calculate list of allowed groups and users.');
+    return;
+  }
 
-  if ((groups && intersection(groups, allowed).length > 0) ||
-     intersection([req.user.cn], allowed).length > 0)
+  if (intersection(usernameAndUserGroups, allowedUsersAndGroups).length > 0)
     next();
   else {
     console.error('User "%s" is not in authorized to debug', req.user.cn);
     res.status(403);
-    res.send('Unauthorized access to container');
+    res.send('Unauthorized access to container.');
   }
 }
 
