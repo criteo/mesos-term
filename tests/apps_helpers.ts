@@ -48,7 +48,7 @@ export function testInteractionsWithTerminal(user: string, appName: string) {
         .then(function() {
           return Bluebird.resolve(
             driver.wait(webdriver.until.elementLocated(
-              webdriver.By.css(".xterm-rows div:nth-child(1)")), 5000))
+              webdriver.By.css(".xterm-rows")), 5000))
         })
         .then(function(el) {
           return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'runs'), 5000));
@@ -61,9 +61,11 @@ export function testInteractionsWithTerminal(user: string, appName: string) {
           return el.sendKeys('ls\n');
         })
         .then(function() {
-          const el = driver.findElement(webdriver.By.css(".xterm-rows div:nth-child(2)"));
-          return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'stdout'), 5000));
+          return driver.findElement(webdriver.By.css(".xterm-rows div:nth-child(2)"));
         })
+        .then(function(el) {
+	  return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'stdout'), 5000));
+        });
     });
   });
 }
