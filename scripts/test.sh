@@ -9,6 +9,7 @@ npm run test
 
 pushd $script_dir/tests
 
+docker-compose build
 docker-compose up -d
 ./setup.sh
 

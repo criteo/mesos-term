@@ -1,14 +1,37 @@
 sudo: false
-language: bash
+dist: trusty
+language: node_js
+sudo: required
+node_js:
+  - "8"
 services:
-- docker
+  - docker
+  - ntp
+addons:
+  chrome: stable 
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - libgif-dev
+      - google-chrome-stable
+
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3
+
 script:
-- ./scripts/test.sh
-- ./scripts/build.sh
-- ./scripts/deploy_dockerhub.sh
+  - ./scripts/test.sh
+  - ./scripts/build.sh
+
+after_success:
+  - ./scripts/deploy_dockerhub.sh
+
 before_deploy:
-- echo "deploying mesos-term-$TRAVIS_TAG.tgz to GitHub releases"
-- tar czvf mesos-term-$TRAVIS_TAG.tgz package.json package-lock.json src/
+  - echo "deploying mesos-term-$TRAVIS_TAG.tgz to GitHub releases"
+  - tar czvf mesos-term-$TRAVIS_TAG.tgz package.json package-lock.json src/
+
 deploy:
   provider: releases
   skip_cleanup: true
