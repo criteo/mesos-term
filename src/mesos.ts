@@ -21,6 +21,14 @@ interface MesosTasks {
   tasks: MesosTask[];
 }
 
+interface MesosFramework {
+  tasks: MesosTask[];
+}
+
+interface MesosState {
+  frameworks: MesosFramework[];
+}
+
 export interface Task {
   labels: Labels;
   user: string;
@@ -40,9 +48,13 @@ function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
 }
 
 export function getTaskInfo(taskId: string): Bluebird<Task> {
-  return Request({ uri: `${env.MESOS_MASTER_URL}/master/tasks.json`, json: true })
-    .then(function(mesosTasks: MesosTasks) {
-      const tasks = mesosTasks.tasks.filter((task) => {
+  return Request({ uri: `${env.MESOS_MASTER_URL}/master/state`, json: true })
+    .then(function(mesosState: MesosState) {
+      const mesosTasks = mesosState.frameworks
+        .reduce(function(acc: MesosTask[], framework: MesosFramework) {
+          return acc.concat(framework.tasks);
+        }, [] as MesosTask[]);
+      const tasks = mesosTasks.filter((task) => {
         return task.id === taskId && task.state == 'TASK_RUNNING';
       });
 
