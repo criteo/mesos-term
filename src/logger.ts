@@ -1,6 +1,7 @@
 import Express = require('express');
 
 export abstract class Logger {
+  abstract request(req: Express.Request, taskId: string): void;
   abstract open(req: Express.Request, taskId: string, terminalPid: number): void;
   abstract connect(req: Express.Request, terminalPid: number): void;
   abstract disconnect(req: Express.Request, terminalPid: number): void;
@@ -15,6 +16,11 @@ export abstract class Logger {
 }
 
 export class AnonymousLogger extends Logger {
+  request(req: Express.Request, taskId: string): void {
+    console.log('Anonymous user has requested a session in container "%s"',
+      taskId);
+  }
+
   open(req: Express.Request, taskId: string, terminalPid: number): void {
     console.log('Anonymous user has opened a session in container "%s" (pid=%s)',
       taskId, terminalPid);
@@ -30,6 +36,11 @@ export class AnonymousLogger extends Logger {
 }
 
 export class AuthenticatedLogger extends Logger {
+  request(req: Express.Request, taskId: string): void {
+    console.log('User "%s" has requested a session in container "%s"',
+      req.user.cn, taskId);
+  }
+
   open(req: Express.Request, taskId: string, terminalPid: number): void {
     console.log('User "%s" has opened a session in container "%s" (pid=%s)',
       req.user.cn, taskId, terminalPid);

@@ -29,11 +29,8 @@
         cols = initialGeometry.cols,
         rows = initialGeometry.rows;
   
-    fetch('/terminals/' + task_id, {
-      method: 'POST',
-      credentials: "same-origin"
-    }).then(function (res) {
-      res.text().then(function (pid) {
+    $.post('/terminals/' + task_id)
+      .done(function (pid) {
         window.pid = pid;
         socketURL += pid;
         socket = new WebSocket(socketURL);
@@ -41,7 +38,6 @@
         socket.onclose = onSocketClose;
         socket.onerror = onSocketError;
       });
-    });
   }
 
   function onSocketClose() {
@@ -49,7 +45,7 @@
   }
 
   function onSocketError() {
-    console.log('socket error');
+    $('.connection-closed-splash').show();
   }
   
   function runRealTerminal() {

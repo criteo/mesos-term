@@ -1,7 +1,7 @@
 import Express = require('express');
 import Constants = require('../constants');
 import { getTaskInfo, TaskInfo } from '../mesos';
-import { getOwnersByTaskId } from '../express_helpers';
+import { getOwnersByTaskId, getLogger } from '../express_helpers';
 import { isUserInAdminGroups, isUserAllowedToDebug } from '../authorizations';
 import { env } from '../env_vars';
 
@@ -16,8 +16,7 @@ function denyRootContainerLogin(task_info: TaskInfo, req: Express.Request, next:
 
 function renderTerminal(req: Express.Request, res: Express.Response, task_info: TaskInfo) {
   const task_id = req.params.task_id;
-  console.log('Anonymous user has requested a session in container "%s"',
-    task_id);
+  getLogger(req).request(req, task_id);
 
   res.render('index', {
     task_id: task_id,

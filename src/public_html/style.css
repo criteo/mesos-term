@@ -25,6 +25,10 @@ body, html {
   padding-bottom: 4px;
 }
 
+#terminal-container .terminal .xterm-rows {
+  z-index: 10;
+}
+
 .status-bar {
   background-color: #004561;
   position: absolute;
@@ -105,7 +109,7 @@ body, html {
   text-align: center;
   font-size: 1.3em;
   display: none;
-  z-index: 10;
+  z-index: 20;
 }
 
 .connection-closed-splash span {

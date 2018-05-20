@@ -5,6 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --colors --require ts-node/register --recursive src/**/*.spec.ts",
+    "test-int": "./node_modules/.bin/mocha --colors --require ts-node/register --recursive tests/**/*.ts",
     "lint": "./node_modules/.bin/tslint -c tslint.json -p tsconfig.json",
     "compile": "./node_modules/.bin/tsc -p tsconfig.json",
     "dist": "cp -r src/views src/public_html dist"
@@ -36,8 +37,14 @@
     "@types/express-ws": "^3.0.0",
     "@types/mocha": "^5.2.0",
     "@types/node": "^10.1.1",
+    "@types/request-promise": "^4.1.41",
+    "@types/selenium-webdriver": "^3.0.8",
     "@types/sinon": "^4.3.3",
+    "bluebird": "^3.5.1",
+    "chromedriver": "^2.38.3",
     "mocha": "^5.1.1",
+    "request-promise": "^4.2.2",
+    "selenium-webdriver": "^4.0.0-alpha.1",
     "sinon": "^5.0.7",
     "ts-node": "^6.0.3",
     "tsc": "^1.20150623.0",
