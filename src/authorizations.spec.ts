@@ -1,6 +1,6 @@
 import Assert = require('assert');
-import { isUserAdmin } from './authorizations';
 import Sinon = require('sinon');
+import { isUserAdmin } from './authorizations';
 
 describe('authorizations', function() {
   beforeEach(function() {
