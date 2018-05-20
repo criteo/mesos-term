@@ -1,0 +1,3 @@
+[submodule "3rdparties/mesos-task-exec"]
+	path = 3rdparties/mesos-task-exec
+	url = git@github.com:clems4ever/mesos-task-exec.git
