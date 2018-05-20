@@ -40,7 +40,7 @@ export function testAuthorizations(user: string, appName: string, statusCode: nu
 
 export function testInteractionsWithTerminal(user: string, appName: string) {
   it('should be able to interact with terminal', function() {
-    this.timeout(5000);
+    this.timeout(10000);
 
     const instanceId = this.mesosTaskIds[appName];
     return helpers.withChrome(function(driver) {
@@ -48,21 +48,21 @@ export function testInteractionsWithTerminal(user: string, appName: string) {
         .then(function() {
           return Bluebird.resolve(
             driver.wait(webdriver.until.elementLocated(
-              webdriver.By.css(".xterm-rows div:nth-child(1)")), 3000))
+              webdriver.By.css(".xterm-rows div:nth-child(1)")), 5000))
         })
         .then(function(el) {
-          return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'runs'), 2000));
+          return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'runs'), 5000));
         })
         .then(function() {
           return Bluebird.resolve(
-            driver.wait(webdriver.until.elementLocated(webdriver.By.css(".terminal")), 2000));
+            driver.wait(webdriver.until.elementLocated(webdriver.By.css(".terminal")), 5000));
         })
         .then(function(el: webdriver.WebElement) {
           return el.sendKeys('ls\n');
         })
         .then(function() {
           const el = driver.findElement(webdriver.By.css(".xterm-rows div:nth-child(2)"));
-          return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'stdout'), 2000));
+          return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'stdout'), 5000));
         })
     });
   });
