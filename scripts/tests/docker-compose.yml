@@ -121,12 +121,12 @@ services:
       - mesos-master
       - openldap
     environment:
-      - MESOS_MASTER_URL=http://mesos-master:5050
       - ADMINS=admins
+      - LDAP_URL=ldap://openldap
       - LDAP_BASE_DN=dc=example,dc=com
       - LDAP_USER=cn=admin,dc=example,dc=com
-      - LDAP_URL=ldap://openldap:389
       - LDAP_PASSWORD=password
+      - MESOS_MASTER_URL=http://mesos-master:5050
       - SESSION_SECRET=abcd
 
 networks:
