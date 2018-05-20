@@ -7,3 +7,4 @@ export LDAP_BASE_DN=dc=example,dc=com
 export LDAP_USER=cn=admin,dc=example,dc=com
 export LDAP_URL=ldap://localhost
 export LDAP_PASSWORD=password
+export SESSION_SECRET=abcd
