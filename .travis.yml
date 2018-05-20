@@ -15,6 +15,7 @@ addons:
     packages:
       - libgif-dev
       - google-chrome-stable
+      - ldap-utils
 
 before_script:
   - export DISPLAY=:99.0
