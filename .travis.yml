@@ -22,8 +22,8 @@ before_script:
   - sleep 3
 
 script:
-  - ./scripts/test.sh
   - ./scripts/build.sh
+  - ./scripts/test.sh
 
 after_success:
   - ./scripts/deploy_dockerhub.sh
