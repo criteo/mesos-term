@@ -1,37 +1,66 @@
-import child_process = require('child_process');
 import { env } from './env_vars';
+import Request = require('request-promise');
+import Bluebird = require('bluebird');
 
 type Labels = {[key: string]: string};
-type MesosLabels = {[key: string]: { key: string, value: string }};
 
-export interface TaskInfo {
-  labels: Labels;
+interface MesosLabel {
+  key: string;
+  value: string;
+}
+
+interface MesosTask {
+  labels: MesosLabel[];
+  id: string;
+  state: 'TASK_RUNNING';
+  container_id: string;
   user: string;
 }
 
-export function getTaskInfo(
-  taskId: string,
-  fn: (err: Error, info?: TaskInfo) => void) {
+interface MesosTasks {
+  tasks: MesosTask[];
+}
 
-  child_process.exec(`python3 ${env.MESOS_TASK_EXEC_DIR}/get_task_info.py ${taskId}`,
-    function(err, stdout, stderr) {
-    if (err) {
-      fn(err);
-      return;
-    }
-    const info = JSON.parse(stdout);
-    const labels = ('labels' in info) ? info['labels'] : [];
-    const user = ('user' in info) ? info['user'] : undefined;
-    const labelsDict: Labels = {};
+export interface Task {
+  labels: Labels;
+  user: string;
+  container_id: string;
+}
 
-    for (let i = 0; i < labels.length; ++i) {
-      labelsDict[labels[i]['key']] = labels[i]['value'];
-    }
+function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
+  if (!mesosLabels) {
+    return {};
+  }
 
-    const task_info = {
-      labels: labelsDict,
-      user: user
-    };
-    fn(undefined, task_info);
-  });
+  const labels: Labels = {};
+  for (let i = 0; i < mesosLabels.length; ++i) {
+    labels[mesosLabels[i]['key']] = mesosLabels[i]['value'];
+  }
+  return labels;
+}
+
+export function getTaskInfo(taskId: string): Bluebird<Task> {
+  return Request({ uri: `${env.MESOS_MASTER_URL}/master/tasks.json`, json: true })
+    .then(function(mesosTasks: MesosTasks) {
+      const tasks = mesosTasks.tasks.filter((task) => {
+        return task.id === taskId && task.state == 'TASK_RUNNING';
+      });
+
+      if (tasks.length == 0) {
+        return Bluebird.reject(new Error(`No task details found for task ID ${taskId}`));
+      }
+
+      if (tasks.length > 1) {
+        return Bluebird.reject(new Error(`Several task details found for task ID ${taskId}`));
+      }
+
+      const taskInfo = tasks[0];
+      const labels = fromMesosLabels(taskInfo.labels);
+
+      return Bluebird.resolve({
+        labels: labels,
+        user: taskInfo.user,
+        container_id: taskInfo.container_id
+      });
+    });
 }
