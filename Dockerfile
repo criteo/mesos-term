@@ -10,7 +10,8 @@ RUN apk add --no-cache python python-dev python3 python3-dev \
 
 WORKDIR /usr/app
 
-ADD 3rdparties 3rdparties
+ADD 3rdparties/mesos-task-exec/requirements.yml 3rdparties/mesos-task-exec/requirements.yml
+ADD 3rdparties/mesos-task-exec/src 3rdparties/mesos-task-exec/src
 RUN cd 3rdparties/mesos-task-exec && pip3 install -r requirements.yml
 ENV MESOS_TASK_EXEC_DIR=/usr/app/3rdparties/mesos-task-exec/src
 
