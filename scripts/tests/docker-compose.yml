@@ -94,6 +94,9 @@ services:
     image: clems4ever/openldap
     ports:
       - "389:389"
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.121.6
     environment:
       - SLAPD_ORGANISATION=MyCompany
       - SLAPD_DOMAIN=example.com
@@ -103,13 +106,28 @@ services:
       - SLAPD_ADDITIONAL_SCHEMAS=openldap
       - SLAPD_FORCE_RECONFIGURE=true
 
-  openldap-admin:
-    image: osixia/phpldapadmin:0.6.11
+  mesos-term:
+    build:
+      context: ../..
     ports:
-      - 9090:80
+      - "3000:3000"
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.121.8
+    links:
+      - mesos-master
+      - openldap
+    depends_on:
+      - mesos-master
+      - openldap
     environment:
-      - PHPLDAPADMIN_LDAP_HOSTS=openldap
-      - PHPLDAPADMIN_HTTPS=false
+      - MESOS_MASTER_URL=http://mesos-master:5050
+      - ADMINS=admins
+      - LDAP_BASE_DN=dc=example,dc=com
+      - LDAP_USER=cn=admin,dc=example,dc=com
+      - LDAP_URL=ldap://openldap:389
+      - LDAP_PASSWORD=password
+      - SESSION_SECRET=abcd
 
 networks:
   mesos_command_modules_net:
