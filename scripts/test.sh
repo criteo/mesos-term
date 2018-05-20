@@ -19,5 +19,8 @@ docker-compose up -d
 
 npm run test-int
 
+docker ps -a
+docker-compose logs mesos-term
+
 ./cleanup.sh
 popd
