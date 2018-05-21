@@ -15,6 +15,8 @@ interface MesosTask {
   state: 'TASK_RUNNING';
   container_id: string;
   user: string;
+  slave_id: string;
+  framework_id: string;
 }
 
 interface MesosTasks {
@@ -33,6 +35,8 @@ export interface Task {
   labels: Labels;
   user: string;
   container_id: string;
+  slave_id: string;
+  framework_id: string;
 }
 
 function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
@@ -72,7 +76,9 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
       return Bluebird.resolve({
         labels: labels,
         user: taskInfo.user,
-        container_id: taskInfo.container_id
+        container_id: taskInfo.container_id,
+        slave_id: taskInfo.slave_id,
+        framework_id: taskInfo.framework_id
       });
     });
 }

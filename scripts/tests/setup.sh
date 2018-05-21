@@ -1,5 +1,9 @@
 #!/bin/bash
 
+script_dir=`dirname "$0"`
+
+pushd $script_dir
+
 docker-compose build
 docker-compose up -d
 
@@ -13,3 +17,5 @@ sleep 15 # Wait for Marathon to start
 
 echo "Wait for apps to be ready"
 sleep 10 # Let the applications be scheduled
+
+popd

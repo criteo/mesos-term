@@ -11,7 +11,10 @@ function renderTerminal(req: Express.Request, res: Express.Response, task: Task)
 
   res.render('index', {
     task_id: task_id,
-    user: task.user || '(no user)'
+    user: task.user || '(no user)',
+    slave_id: task.slave_id,
+    framework_id: task.framework_id,
+    mesos_master_url: env.MESOS_MASTER_URL
   });
 }
 

@@ -74,6 +74,15 @@ body, html {
   margin-right: 6px;
 }
 
+.status-bar .task_id a {
+  color: white;
+  text-decoration: none;
+}
+
+.status-bar .task_id a:hover {
+  color: #cccccc;
+}
+
 .status-bar .brand {
   float: right;
   background: #2eaadc;

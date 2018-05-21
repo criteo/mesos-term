@@ -14,8 +14,10 @@
           <div><span>
             <i class="fas fa-user icon"></i><%= user %>
           </span></div>
-          <div><span>
-            <i class="fas fa-chevron-circle-right icon"></i><%= task_id %>
+          <div class="task_id"><span>
+            <a href="<%= mesos_master_url %>/#/agents/<%= slave_id %>/frameworks/<%= framework_id %>/executors/<%= task_id %>" target="_blank">
+              <i class="fas fa-chevron-circle-right icon"></i><%= task_id %>
+            </a>
           </span></div>
           <div class="brand"><span>
             <a href="https://github.com/clems4ever/mesos-term" target="_blank"><i class="fab fa-github icon"></i>MesosTerm</a>
