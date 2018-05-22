@@ -24,11 +24,11 @@ export function requestTerminal(req: Express.Request, res: Express.Response) {
     return;
   }
 
-  let params: string[] = [
+  const params = [
     Path.resolve(__dirname, '..', 'python/terminal.py'),
     taskInfo.agent_url,
     taskInfo.container_id,
-  ]
+  ];
 
   if (taskInfo.user) {
     params.push('--user');
