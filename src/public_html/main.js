@@ -12,6 +12,20 @@
     $('.status-bar').css('height', statusBarHeight);
     $('.status-bar div').css('height', statusBarHeight);
     $('.status-bar div span').css('height', statusBarHeight);
+    resizeTerminal();
+  }
+
+  function resizeTerminal(fn) {
+    if (!window.pid || !term) return;
+
+    var initialGeometry = term.proposeGeometry(),
+        cols = initialGeometry.cols,
+        rows = initialGeometry.rows;
+    $.post(`/terminals/${window.pid}/size?cols=${cols}&rows=${rows}`)
+      .done(() => {
+        console.log(`Resized to ${cols}x${rows}`);
+        if(fn) fn();
+      });
   }
   
   function createTerminal(terminalContainer, task_id) {
@@ -28,8 +42,8 @@
     var initialGeometry = term.proposeGeometry(),
         cols = initialGeometry.cols,
         rows = initialGeometry.rows;
-  
-    $.post('/terminals/' + task_id)
+
+    $.post(`/terminals/${task_id}`)
       .done(function (pid) {
         window.pid = pid;
         socketURL += pid;
@@ -37,7 +51,9 @@
         socket.onopen = runRealTerminal;
         socket.onclose = onSocketClose;
         socket.onerror = onSocketError;
+        resizeTerminal();
       });
+
   }
 
   function onSocketClose() {
