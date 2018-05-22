@@ -31,6 +31,7 @@ export function requestTerminal(req: Express.Request, res: Express.Response) {
   ]
 
   if (taskInfo.user) {
+    params.push('--user');
     params.push(taskInfo.user);
   }
 

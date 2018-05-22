@@ -18,6 +18,7 @@
             <a href="<%= mesos_master_url %>/#/agents/<%= slave_id %>/frameworks/<%= framework_id %>/executors/<%= task_id %>" target="_blank">
               <i class="fas fa-chevron-circle-right icon"></i><%= task_id %>
             </a>
+            <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text="<%= task_id %>"><i class="far fa-copy"></i></div>
           </span></div>
           <div class="brand"><span>
             <a href="https://github.com/clems4ever/mesos-term" target="_blank"><i class="fab fa-github icon"></i>MesosTerm</a>
@@ -33,6 +34,7 @@
           <img src="static/images/mesos.png"/>
         </div>
 
+        <script src="static/clipboard.min.js"></script>
         <script src="static/fontawesome-all.min.js"></script>
         <script src="static/jquery-3.3.1.min.js"></script>
         <script src="static/xterm.js" ></script>

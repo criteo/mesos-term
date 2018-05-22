@@ -78,10 +78,24 @@
     term._initialized = true;
   }
 
+  function clipboard() {
+    $('.copy-btn').mousedown(function() {
+      $(this).addClass('click');
+    });
+    $('.copy-btn').mouseup(function() {
+      const that = this;
+      setTimeout(function() {
+        $(that).removeClass('click');
+      }, 200);
+    });
+  }
+
   $(document).ready(function() {
     var terminalContainer = $('#terminal-container').get(0);
     const taskId = terminalContainer.getAttribute('data-taskid');
     createTerminal(terminalContainer, taskId);
     $(window).resize(resize);
+    new ClipboardJS('.copy-btn');
+    clipboard(); 
   });
 })()

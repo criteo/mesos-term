@@ -83,6 +83,10 @@ body, html {
   color: #cccccc;
 }
 
+.status-bar .copy-btn {
+  padding: 0;
+}
+
 .status-bar .brand {
   float: right;
   background: #2eaadc;
@@ -150,6 +154,48 @@ body, html {
   height: 64px;
   float: left;
 }
+
+
+/* Tooltip */
+
+/* setup tooltips */
+.tooltip {
+  position: relative;
+}
+.tooltip:before,
+.tooltip:after {
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+}
+.tooltip:before {
+  background: #2eaadc;
+  border-radius: 2px;
+  color: #fff;
+  content: attr(data-title);
+  font-size: 14px;
+  padding: 6px 10px;
+  top: -30px;
+  white-space: nowrap;
+}
+
+/* the animations */
+
+/* fade */
+.tooltip.fade:after,
+.tooltip.fade:before {
+  transform: translate3d(0,-10px,0);
+  transition: all .05s ease-in-out;
+}
+.tooltip.fade.click:after,
+.tooltip.fade.click:before {
+  opacity: 1;
+  transform: translate3d(0,0,0);
+}
+
+
+/* Scrollbar */
 
 /* width */
 ::-webkit-scrollbar {
