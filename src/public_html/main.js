@@ -10,8 +10,8 @@
     const terminal = $('.terminal');
     statusBarHeight = parseInt($(window).height() - terminal.height() - 2);
     $('.status-bar').css('height', statusBarHeight);
-    $('.status-bar div').css('height', statusBarHeight);
-    $('.status-bar div span').css('height', statusBarHeight);
+    $('.status-bar .bar-item').css('height', statusBarHeight);
+    $('.status-bar .bar-item span').css('height', statusBarHeight);
     resizeTerminal();
   }
 

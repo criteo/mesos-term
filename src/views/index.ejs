@@ -11,21 +11,29 @@
           <div id="terminal-container" data-taskid="<%= task_id %>"></div>
         </div>
         <div class="status-bar">
-          <div><span>
-            <i class="fas fa-user icon"></i><%= user %>
-          </span></div>
-          <div class="task_id"><span>
-            <a href="<%= mesos_master_url %>/#/agents/<%= slave_id %>/frameworks/<%= framework_id %>/executors/<%= task_id %>" target="_blank">
-              <i class="fas fa-chevron-circle-right icon"></i><%= task_id %>
-            </a>
+          <div class="bar-item">
+            <span>
+              <i class="fas fa-user icon"></i><%= user %>
+            </span>
+          </div>
+          <div class="task_id bar-item">
+            <span>
+              <a href="<%= mesos_master_url %>/#/agents/<%= slave_id %>/frameworks/<%= framework_id %>/executors/<%= task_id %>" target="_blank">
+                <i class="fas fa-chevron-circle-right icon"></i><%= task_id %>
+              </a>
             <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text="<%= task_id %>"><i class="far fa-copy"></i></div>
-          </span></div>
-          <div><span>
-            <i class="far fa-hdd icon"></i><%= slave_hostname %>
-          </span></div>
-          <div class="brand"><span>
-            <a href="https://github.com/clems4ever/mesos-term" target="_blank"><i class="fab fa-github icon"></i>MesosTerm</a>
-          </span></div>
+            </span>
+          </div>
+          <div class="bar-item">
+            <span>
+              <i class="far fa-hdd icon"></i><%= slave_hostname %>
+            </span>
+          </div>
+          <div class="brand bar-item">
+            <span>
+              <a href="https://github.com/clems4ever/mesos-term" target="_blank"><i class="fab fa-github icon"></i>MesosTerm</a>
+            </span>
+          </div>
         </div>
         <div class="connection-closed-splash">
           <span>

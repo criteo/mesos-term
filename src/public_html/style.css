@@ -24,13 +24,7 @@ body, html {
 
 @media screen and (min-height: 480px) {
   .term {
-    height: 98%;
-  }
-}
-
-@media screen and (min-height: 960px) {
-  .term {
-    height: 99%;
+    height: 97%;
   }
 }
 
@@ -85,6 +79,7 @@ body, html {
 
 .status-bar .copy-btn {
   padding: 0;
+  height: 0px;
 }
 
 .status-bar .brand {
