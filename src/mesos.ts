@@ -9,14 +9,23 @@ interface MesosLabel {
   value: string;
 }
 
+interface MesosStatus {
+  state: string;
+  container_status: {
+    container_id: {
+      value: string;
+    }
+  };
+}
+
 interface MesosTask {
   labels: MesosLabel[];
   id: string;
   state: 'TASK_RUNNING';
-  container_id: string;
   user: string;
   slave_id: string;
   framework_id: string;
+  statuses: MesosStatus[];
 }
 
 interface MesosTasks {
@@ -27,9 +36,19 @@ interface MesosFramework {
   tasks: MesosTask[];
 }
 
+interface MesosSlave {
+  id: string;
+  hostname: string;
+  port: number;
+  pid: string;
+}
+
 interface MesosState {
   frameworks: MesosFramework[];
+  slaves: MesosSlave[];
 }
+
+type SlaveById = {[id: string]: MesosSlave};
 
 export interface Task {
   labels: Labels;
@@ -37,6 +56,7 @@ export interface Task {
   container_id: string;
   slave_id: string;
   framework_id: string;
+  agent_url: string;
 }
 
 function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
@@ -58,6 +78,13 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
         .reduce(function(acc: MesosTask[], framework: MesosFramework) {
           return acc.concat(framework.tasks);
         }, [] as MesosTask[]);
+
+      const slaves = mesosState.slaves
+        .reduce(function(acc: SlaveById, slave: MesosSlave) {
+          acc[slave.id] = slave;
+          return acc;
+        }, {} as SlaveById);
+
       const tasks = mesosTasks.filter((task) => {
         return task.id === taskId && task.state == 'TASK_RUNNING';
       });
@@ -71,14 +98,33 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
       }
 
       const taskInfo = tasks[0];
+
+      const statuses = taskInfo.statuses.filter(function(status: MesosStatus) {
+        return status.state == 'TASK_RUNNING';
+      });
+
+      if (statuses.length == 0) {
+        return Bluebird.reject(new Error(`No status details found for task ID ${taskId}`));
+      }
+
+      if (statuses.length > 1) {
+        return Bluebird.reject(new Error(`Several status details found for task ID ${taskId}`));
+      }
+
+      const containerId = statuses[0].container_status.container_id.value;
       const labels = fromMesosLabels(taskInfo.labels);
+
+      const slave_pid = slaves[taskInfo.slave_id].pid;
+      const address = slave_pid.split('@')[1];
+      const slave_url = `http://${address}`;
 
       return Bluebird.resolve({
         labels: labels,
         user: taskInfo.user,
-        container_id: taskInfo.container_id,
+        container_id: containerId,
         slave_id: taskInfo.slave_id,
-        framework_id: taskInfo.framework_id
+        framework_id: taskInfo.framework_id,
+        agent_url: slave_url
       });
     });
 }

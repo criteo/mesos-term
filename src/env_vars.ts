@@ -13,7 +13,6 @@ export interface EnvVars {
   LDAP_BASE_DN?: string;
   LDAP_USER?: string;
   LDAP_PASSWORD?: string;
-  MESOS_TASK_EXEC_DIR: string;
   MESOS_MASTER_URL: string;
   SESSION_SECRET: string;
   AUTHORIZATIONS_ENABLED: boolean;
@@ -22,7 +21,6 @@ export interface EnvVars {
 const authorizations_enabled = (process.env['LDAP_URL']) ? true : false;
 
 export const env: EnvVars = {
-  MESOS_TASK_EXEC_DIR: getOrExit('MESOS_TASK_EXEC_DIR'),
   SESSION_SECRET: getOrExit('SESSION_SECRET'),
   ADMINS: process.env['ADMINS'] || '',
   MESOS_MASTER_URL: getOrExit('MESOS_MASTER_URL'),

@@ -2,7 +2,7 @@ import Express = require('express');
 import * as Ws from 'ws';
 import Util = require('util');
 
-import { getAdminsByTaskId, getTaskIdByPid, getUserByTaskId, getEnv } from './express_helpers';
+import { getAdminsByTaskId, getTaskIdByPid, getTaskInfoByTaskId, getEnv } from './express_helpers';
 
 function intersection(array1: string[], array2: string[]) {
   return array1.filter(function(n) {
@@ -57,9 +57,17 @@ export function isUserAllowedToDebug(
 
   // ensure non admin users cannot log into root containers
   if (!isUserAdmin(req)) {
-    const userByTaskId = getUserByTaskId(req);
-    const userOfTaskId = userByTaskId[taskId];
-    if (!userOfTaskId || userOfTaskId === 'root') {
+    const taskInfoByTaskId = getTaskInfoByTaskId(req);
+    const taskInfo = taskInfoByTaskId[taskId];
+
+    if (!taskInfo) {
+      const err = `No task info found for task ${taskId}.`;
+      console.error(err);
+      res.send(err);
+      return;
+    }
+
+    if (!taskInfo.user || taskInfo.user === 'root') {
       console.log('Cannot log into root container %s', taskId);
       res.status(403);
       res.send('Cannot log into a root container, please contact an administrator.');

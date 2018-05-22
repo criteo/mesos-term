@@ -1,9 +1,10 @@
 import Express = require('express');
 import NodePty = require('node-pty');
 import * as Ws from 'ws';
+import Path = require('path');
 
 import { env } from '../env_vars';
-import { getTaskIdByPid, getAdminsByTaskId, getUserByTaskId, getLogger } from '../express_helpers';
+import { getTaskIdByPid, getAdminsByTaskId, getTaskInfoByTaskId, getLogger } from '../express_helpers';
 
 const terminals: {[pid: number]: NodePty.IPty} = {};
 const logs: {[pid: number]: string} = {};
@@ -15,12 +16,27 @@ export function requestTerminal(req: Express.Request, res: Express.Response) {
     return;
   }
 
-  const term = NodePty.spawn('python3',
-    [env.MESOS_TASK_EXEC_DIR + '/exec.py', taskId], {
-    name: 'mesos-task-exec',
-    cwd: process.env.PWD,
-    env: process.env
-  });
+  const taskInfo = getTaskInfoByTaskId(req)[taskId];
+  if (!taskInfo) {
+    const err = `No task info found for task ${taskId}.`;
+    console.error(err);
+    res.send(err);
+    return;
+  }
+
+  let params: string[] = [
+    Path.resolve(__dirname, '..', 'python/terminal.py'),
+    taskInfo.agent_url,
+    taskInfo.container_id,
+  ]
+
+  if (taskInfo.user) {
+    params.push(taskInfo.user);
+  }
+
+  const term = NodePty.spawn('python3', params, {
+      name: 'terminal'
+    });
 
   getLogger(req).open(req, taskId, term.pid);
 
@@ -80,9 +96,9 @@ export function connectTerminal(ws: Ws, req: Express.Request) {
     if (term.pid in taskIdByPid) {
       const taskId = taskIdByPid[term.pid];
 
-      const userByTaskId = getUserByTaskId(req);
-      if (taskId in userByTaskId) {
-        delete userByTaskId[taskId];
+      const taskInfoByTaskId = getTaskInfoByTaskId(req);
+      if (taskId in taskInfoByTaskId) {
+        delete taskInfoByTaskId[taskId];
       }
 
       const adminsByTaskId = getAdminsByTaskId(req);

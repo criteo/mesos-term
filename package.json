@@ -8,7 +8,7 @@
     "test-int": "./node_modules/.bin/mocha --colors --require ts-node/register --recursive tests/**/*.ts",
     "lint": "./node_modules/.bin/tslint -c tslint.json -p tsconfig.json",
     "compile": "./node_modules/.bin/tsc -p tsconfig.json",
-    "dist": "cp -r src/views src/public_html dist"
+    "dist": "cp -r src/views src/public_html src/python dist"
   },
   "repository": {
     "type": "git",

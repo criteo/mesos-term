@@ -1,7 +1,7 @@
 import Express = require('express');
 import Constants = require('../constants');
 import { getTaskInfo, Task } from '../mesos';
-import { getAdminsByTaskId, getUserByTaskId, getLogger } from '../express_helpers';
+import { getAdminsByTaskId, getTaskInfoByTaskId, getLogger } from '../express_helpers';
 import { isUserAllowedToDebug } from '../authorizations';
 import { env } from '../env_vars';
 
@@ -33,18 +33,16 @@ export function authenticated(req: Express.Request, res: Express.Response) {
         adminsByTaskId[taskId] = task.labels[Constants.DEBUG_ALLOWED_TO_KEY].split(',');
       }
 
-      if (task.user) {
-        const userByTaskId = getUserByTaskId(req);
-        userByTaskId[taskId] = task.user;
-      }
+      const taskInfoByTaskId = getTaskInfoByTaskId(req);
+      taskInfoByTaskId[taskId] = task;
 
       isUserAllowedToDebug(req, res, function() {
         renderTerminal(req, res, task);
       });
     })
     .catch(function(err: Error) {
-      res.send('Error while retrieving task labels.');
-      console.error('Error while retrieving task labels %s', err);
+      res.send(err.message);
+      console.error(err);
     });
 }
 

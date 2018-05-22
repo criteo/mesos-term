@@ -31,7 +31,6 @@ services:
       MESOS_LOG_DIR: /var/log/mesos
       LIBPROCESS_IP: 172.16.121.3
 
-
   mesos-slave:
     build:
       context: mesos

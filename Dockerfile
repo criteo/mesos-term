@@ -10,10 +10,6 @@ RUN apk add --no-cache python python-dev python3 python3-dev \
 
 WORKDIR /usr/app
 
-ADD 3rdparties/mesos-task-exec/requirements.yml 3rdparties/mesos-task-exec/requirements.yml
-ADD 3rdparties/mesos-task-exec/src 3rdparties/mesos-task-exec/src
-RUN cd 3rdparties/mesos-task-exec && pip3 install -r requirements.yml
-ENV MESOS_TASK_EXEC_DIR=/usr/app/3rdparties/mesos-task-exec/src
 
 ADD package.json package.json
 ADD package-lock.json package-lock.json
@@ -21,6 +17,8 @@ RUN npm install --production
 
 ADD scripts/entrypoint.sh /entrypoint.sh
 ADD dist dist
+
+RUN cd dist/python && pip3 install -r requirements.yml
 
 ENV MESOS_MASTER_URL=http://localhost:5050
 
