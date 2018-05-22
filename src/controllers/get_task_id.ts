@@ -14,7 +14,8 @@ function renderTerminal(req: Express.Request, res: Express.Response, task: Task)
     user: task.user || '(no user)',
     slave_id: task.slave_id,
     framework_id: task.framework_id,
-    mesos_master_url: env.MESOS_MASTER_URL
+    mesos_master_url: env.MESOS_MASTER_URL,
+    slave_hostname: task.slave_hostname
   });
 }
 

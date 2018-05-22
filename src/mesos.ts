@@ -57,6 +57,7 @@ export interface Task {
   slave_id: string;
   framework_id: string;
   agent_url: string;
+  slave_hostname: string;
 }
 
 function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
@@ -114,9 +115,11 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
       const containerId = statuses[0].container_status.container_id.value;
       const labels = fromMesosLabels(taskInfo.labels);
 
-      const slave_pid = slaves[taskInfo.slave_id].pid;
+      const slave = slaves[taskInfo.slave_id];
+      const slave_pid = slave.pid;
       const address = slave_pid.split('@')[1];
       const slave_url = `http://${address}`;
+      const slave_hostname = slave.hostname;
 
       return Bluebird.resolve({
         labels: labels,
@@ -124,7 +127,8 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
         container_id: containerId,
         slave_id: taskInfo.slave_id,
         framework_id: taskInfo.framework_id,
-        agent_url: slave_url
+        agent_url: slave_url,
+        slave_hostname: slave_hostname
       });
     });
 }
