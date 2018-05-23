@@ -21,12 +21,13 @@
               <a href="<%= mesos_master_url %>/#/agents/<%= slave_id %>/frameworks/<%= framework_id %>/executors/<%= task_id %>" target="_blank">
                 <i class="fas fa-chevron-circle-right icon"></i><%= task_id %>
               </a>
-            <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text="<%= task_id %>"><i class="far fa-copy"></i></div>
+              <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text="<%= task_id %>"><i class="far fa-copy"></i></div>
             </span>
           </div>
           <div class="bar-item">
             <span>
-              <i class="far fa-hdd icon"></i><%= slave_hostname %>
+              <i class="fas fa-server icon"></i><%= slave_hostname %>
+              <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text="<%= slave_hostname %>"><i class="far fa-copy"></i></div>
             </span>
           </div>
           <div class="brand bar-item">
