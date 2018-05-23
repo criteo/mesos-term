@@ -21,7 +21,13 @@
     var initialGeometry = term.proposeGeometry(),
         cols = initialGeometry.cols,
         rows = initialGeometry.rows;
-    $.post(`/terminals/${window.pid}/size?cols=${cols}&rows=${rows}`)
+    $.ajax({
+        url: `/terminals/${window.pid}/size?cols=${cols}&rows=${rows}`,
+        method: 'POST',
+        xhrFields: {
+          withCredentials: true
+        }
+      })
       .done(() => {
         console.log(`Resized to ${cols}x${rows}`);
         if(fn) fn();
@@ -43,7 +49,13 @@
         cols = initialGeometry.cols,
         rows = initialGeometry.rows;
 
-    $.post(`/terminals/${task_id}`)
+    $.ajax({
+        url: `/terminals/${task_id}`,
+        method: 'POST',
+        xhrFields: {
+          withCredentials: true
+        }
+      })
       .done(function (pid) {
         window.pid = pid;
         socketURL += pid;
