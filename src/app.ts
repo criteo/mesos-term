@@ -19,14 +19,22 @@ import { AuthenticatedLogger, AnonymousLogger } from './logger';
 const app = Express();
 const expressWs = ExpressWs(app);
 
-app.use('/static', Express.static(__dirname + '/public_html'));
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '/views'));
-app.use(session({
+const sessionOptions = {
   secret: env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-}));
+  cookie: { secure: true }
+};
+
+if (app.get('env') === 'production') {
+  app.set('trust proxy', 1);
+  sessionOptions.cookie.secure = true;
+}
+
+app.use('/static', Express.static(__dirname + '/public_html'));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '/views'));
+app.use(session(sessionOptions));
 
 if (env.AUTHORIZATIONS_ENABLED) {
   console.log('Authorizations are enabled.');
