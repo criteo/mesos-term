@@ -2,7 +2,7 @@ import Express = require('express');
 import * as Ws from 'ws';
 import Util = require('util');
 
-import { getAdminsByTaskId, getTaskIdByPid, getTaskInfoByTaskId, getEnv } from './express_helpers';
+import { getTaskIdByPid, getTaskInfoByTaskId, getEnv } from './express_helpers';
 
 function intersection(array1: string[], array2: string[]) {
   return array1.filter(function(n) {
@@ -55,31 +55,27 @@ export function isUserAllowedToDebug(
     return;
   }
 
+  const taskInfoByTaskId = getTaskInfoByTaskId(req);
+  const taskInfo = taskInfoByTaskId[taskId];
+
+  if (!taskInfo) {
+    const err = `Authorizer: No task info found for task ${taskId}.`;
+    console.error(err);
+    res.send(err);
+    return;
+  }
+
   // ensure non admin users cannot log into root containers
-  if (!isUserAdmin(req)) {
-    const taskInfoByTaskId = getTaskInfoByTaskId(req);
-    const taskInfo = taskInfoByTaskId[taskId];
-
-    if (!taskInfo) {
-      const err = `Authorizer: No task info found for task ${taskId}.`;
-      console.error(err);
-      res.send(err);
-      return;
-    }
-
-    if (!taskInfo.user || taskInfo.user === 'root') {
-      console.log('Cannot log into root container %s', taskId);
-      res.status(403);
-      res.send('Cannot log into a root container, please contact an administrator.');
-      return;
-    }
+  if (!isUserAdmin(req) && (!taskInfo.user || taskInfo.user === 'root')) {
+    console.log('Cannot log into root container %s', taskId);
+    res.status(403);
+    res.send('Cannot log into a root container, please contact an administrator.');
+    return;
   }
 
   const env = getEnv(req);
   const adminGroupsAndUsers = (env.ADMINS != '') ? env.ADMINS.split(',') : [];
-
-  const adminsByTaskId = getAdminsByTaskId(req);
-  const adminsOfTaskId = adminsByTaskId[taskId];
+  const adminsOfTaskId = taskInfo.admins;
   const allowedUsersAndGroups = (adminsOfTaskId)
     ? adminGroupsAndUsers.concat(adminsOfTaskId)
     : adminGroupsAndUsers;

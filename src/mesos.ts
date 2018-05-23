@@ -58,6 +58,7 @@ export interface Task {
   framework_id: string;
   agent_url: string;
   slave_hostname: string;
+  admins: string[];
 }
 
 function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
@@ -128,7 +129,8 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
         slave_id: taskInfo.slave_id,
         framework_id: taskInfo.framework_id,
         agent_url: slave_url,
-        slave_hostname: slave_hostname
+        slave_hostname: slave_hostname,
+        admins: []
       });
     });
 }

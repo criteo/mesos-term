@@ -1,7 +1,7 @@
 import Express = require('express');
 import Constants = require('../constants');
 import { getTaskInfo, Task } from '../mesos';
-import { getAdminsByTaskId, getTaskInfoByTaskId, getLogger } from '../express_helpers';
+import { getTaskInfoByTaskId, getLogger } from '../express_helpers';
 import { isUserAllowedToDebug } from '../authorizations';
 import { env } from '../env_vars';
 
@@ -30,8 +30,7 @@ export function authenticated(req: Express.Request, res: Express.Response) {
   getTaskInfo(taskId)
     .then(function(task: Task) {
       if (Constants.DEBUG_ALLOWED_TO_KEY in task.labels) {
-        const adminsByTaskId = getAdminsByTaskId(req);
-        adminsByTaskId[taskId] = task.labels[Constants.DEBUG_ALLOWED_TO_KEY].split(',');
+        task.admins = task.labels[Constants.DEBUG_ALLOWED_TO_KEY].split(',');
       }
 
       const taskInfoByTaskId = getTaskInfoByTaskId(req);

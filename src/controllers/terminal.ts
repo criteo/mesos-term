@@ -4,7 +4,7 @@ import * as Ws from 'ws';
 import Path = require('path');
 
 import { env } from '../env_vars';
-import { getTaskIdByPid, getAdminsByTaskId, getTaskInfoByTaskId, getLogger } from '../express_helpers';
+import { getTaskIdByPid, getTaskInfoByTaskId, getLogger } from '../express_helpers';
 
 const terminals: {[pid: number]: NodePty.IPty} = {};
 const logs: {[pid: number]: string} = {};
