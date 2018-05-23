@@ -61,7 +61,7 @@ export function isUserAllowedToDebug(
     const taskInfo = taskInfoByTaskId[taskId];
 
     if (!taskInfo) {
-      const err = `No task info found for task ${taskId}.`;
+      const err = `Authorizer: No task info found for task ${taskId}.`;
       console.error(err);
       res.send(err);
       return;

@@ -54,7 +54,7 @@ export function anonymous(req: Express.Request, res: Express.Response) {
       renderTerminal(req, res, task);
     })
     .catch(function(err: Error) {
-      res.send('Error while retrieving task labels.');
-      console.error('Error while retrieving task labels %s', err);
+      res.send(err.message);
+      console.error(err);
     });
 }

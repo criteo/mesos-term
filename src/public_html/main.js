@@ -105,6 +105,7 @@
   $(document).ready(function() {
     var terminalContainer = $('#terminal-container').get(0);
     const taskId = terminalContainer.getAttribute('data-taskid');
+    console.log(taskId);
     createTerminal(terminalContainer, taskId);
     $(window).resize(resize);
     new ClipboardJS('.copy-btn');

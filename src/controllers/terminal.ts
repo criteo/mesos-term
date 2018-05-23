@@ -16,10 +16,13 @@ export function requestTerminal(req: Express.Request, res: Express.Response) {
     return;
   }
 
-  const taskInfo = getTaskInfoByTaskId(req)[taskId];
+  const taskInfoByTaskId = getTaskInfoByTaskId(req);
+  const taskInfo = taskInfoByTaskId[taskId];
+
   if (!taskInfo) {
     const err = `No task info found for task ${taskId}.`;
     console.error(err);
+    res.status(503);
     res.send(err);
     return;
   }
@@ -95,18 +98,6 @@ export function connectTerminal(ws: Ws, req: Express.Request) {
 
     // Clean things up
     if (term.pid in taskIdByPid) {
-      const taskId = taskIdByPid[term.pid];
-
-      const taskInfoByTaskId = getTaskInfoByTaskId(req);
-      if (taskId in taskInfoByTaskId) {
-        delete taskInfoByTaskId[taskId];
-      }
-
-      const adminsByTaskId = getAdminsByTaskId(req);
-      if (taskId in adminsByTaskId) {
-        delete adminsByTaskId[taskId];
-      }
-
       delete taskIdByPid[term.pid];
     }
 
