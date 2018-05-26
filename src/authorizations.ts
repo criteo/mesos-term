@@ -1,8 +1,4 @@
-import Express = require('express');
-import * as Ws from 'ws';
-import Util = require('util');
-
-import { getTaskIdByPid, getTaskInfoByTaskId, getEnv } from './express_helpers';
+import Bluebird = require('bluebird');
 
 function intersection(array1: string[], array2: string[]) {
   return array1.filter(function(n) {
@@ -10,7 +6,7 @@ function intersection(array1: string[], array2: string[]) {
   });
 }
 
-function extractUserGroupNames(groups: string[]): string[] {
+function extractCN(groups: string[]): string[] {
   if (!groups) {
     return [];
   }
@@ -25,83 +21,32 @@ function extractUserGroupNames(groups: string[]): string[] {
   }).filter(m => m !== undefined);
 }
 
-export function isUserAdmin(req: Express.Request): boolean {
-  const env = getEnv(req);
-  const admins = (env.ADMINS != '') ? env.ADMINS.split(',') : [];
-  const userAndGroups = [req.user.cn].concat(extractUserGroupNames(req.user.memberOf));
-  return userAndGroups && intersection(userAndGroups, admins).length > 0;
+export function CheckUserAuthorizations(
+  userCN: string,
+  userLdapGroups: string[],
+  admins: string[],
+  superAdmins: string[]) {
+
+  const userGroups = extractCN(userLdapGroups);
+  const userAndGroups = [userCN].concat(userGroups);
+  const allowed = admins.concat(superAdmins);
+  return (intersection(userAndGroups, allowed).length > 0)
+    ? Bluebird.resolve()
+    : Bluebird.reject(new Error('Unauthorized'));
 }
 
-function sendError(res: Express.Response, msg: string, ...args: string[]) {
-    console.log(msg, args);
-    res.send(Util.format(msg, args));
+export function CheckRootContainer(
+  taskUser: string,
+  userCN: string,
+  userLdapGroups: string[],
+  superAdmins: string[]) {
+
+  const userGroups = extractCN(userLdapGroups);
+  const userAndGroups = [userCN].concat(userGroups);
+  const isUserAdmin = (intersection(userAndGroups, superAdmins).length > 0);
+
+  return (isUserAdmin || (taskUser && taskUser !== 'root'))
+    ? Bluebird.resolve()
+    : Bluebird.reject(new Error('Cannot log into root container'));
 }
 
-export function isUserAllowedToDebug(
-  req: Express.Request,
-  res: Express.Response,
-  next: Express.NextFunction) {
-
-  let taskId = req.params.task_id;
-  if (!taskId) {
-    const pid = req.params.pid;
-    const taskIdByPid = getTaskIdByPid(req);
-    taskId = taskIdByPid[pid];
-  }
-
-  if (!taskId) {
-    const pid = (req.params.pid) ? req.params.pid : 'unknown';
-    sendError(res, 'Cannot find taskId related to PID %s', pid);
-    return;
-  }
-
-  const taskInfoByTaskId = getTaskInfoByTaskId(req);
-  const taskInfo = taskInfoByTaskId[taskId];
-
-  if (!taskInfo) {
-    const err = `Authorizer: No task info found for task ${taskId}.`;
-    console.error(err);
-    res.send(err);
-    return;
-  }
-
-  // ensure non admin users cannot log into root containers
-  if (!isUserAdmin(req) && (!taskInfo.user || taskInfo.user === 'root')) {
-    console.log('Cannot log into root container %s', taskId);
-    res.status(403);
-    res.send('Cannot log into a root container, please contact an administrator.');
-    return;
-  }
-
-  const env = getEnv(req);
-  const adminGroupsAndUsers = (env.ADMINS != '') ? env.ADMINS.split(',') : [];
-  const adminsOfTaskId = taskInfo.admins;
-  const allowedUsersAndGroups = (adminsOfTaskId)
-    ? adminGroupsAndUsers.concat(adminsOfTaskId)
-    : adminGroupsAndUsers;
-
-  const userGroups = extractUserGroupNames(req.user.memberOf);
-  const usernameAndUserGroups = [req.user.cn].concat(userGroups);
-
-  if (!userGroups) {
-    sendError(res, 'Cannot retrieve groups of user "%s".', req.user.cn);
-    return;
-  }
-
-  if (!usernameAndUserGroups) {
-    sendError(res, 'Cannot calculate list of allowed groups and users.');
-    return;
-  }
-
-  if (intersection(usernameAndUserGroups, allowedUsersAndGroups).length > 0)
-    next();
-  else {
-    console.error('User "%s" is not in authorized to debug', req.user.cn);
-    res.status(403);
-    res.send('Unauthorized access to container.');
-  }
-}
-
-export function wsIsUserAllowedToDebug(ws: Ws, req: Express.Request, next: Express.NextFunction) {
-  isUserAllowedToDebug(req, undefined, next);
-}

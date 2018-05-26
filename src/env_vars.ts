@@ -8,21 +8,30 @@ function getOrExit(var_name: string): string {
 }
 
 export interface EnvVars {
-  ADMINS: string;
+  ADMINS: string[];
   LDAP_URL?: string;
   LDAP_BASE_DN?: string;
   LDAP_USER?: string;
   LDAP_PASSWORD?: string;
   MESOS_MASTER_URL: string;
   SESSION_SECRET: string;
+  JWT_SECRET: string;
   AUTHORIZATIONS_ENABLED: boolean;
 }
 
 const authorizations_enabled = (process.env['LDAP_URL']) ? true : false;
 
+function getAdmins() {
+  const adminsStr = process.env['ADMINS'];
+  return (adminsStr)
+    ? adminsStr.split(',')
+    : [];
+}
+
 export const env: EnvVars = {
   SESSION_SECRET: getOrExit('SESSION_SECRET'),
-  ADMINS: process.env['ADMINS'] || '',
+  JWT_SECRET: getOrExit('JWT_SECRET'),
+  ADMINS: getAdmins(),
   MESOS_MASTER_URL: getOrExit('MESOS_MASTER_URL'),
   AUTHORIZATIONS_ENABLED: authorizations_enabled
 };

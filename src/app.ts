@@ -8,11 +8,10 @@ import { env } from './env_vars';
 
 import index from './controllers/index';
 import ping from './controllers/ping';
-import GetTaskId = require('./controllers/get_task_id');
-import { connectTerminal, requestTerminal, resizeTerminal } from './controllers/terminal';
+import GetTaskId from './controllers/get_task_id';
+import TerminalController from './controllers/terminal';
 
 import { setup } from './express_helpers';
-import { isUserAllowedToDebug, wsIsUserAllowedToDebug } from './authorizations';
 import authentication from './authentication';
 import { AuthenticatedLogger, AnonymousLogger } from './logger';
 
@@ -40,24 +39,16 @@ if (env.AUTHORIZATIONS_ENABLED) {
   console.log('Authorizations are enabled.');
   setup(app, new AuthenticatedLogger());
   authentication(app);
-
-  app.get('/:task_id', GetTaskId.authenticated);
-  app.post('/terminals/:task_id', isUserAllowedToDebug, requestTerminal);
-  app.post('/terminals/:pid/size', isUserAllowedToDebug, resizeTerminal);
-  (app as any).ws('/terminals/:pid', wsIsUserAllowedToDebug, connectTerminal);
 }
 else {
   console.log('Authorizations are disabled.');
   setup(app, new AnonymousLogger());
-
-  app.get('/:task_id', GetTaskId.anonymous);
-  app.post('/terminals/:task_id', requestTerminal);
-  app.post('/terminals/:pid/size', resizeTerminal);
-  (app as any).ws('/terminals/:pid', connectTerminal);
 }
 
 app.get('/', index);
 app.get('/ping', ping);
+app.get('/:task_id', GetTaskId);
+TerminalController(app, env.AUTHORIZATIONS_ENABLED);
 
 
 // Start server

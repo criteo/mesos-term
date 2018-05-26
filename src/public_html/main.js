@@ -3,7 +3,7 @@
       protocol,
       socketURL,
       socket,
-      pid;
+      token;
   
   function resize() {
     term.fit();
@@ -16,13 +16,13 @@
   }
 
   function resizeTerminal(fn) {
-    if (!window.pid || !term) return;
+    if (!window.token || !term) return;
 
     var initialGeometry = term.proposeGeometry(),
         cols = initialGeometry.cols,
         rows = initialGeometry.rows;
     $.ajax({
-        url: `/terminals/${window.pid}/size?cols=${cols}&rows=${rows}`,
+        url: `/terminals/resize?cols=${cols}&rows=${rows}&token=${window.token}`,
         method: 'POST',
         xhrFields: {
           withCredentials: true
@@ -34,13 +34,13 @@
       });
   }
   
-  function createTerminal(terminalContainer, task_id) {
+  function createTerminal(terminalContainer, taskId) {
     while (terminalContainer.children.length) {
       terminalContainer.removeChild(terminalContainer.children[0]);
     }
     term = new Terminal();
     protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
-    socketURL = protocol + location.hostname + ((location.port) ? (':' + location.port) : '') + '/terminals/';
+    socketURL = protocol + location.hostname + ((location.port) ? (':' + location.port) : '') + '/terminals/ws?token=';
   
     term.open(terminalContainer, true);
     resize();
@@ -50,15 +50,17 @@
         rows = initialGeometry.rows;
 
     $.ajax({
-        url: `/terminals/${task_id}`,
+        url: `/terminals/create/${taskId}`,
         method: 'POST',
         xhrFields: {
           withCredentials: true
         }
       })
-      .done(function (pid) {
-        window.pid = pid;
-        socketURL += pid;
+      .done(function (data) {
+        console.log(data);
+        window.token = data.token;
+        fillTaskInfo(data.task, data.master_url);
+        socketURL += window.token;
         socket = new WebSocket(socketURL);
         socket.onopen = runRealTerminal;
         socket.onclose = onSocketClose;
@@ -74,6 +76,27 @@
 
   function onSocketError() {
     $('.connection-closed-splash').show();
+  }
+
+  function fillTaskInfo(task, master_url) {
+    // fill missing fields
+    $('.hostname .content').text(task.slave_hostname);
+    $('.user .content').text(task.user);
+    $('.task_id a').attr('href', `${master_url}/#/agents/${task.slave_id}/frameworks/${task.framework_id}/executors/${task.task_id}`);
+
+    // display the status bar
+    $('.status-bar').removeClass('hidden');
+
+    // Reduce opacity of Mesos logo to make it a watermark
+    $('.background-watermark').css({opacity: '1'}).animate({opacity: '0.3'}, 'slow');
+
+    // slide up th status bar.
+    $('.status-bar').animate({bottom: '0px'}, 'slow');
+
+    // hide the progress spin progressively.
+    $('.progress-spin').css({opacity: '1'}).animate({opacity: '0'}, 'slow', function() {
+      $('.progress-spin').css({ display: 'none' });
+    });
   }
   
   function runRealTerminal() {

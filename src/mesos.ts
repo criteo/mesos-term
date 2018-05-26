@@ -1,6 +1,7 @@
 import { env } from './env_vars';
 import Request = require('request-promise');
 import Bluebird = require('bluebird');
+import Constants = require('./constants');
 
 type Labels = {[key: string]: string};
 
@@ -59,6 +60,7 @@ export interface Task {
   agent_url: string;
   slave_hostname: string;
   admins: string[];
+  task_id: string;
 }
 
 function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
@@ -92,7 +94,7 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
       });
 
       if (tasks.length == 0) {
-        return Bluebird.reject(new Error(`No task details found for task ID ${taskId}`));
+        return Bluebird.reject(new Error(`No info found for task ID ${taskId}`));
       }
 
       if (tasks.length > 1) {
@@ -121,6 +123,12 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
       const address = slave_pid.split('@')[1];
       const slave_url = `http://${address}`;
       const slave_hostname = slave.hostname;
+      let admins: string[] = [];
+
+      if (Constants.DEBUG_ALLOWED_TO_KEY in labels) {
+        const allowed: string = labels[Constants.DEBUG_ALLOWED_TO_KEY];
+        admins = allowed.split(',') as string[];
+      }
 
       return Bluebird.resolve({
         labels: labels,
@@ -130,7 +138,8 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
         framework_id: taskInfo.framework_id,
         agent_url: slave_url,
         slave_hostname: slave_hostname,
-        admins: []
+        admins: admins,
+        task_id: taskId
       });
     });
 }
