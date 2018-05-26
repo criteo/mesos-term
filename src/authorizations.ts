@@ -32,7 +32,7 @@ export function CheckUserAuthorizations(
   const allowed = admins.concat(superAdmins);
   return (intersection(userAndGroups, allowed).length > 0)
     ? Bluebird.resolve()
-    : Bluebird.reject(new Error('Unauthorized'));
+    : Bluebird.reject(new Error('Unauthorized access to container.'));
 }
 
 export function CheckRootContainer(
@@ -47,6 +47,6 @@ export function CheckRootContainer(
 
   return (isUserAdmin || (taskUser && taskUser !== 'root'))
     ? Bluebird.resolve()
-    : Bluebird.reject(new Error('Cannot log into root container'));
+    : Bluebird.reject(new Error('Unauthorized to log into root container.'));
 }
 

@@ -11,27 +11,31 @@
           <div id="terminal-container" data-taskid="<%= task_id %>"></div>
         </div>
         <div class="status-bar hidden">
-          <div class="user bar-item">
-            <span class="bar-item-content">
-              <i class="fas fa-user icon"></i>
-              <span class="content"></span>
-            </span>
-          </div>
-          <div class="task_id bar-item">
-            <span class="bar-item-content">
-              <a href="" target="_blank">
-                <i class="fas fa-chevron-circle-right icon"></i>
-                <span class="content"><%= task_id %></span>
-              </a>
-              <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text="<%= task_id %>"><i class="far fa-copy"></i></div>
-            </span>
-          </div>
-          <div class="hostname bar-item">
-            <span class="bar-item-content">
-              <i class="fas fa-server icon"></i>
-              <span class="content"></span>
-              <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text=""><i class="far fa-copy"></i></div>
-            </span>
+          <div class="left-bar">
+            <div class="left-bar-content">
+              <div class="user bar-item">
+                <span class="bar-item-content">
+                  <i class="fas fa-user icon"></i>
+                  <span class="content"></span>
+                </span>
+              </div>
+              <div class="task_id bar-item">
+                <span class="bar-item-content">
+                  <a href="" target="_blank">
+                    <i class="fas fa-chevron-circle-right icon"></i>
+                    <span class="content"><%= task_id %></span>
+                  </a>
+                  <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text="<%= task_id %>"><i class="far fa-copy"></i></div>
+                </span>
+              </div>
+              <div class="hostname bar-item">
+                <span class="bar-item-content">
+                  <i class="fas fa-server icon"></i>
+                  <span class="content"></span>
+                  <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text=""><i class="far fa-copy"></i></div>
+                </span>
+              </div>
+            </div>
           </div>
           <div class="brand bar-item">
             <span class="bar-item-content">
@@ -42,10 +46,12 @@
           </div>
         </div>
         <div class="connection-closed-splash">
-          <span>
-            <i class="fas fa-times-circle icon"></i>
-            Connection has been closed. The container probably stopped...
-          </span>
+          <table>
+            <tr>
+              <td><i class="fas fa-times-circle icon"></i></td>
+              <td class="error-cell"><span class="error"></span></td>
+            </tr>
+          </table>
         </div>
         <div class="background-watermark">
           <img src="static/images/mesos.png"/>

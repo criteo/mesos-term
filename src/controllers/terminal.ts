@@ -32,7 +32,7 @@ declare global {
 
 function VerifyBearer(req: Express.Request) {
   if (!(BEARER_KEY in req.query)) {
-    return Bluebird.reject(new Error('Unauthorized'));
+    return Bluebird.reject(new Error('Unauthorized due to missing bearer.'));
   }
 
   const token = req.query[BEARER_KEY];
@@ -58,7 +58,6 @@ function TerminalBearer(
   VerifyBearer(req)
     .then(next)
     .catch(function(err: Error) {
-      console.log(err);
       res.status(403);
       res.send(err);
     });
@@ -144,7 +143,7 @@ function createTerminal(
 
   const taskId = req.params.task_id;
   if (!taskId) {
-    res.send('You must provide a task id.');
+    res.send('No task ID provided.');
     return;
   }
 

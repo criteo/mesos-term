@@ -97,12 +97,12 @@ function getMesosTask(
         .then(() => getMesosTask(mesos_master_url, taskId, false));
     }
     else {
-      return Bluebird.reject(new Error(`No info found for task ID ${taskId}`));
+      return Bluebird.reject(new Error(`Task not found.`));
     }
   }
 
   if (tasks.length > 1) {
-    return Bluebird.reject(new Error(`Several task details found for task ID ${taskId}`));
+    return Bluebird.reject(new Error(`Several task details found for this task.`));
   }
 
   return Bluebird.resolve(tasks[0]);
@@ -116,11 +116,11 @@ export function getTaskInfo(mesos_master_url: string, taskId: string): Bluebird<
       });
 
       if (statuses.length == 0) {
-        return Bluebird.reject(new Error(`No status details found for task ID ${taskId}`));
+        return Bluebird.reject(new Error(`No status details found.`));
       }
 
       if (statuses.length > 1) {
-        return Bluebird.reject(new Error(`Several status details found for task ID ${taskId}`));
+        return Bluebird.reject(new Error(`Several status details found.`));
       }
 
       const containerId = statuses[0].container_status.container_id.value;

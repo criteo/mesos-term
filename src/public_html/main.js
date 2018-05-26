@@ -62,16 +62,36 @@
         socket.onclose = onSocketClose;
         socket.onerror = onSocketError;
         resizeTerminal();
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+        throwError(jqXHR.responseText);
       });
+  }
 
+  function throwError(error) {
+    $('.progress-spin').css({ display: 'none' });
+    $('.connection-closed-splash .error').text(error);
+    $('.connection-closed-splash').show();
+    showStatusBar(false);
   }
 
   function onSocketClose() {
-    $('.connection-closed-splash').show();
+    throwError('Connection has been closed. The container probably stopped...');
   }
 
-  function onSocketError() {
-    $('.connection-closed-splash').show();
+  function onSocketError(err) {
+    throwError(`Error with websocket: ${err.message}`);
+  }
+
+  function showStatusBar(showContent) {
+    // display the status bar
+    $('.status-bar').removeClass('hidden');
+
+    // slide up th status bar.
+    $('.status-bar').animate({bottom: '0px'}, 'slow');
+    if (showContent) {
+      $('.status-bar .left-bar-content').show();
+    }
   }
 
   function fillTaskInfo(task, master_url) {
@@ -81,14 +101,10 @@
     $('.task_id a').attr('href', 
       `${master_url}/#/agents/${task.slave_id}/frameworks/${task.framework_id}/executors/${task.task_id}`);
 
-    // display the status bar
-    $('.status-bar').removeClass('hidden');
+    showStatusBar(true);
 
     // Reduce opacity of Mesos logo to make it a watermark
     $('.background-watermark').css({opacity: '1'}).animate({opacity: '0.3'}, 'slow');
-
-    // slide up th status bar.
-    $('.status-bar').animate({bottom: '0px'}, 'slow');
 
     // hide the progress spin progressively.
     $('.progress-spin').css({opacity: '1'}).animate({opacity: '0'}, 'slow', function() {

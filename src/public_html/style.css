@@ -52,7 +52,15 @@ body, html {
   font-family: inconsolata;
 }
 
-.status-bar.hidden {
+.status-bar .left-bar {
+  display: inline-block;
+}
+
+.status-bar .left-bar-content {
+  display: none;
+}
+
+.hidden {
   display: none;
 }
 
@@ -126,14 +134,14 @@ body, html {
 }
 
 .connection-closed-splash {
-  width: 300px;
-  height: 100px;
+  width: 400px;
+  height: 150px;
   background: #ff0000de;
   position: absolute;
   top: 50%;
   left: 50%;
-  margin-left: -150px;
-  margin-top: -50px;
+  margin-left: -200px;
+  margin-top: -75px;
   padding: 20px;
   border-radius: 10px;
   color: white;
@@ -141,11 +149,20 @@ body, html {
   font-size: 1.3em;
   display: none;
   z-index: 20;
+  opacity: 0.9;
+}
+
+.connection-closed-splash table {
+  height: 100%;
+  width: 100%;
+}
+
+.connection-closed-splash .error-cell {
+  width: 100%;
 }
 
 .connection-closed-splash span {
-  display: table-cell;
-  height: 100px;
+  width: 100%;
   vertical-align: middle;
 }
 
