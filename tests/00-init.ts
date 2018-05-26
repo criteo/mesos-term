@@ -32,3 +32,9 @@ before(function() {
 after(function() {
   console.log('Clean up suite');
 });
+
+beforeEach(function (done) {
+  setTimeout(function(){
+    done();
+  }, 500);
+});
