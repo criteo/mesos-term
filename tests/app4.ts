@@ -5,14 +5,6 @@ describe('app4 (label GRANTED_TO harry and bob, no user most probably meaning ro
     describe('user john', function() {
       AppsHelpers.testInteractionsWithTerminal(3001, 'john', 'app4');
     });
-
-    describe('user harry', function() {
-      AppsHelpers.testInteractionsWithTerminal(3001, 'harry', 'app4');
-    });
-
-    describe('user bob', function() {
-      AppsHelpers.testInteractionsWithTerminal(3001, 'bob', 'app4');
-    });
   });
 
   describe('authorizations enabled', function() {

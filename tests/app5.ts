@@ -5,14 +5,6 @@ describe('app5 (no label, root user)', function() {
     describe('user john', function() {
       AppsHelpers.testInteractionsWithTerminal(3001, 'john', 'app5');
     });
-
-    describe('user harry', function() {
-      AppsHelpers.testInteractionsWithTerminal(3001, 'harry', 'app5');
-    });
-
-    describe('user bob', function() {
-      AppsHelpers.testInteractionsWithTerminal(3001, 'bob', 'app5');
-    });
   });
 
   describe('authorizations enabled', function() {
