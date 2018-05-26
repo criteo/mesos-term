@@ -101,6 +101,11 @@ example using Marathon.
 
 ![authorized users](doc/images/authorizations.png?raw=true "Authorizations")
 
+For security reasons, it has been decided to not allow admins of an application
+to spawn a terminal in the case the Mesos task runs as `root` or no user
+(meaning the user running Mesos, i.e., most probably `root`). Only super-admins
+can debug those containers.
+
 ## Mesos state caching
 
 For production Mesos cluster having a few thousands of instances, it might be
