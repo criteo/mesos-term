@@ -20,6 +20,14 @@ ADD dist dist
 
 RUN cd dist/python && pip3 install -r requirements.yml
 
+# The URL to the Mesos master to retrieve the state from.
 ENV MESOS_MASTER_URL=http://localhost:5050
+
+# Put Mesos state in cache every 60 seconds.
+ENV MESOS_STATE_CACHE_TIME=60
+
+# Secrets to encrypt session cookie and authorization tokens
+ENV SESSION_SECRET=unsecure-session-secret
+ENV JWT_SECRET=unsecure-jwt-secret
 
 CMD ["/entrypoint.sh"]
