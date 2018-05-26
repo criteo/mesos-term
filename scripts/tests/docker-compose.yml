@@ -120,7 +120,7 @@ services:
       - mesos-master
       - openldap
     environment:
-      - ADMINS=admins
+      - SUPER_ADMINS=admins
       - LDAP_URL=ldap://openldap
       - LDAP_BASE_DN=dc=example,dc=com
       - LDAP_USER=cn=admin,dc=example,dc=com

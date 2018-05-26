@@ -111,7 +111,7 @@ function tryRequestTerminal(
   const userCN = req.user.cn;
   const userLdapGroups = req.user.memberOf;
   const admins = task.admins;
-  const superAdmins = env.ADMINS;
+  const superAdmins = env.SUPER_ADMINS;
 
   return Bluebird.join(
       Authorizations.CheckUserAuthorizations(
