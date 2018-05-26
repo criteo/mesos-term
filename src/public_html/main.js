@@ -122,7 +122,7 @@
       term.attach(socket);
       term._initialized = true;
       fillTaskInfo(data.task, data.master_url);
-      resizeTerminal();
+      // resizeTerminal();
     };
   }
 
