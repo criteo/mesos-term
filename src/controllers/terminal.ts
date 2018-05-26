@@ -125,7 +125,7 @@ function checkAuthorizations(
         userLdapGroups,
         superAdmins
       )
-    )
+    );
 }
 
 function tryRequestTerminal(
@@ -136,7 +136,7 @@ function tryRequestTerminal(
   const spawnPromise = (env.AUTHORIZATIONS_ENABLED)
     ? checkAuthorizations(req, task)
         .then(() => spawnTerminal(req, res, task))
-    : spawnTerminal(req, res, task)
+    : spawnTerminal(req, res, task);
 
   return spawnPromise.then(function(pid: number) {
     const payload = { pid: pid };

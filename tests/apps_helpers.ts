@@ -38,13 +38,17 @@ export function testAuthorizations(user: string, appName: string, statusCode: nu
   });
 }
 
-export function testInteractionsWithTerminal(user: string, appName: string) {
+export function testInteractionsWithTerminal(
+  port: number,
+  user: string,
+  appName: string) {
+
   it('should be able to interact with terminal', function() {
     this.timeout(10000);
 
     const instanceId = this.mesosTaskIds[appName];
     return helpers.withChrome(function(driver) {
-      return Bluebird.resolve(driver.get(`http://${user}:password@localhost:3000/${instanceId}`))
+      return Bluebird.resolve(driver.get(`http://${user}:password@localhost:${port}/${instanceId}`))
         .then(function() {
           return Bluebird.resolve(
             driver.wait(webdriver.until.elementLocated(webdriver.By.css(".xterm-rows")), 10000))
@@ -70,9 +74,14 @@ export function testInteractionsWithTerminal(user: string, appName: string) {
   });
 }
 
-function testReceiveErrorMessage(user: string, instanceId: string, expectedError: string) {
+function testReceiveErrorMessage(
+  port: number,
+  user: string,
+  instanceId: string,
+  expectedError: string) {
+
   return helpers.withChrome(function(driver) {
-    return Bluebird.resolve(driver.get(`http://${user}:password@localhost:3000/${instanceId}`))
+    return Bluebird.resolve(driver.get(`http://${user}:password@localhost:${port}/${instanceId}`))
       .then(function() {
         return Bluebird.resolve(
           driver.wait(webdriver.until.elementLocated(webdriver.By.css(".error-splash .error")), 10000))
@@ -84,6 +93,7 @@ function testReceiveErrorMessage(user: string, instanceId: string, expectedError
 }
 
 function testReceiveErrorMessageFromAppName(
+  port: number,
   user: string,
   appName: string,
   expectedError: string) {
@@ -93,12 +103,13 @@ function testReceiveErrorMessageFromAppName(
       this.timeout(10000);
 
       const instanceId = this.mesosTaskIds[appName];
-      return testReceiveErrorMessage(user, instanceId, expectedError);
+      return testReceiveErrorMessage(port, user, instanceId, expectedError);
     });
   });
 }
 
 function testReceiveErrorMessageFromInstanceId(
+  port: number,
   user: string,
   instanceId: string,
   expectedError: string) {
@@ -107,19 +118,19 @@ function testReceiveErrorMessageFromInstanceId(
     it(`should receive error "${expectedError}"`, function() {
       this.timeout(10000);
 
-      return testReceiveErrorMessage(user, instanceId, expectedError);
+      return testReceiveErrorMessage(port, user, instanceId, expectedError);
     });
   });
 }
 
-export function testUnauthorizedUser(user: string, appName: string) {
-  testReceiveErrorMessageFromAppName(user, appName, 'Unauthorized access to container.');
+export function testUnauthorizedUser(port: number, user: string, appName: string) {
+  testReceiveErrorMessageFromAppName(port, user, appName, 'Unauthorized access to container.');
 }
 
-export function testUnauthorizedUserInRootContainer(user: string, appName: string) {
-  testReceiveErrorMessageFromAppName(user, appName, 'Unauthorized access to root container.');
+export function testUnauthorizedUserInRootContainer(port: number, user: string, appName: string) {
+  testReceiveErrorMessageFromAppName(port, user, appName, 'Unauthorized access to root container.');
 }
 
-export function testNoTaskId(user: string, instanceId: string) {
-  testReceiveErrorMessageFromInstanceId(user, instanceId, 'Task not found.');
+export function testNoTaskId(port: number, user: string, instanceId: string) {
+  testReceiveErrorMessageFromInstanceId(port, user, instanceId, 'Task not found.');
 }
