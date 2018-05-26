@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+    <head>
+        <title><%= task_id %></title>
+        <link rel="stylesheet" href="/static/xterm.css" />
+        <link rel="stylesheet" href="/static/style.css" />
+        <link rel="shortcut icon" href="/static/ico/favicon.ico">
+    </head>
+    <body>
+        <div class="term">
+          <div id="terminal-container" data-taskid="<%= task_id %>"></div>
+        </div>
+        <div class="status-bar hidden">
+          <div class="left-bar">
+            <div class="left-bar-content">
+              <div class="user bar-item">
+                <span class="bar-item-content">
+                  <i class="fas fa-user icon"></i>
+                  <span class="content"></span>
+                </span>
+              </div>
+              <div class="task_id bar-item">
+                <span class="bar-item-content">
+                  <a href="" target="_blank">
+                    <i class="fas fa-chevron-circle-right icon"></i>
+                    <span class="content"><%= task_id %></span>
+                  </a>
+                  <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text="<%= task_id %>"><i class="far fa-copy"></i></div>
+                </span>
+              </div>
+              <div class="hostname bar-item">
+                <span class="bar-item-content">
+                  <i class="fas fa-server icon"></i>
+                  <span class="content"></span>
+                  <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text=""><i class="far fa-copy"></i></div>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="brand bar-item">
+            <span class="bar-item-content">
+              <a href="https://github.com/clems4ever/mesos-term" target="_blank">
+                <i class="fab fa-github icon"></i><span class="content">MesosTerm</span>
+              </a>
+            </span>
+          </div>
+        </div>
+        <div class="error-splash">
+          <table>
+            <tr>
+              <td><i class="fas fa-times-circle icon"></i></td>
+              <td class="error-cell"><span class="error"></span></td>
+            </tr>
+          </table>
+        </div>
+        <div class="background-watermark">
+          <img src="static/images/mesos.png"/>
+        </div>
+        <div class="sk-circle progress-spin">
+          <div class="sk-circle1 sk-child"></div>
+          <div class="sk-circle2 sk-child"></div>
+          <div class="sk-circle3 sk-child"></div>
+          <div class="sk-circle4 sk-child"></div>
+          <div class="sk-circle5 sk-child"></div>
+          <div class="sk-circle6 sk-child"></div>
+          <div class="sk-circle7 sk-child"></div>
+          <div class="sk-circle8 sk-child"></div>
+          <div class="sk-circle9 sk-child"></div>
+          <div class="sk-circle10 sk-child"></div>
+          <div class="sk-circle11 sk-child"></div>
+          <div class="sk-circle12 sk-child"></div>
+        </div>
+
+        <script src="static/clipboard.min.js"></script>
+        <script src="static/fontawesome-all.min.js"></script>
+        <script src="static/jquery-3.3.1.min.js"></script>
+        <script src="static/xterm.js" ></script>
+        <script src="static/addons/attach/attach.js" ></script>
+        <script src="static/addons/fit/fit.js" ></script>
+        <script src="static/main.js"></script>
+    </body>
+</html>

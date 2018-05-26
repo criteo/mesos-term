@@ -6,9 +6,11 @@ set -x
 script_dir=`dirname "$0"`
 
 export SESSION_SECRET=abcd
+export JWT_SECRET=abcd
+export MESOS_STATE_CACHE_TIME=60
 export MESOS_MASTER_URL=http://localhost:5050
 
-npm run test
+# npm run test
 
 pushd $script_dir/tests
 

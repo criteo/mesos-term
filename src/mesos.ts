@@ -82,6 +82,16 @@ function getMesosTask(
   taskId: string,
   canFetch: boolean): Bluebird<MesosTask> {
 
+  if (!mesosState || !mesosState.frameworks) {
+    if (canFetch) {
+      return fetchMesosState(mesos_master_url)
+        .then(() => getMesosTask(mesos_master_url, taskId, false));
+    }
+    else {
+      return Bluebird.reject(new Error(`Cannot fetch Mesos state.`));
+    }
+  }
+
   const mesosTasks = mesosState.frameworks
     .reduce(function(acc: MesosTask[], framework: MesosFramework) {
       return acc.concat(framework.tasks);

@@ -47,6 +47,6 @@ export function CheckRootContainer(
 
   return (isUserAdmin || (taskUser && taskUser !== 'root'))
     ? Bluebird.resolve()
-    : Bluebird.reject(new Error('Unauthorized to log into root container.'));
+    : Bluebird.reject(new Error('Unauthorized access to root container.'));
 }
 

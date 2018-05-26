@@ -70,8 +70,8 @@
 
   function throwError(error) {
     $('.progress-spin').css({ display: 'none' });
-    $('.connection-closed-splash .error').text(error);
-    $('.connection-closed-splash').show();
+    $('.error-splash .error').text(error);
+    $('.error-splash').show();
     showStatusBar(false);
   }
 

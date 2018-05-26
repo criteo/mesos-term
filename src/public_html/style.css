@@ -133,7 +133,7 @@ body, html {
   width: 400px;
 }
 
-.connection-closed-splash {
+.error-splash {
   width: 400px;
   height: 150px;
   background: #ff0000de;
@@ -152,21 +152,21 @@ body, html {
   opacity: 0.9;
 }
 
-.connection-closed-splash table {
+.error-splash table {
   height: 100%;
   width: 100%;
 }
 
-.connection-closed-splash .error-cell {
+.error-splash .error-cell {
   width: 100%;
 }
 
-.connection-closed-splash span {
+.error-splash span {
   width: 100%;
   vertical-align: middle;
 }
 
-.connection-closed-splash .icon {
+.error-splash .icon {
   width: 64px;
   height: 64px;
   float: left;

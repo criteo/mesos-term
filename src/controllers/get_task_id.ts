@@ -10,5 +10,5 @@ export default function(req: Express.Request, res: Express.Response) {
 
   const taskId = req.params.task_id;
   getLogger(req).request(req, taskId);
-  res.render('index', { task_id: taskId, });
+  res.render('terminal', { task_id: taskId, });
 }

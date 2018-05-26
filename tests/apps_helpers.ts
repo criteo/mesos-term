@@ -69,3 +69,57 @@ export function testInteractionsWithTerminal(user: string, appName: string) {
     });
   });
 }
+
+function testReceiveErrorMessage(user: string, instanceId: string, expectedError: string) {
+  return helpers.withChrome(function(driver) {
+    return Bluebird.resolve(driver.get(`http://${user}:password@localhost:3000/${instanceId}`))
+      .then(function() {
+        return Bluebird.resolve(
+          driver.wait(webdriver.until.elementLocated(webdriver.By.css(".error-splash .error")), 10000))
+      })
+      .then(function(el) {
+        return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, expectedError), 2000));
+      });
+  });
+}
+
+function testReceiveErrorMessageFromAppName(
+  user: string,
+  appName: string,
+  expectedError: string) {
+
+  describe(`from app name ${appName}`, function() {
+    it(`should receive error "${expectedError}"`, function() {
+      this.timeout(10000);
+
+      const instanceId = this.mesosTaskIds[appName];
+      return testReceiveErrorMessage(user, instanceId, expectedError);
+    });
+  });
+}
+
+function testReceiveErrorMessageFromInstanceId(
+  user: string,
+  instanceId: string,
+  expectedError: string) {
+
+  describe(`from instance ID ${instanceId}`, function() {
+    it(`should receive error "${expectedError}"`, function() {
+      this.timeout(10000);
+
+      return testReceiveErrorMessage(user, instanceId, expectedError);
+    });
+  });
+}
+
+export function testUnauthorizedUser(user: string, appName: string) {
+  testReceiveErrorMessageFromAppName(user, appName, 'Unauthorized access to container.');
+}
+
+export function testUnauthorizedUserInRootContainer(user: string, appName: string) {
+  testReceiveErrorMessageFromAppName(user, appName, 'Unauthorized access to root container.');
+}
+
+export function testNoTaskId(user: string, instanceId: string) {
+  testReceiveErrorMessageFromInstanceId(user, instanceId, 'Task not found.');
+}
