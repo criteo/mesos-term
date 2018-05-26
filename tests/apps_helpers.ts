@@ -1,42 +1,6 @@
-import Request = require('request-promise');
-import errors = require('request-promise/errors');
 import Bluebird = require('bluebird');
 import webdriver = require('selenium-webdriver');
 import helpers = require('./helpers');
-
-export function AssertReplyWith(req: Request.Options, statusCode: number): Bluebird<void> {
-  req.resolveWithFullResponse = true;
-  return Request(req)
-    .then(function(res) {
-      return (res.statusCode == statusCode)
-        ? Bluebird.resolve()
-        : Bluebird.reject(new Error(
-          `Bad status code ${res.statusCode} (expected ${statusCode})`));
-    })
-    .catch(errors.StatusCodeError, function(res) {
-      return (res.statusCode == statusCode)
-        ? Bluebird.resolve()
-        : Bluebird.reject(new Error(
-          `Bad status code ${res.statusCode} (expected ${statusCode})`));
-    });
-}
-
-export function testAuthorizations(user: string, appName: string, statusCode: number) {
-  it(`should get ${statusCode} when accessing terminal page`, function() {
-    const instanceId = this.mesosTaskIds[appName];
-    return AssertReplyWith({
-      uri: `http://${user}:password@localhost:3000/${instanceId}`
-    }, statusCode);
-  });
-
-  it(`should get ${statusCode} when requesting a terminal`, function() {
-    const instanceId = this.mesosTaskIds[appName];
-    return AssertReplyWith({
-      method: 'POST',
-      uri: `http://${user}:password@localhost:3000/terminals/${instanceId}`
-    }, statusCode);
-  });
-}
 
 export function testInteractionsWithTerminal(
   port: number,
@@ -44,7 +8,7 @@ export function testInteractionsWithTerminal(
   appName: string) {
 
   it('should be able to interact with terminal', function() {
-    this.timeout(10000);
+    this.timeout(20000);
 
     const instanceId = this.mesosTaskIds[appName];
     return helpers.withChrome(function(driver) {
@@ -87,7 +51,7 @@ function testReceiveErrorMessage(
           driver.wait(webdriver.until.elementLocated(webdriver.By.css(".error-splash .error")), 10000))
       })
       .then(function(el) {
-        return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, expectedError), 2000));
+        return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, expectedError), 10000));
       });
   });
 }
@@ -100,7 +64,7 @@ function testReceiveErrorMessageFromAppName(
 
   describe(`from app name ${appName}`, function() {
     it(`should receive error "${expectedError}"`, function() {
-      this.timeout(10000);
+      this.timeout(20000);
 
       const instanceId = this.mesosTaskIds[appName];
       return testReceiveErrorMessage(port, user, instanceId, expectedError);
@@ -116,7 +80,7 @@ function testReceiveErrorMessageFromInstanceId(
 
   describe(`from instance ID ${instanceId}`, function() {
     it(`should receive error "${expectedError}"`, function() {
-      this.timeout(10000);
+      this.timeout(20000);
 
       return testReceiveErrorMessage(port, user, instanceId, expectedError);
     });
