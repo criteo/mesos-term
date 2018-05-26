@@ -39,9 +39,23 @@ function VerifyBearer(req: Express.Request) {
   return JwtAsync.verifyAsync(token, env.JWT_SECRET)
     .then(function(decoded: any) {
       const pid = decoded.pid;
-      if (!(pid in taskByPid) || !(pid in terminalsByPid) || !(pid in logsByPid)) {
-        return Bluebird.reject(new Error(`No terminal found for PID ${pid}.`));
+
+      if (!pid) {
+        return Bluebird.reject(new Error('No terminal PID in bearer'));
       }
+
+      if (!(pid in taskByPid)) {
+        return Bluebird.reject(new Error(`No PID ${pid} in tasks repository.`));
+      }
+
+      if (!(pid in terminalsByPid)) {
+        return Bluebird.reject(new Error(`No PID ${pid} in terminals repository.`));
+      }
+
+      if (!(pid in logsByPid)) {
+        return Bluebird.reject(new Error(`No PID ${pid} in logs repository.`));
+      }
+
       req.term = {
         task: taskByPid[decoded.pid],
         terminal: terminalsByPid[decoded.pid],
@@ -58,7 +72,7 @@ function TerminalBearer(
   VerifyBearer(req)
     .then(next)
     .catch(function(err: Error) {
-      console.error(err);
+      console.error(`Error with URL ${req.originalUrl}: ${err}`);
       res.status(403);
       res.send(err);
     });
