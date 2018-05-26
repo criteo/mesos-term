@@ -14,7 +14,7 @@
     $('.status-bar .bar-item span').css('height', statusBarHeight);
   }
 
-  function resizeTerminal(fn) {
+  function resizeTerminal() {
     if (!window.token || !term) return;
 
     const initialGeometry = term.proposeGeometry();
@@ -27,10 +27,6 @@
         xhrFields: {
           withCredentials: true
         }
-      })
-      .done(() => {
-        console.log(`Resized to ${cols}x${rows}`);
-        if(fn) fn();
       });
   }
   
