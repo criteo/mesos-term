@@ -1,7 +1,7 @@
 #!/bin/bash
 
-set -e
 set -x
+set -e
 
 script_dir=`dirname "$0"`
 
@@ -18,10 +18,22 @@ docker-compose build
 docker-compose up -d
 ./setup.sh
 
+set +x
+set +e
+
 npm run test-int
 
-docker ps -a
-docker-compose logs mesos-term
+if [ "$?" -ne "0" ];
+then
+  echo "Test failed"
+  docker ps -a
+  docker-compose logs mesos-term
+  docker-compose logs mesos-term-no-auth
+  exit 1
+fi
+
+set -x
+set -e
 
 ./cleanup.sh
 popd
