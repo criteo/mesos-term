@@ -16,6 +16,6 @@ sleep 15 # Wait for Marathon to start
 ./create_apps.sh
 
 echo "Wait for apps to be ready"
-sleep 10 # Let the applications be scheduled
+sleep 20 # Let the applications be scheduled
 
 popd
