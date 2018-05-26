@@ -8,7 +8,7 @@ docker-compose build
 docker-compose up -d
 
 # import users in LDAP
-ldapadd -D "cn=admin,dc=example,dc=com" -f ldap/base.ldif -w password -x
+docker run -it --network host -v $(pwd)/ldap/base.ldif:/base.ldif --rm mbentley/ldap-utils ldapadd -h 172.16.121.6 -D "cn=admin,dc=example,dc=com" -f /base.ldif -w password -x
 
 echo "Wait for Marathon to be ready"
 sleep 15 # Wait for Marathon to start
