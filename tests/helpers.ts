@@ -22,6 +22,6 @@ export function withChrome<T>(
 
   return fn(driver)
     .finally(function() {
-      driver.quit();
+      return driver.quit();
     });
 }
