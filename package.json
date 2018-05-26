@@ -4,7 +4,11 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "exit 0"
+    "test": "./node_modules/.bin/mocha --colors --require ts-node/register --recursive src/**/*.spec.ts",
+    "test-int": "./node_modules/.bin/mocha --colors --require ts-node/register --recursive tests/**/*.ts",
+    "lint": "./node_modules/.bin/tslint -c tslint.json -p tsconfig.json",
+    "compile": "./node_modules/.bin/tsc -p tsconfig.json",
+    "dist": "cp -r src/views src/public_html src/python dist"
   },
   "repository": {
     "type": "git",
@@ -18,12 +22,37 @@
   "homepage": "https://github.com/clems4ever/mesos-task-exec-web#readme",
   "dependencies": {
     "basic-auth": "^2.0.0",
+    "bluebird": "^3.5.1",
     "ejs": "^2.5.7",
     "express": "^4.16.2",
     "express-session": "^1.15.6",
     "express-ws": "^3.0.0",
-    "node-pty": "^0.7.3",
+    "jsonwebtoken": "^8.2.1",
+    "node-pty": "^0.7.4",
     "passport": "^0.4.0",
-    "passport-ldapauth": "^2.0.0"
+    "passport-ldapauth": "^2.0.0",
+    "request": "^2.86.0",
+    "request-promise": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/basic-auth": "^1.1.2",
+    "@types/express": "^4.11.1",
+    "@types/express-session": "^1.15.8",
+    "@types/express-ws": "^3.0.0",
+    "@types/jsonwebtoken": "^7.2.7",
+    "@types/mocha": "^5.2.0",
+    "@types/node": "^10.1.1",
+    "@types/request-promise": "^4.1.41",
+    "@types/selenium-webdriver": "^3.0.8",
+    "@types/sinon": "^4.3.3",
+    "chromedriver": "^2.38.3",
+    "mocha": "^5.1.1",
+    "selenium-webdriver": "^4.0.0-alpha.1",
+    "sinon": "^5.0.7",
+    "ts-node": "^6.0.3",
+    "tsc": "^1.20150623.0",
+    "tslint": "^5.10.0",
+    "tslint-eslint-rules": "^5.3.1",
+    "typescript": "^2.8.3"
   }
 }

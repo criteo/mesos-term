@@ -1,0 +1,19 @@
+{
+  "id": "/app2",
+  "cmd": "env && sleep 3600",
+  "cpus": 0.1,
+  "mem": 16,
+  "disk": 0,
+  "instances": 1,
+  "user": "myuser",
+  "labels": {
+    "DEBUG_GRANTED_TO": "harry"
+  },
+  "portDefinitions": [
+    {
+      "port": 10000,
+      "name": "default",
+      "protocol": "tcp"
+    }
+  ]
+}

@@ -1,24 +1,361 @@
+@font-face {
+  font-family: inconsolata;
+  src: url(fonts/Inconsolata-Regular.ttf);
+}
+
 body, html {
   margin: 0;
   padding: 0;
   background-color: black;
+  overflow: hidden;
 }
 
-.header {
-  color: white;
-  text-align: center;
-  height: 105px;
-  border-bottom: 1px #aaa solid;
-  margin: 0;
-}
-
-.container {
-  position: fixed;
+.term {
+  position: absolute;
   width: 100%;
-  height: 100%;
+  height: 90%;
+}
+
+@media screen and (min-height: 320px) {
+  .term {
+    height: 96%;
+  }
+}
+
+@media screen and (min-height: 480px) {
+  .term {
+    height: 98%;
+  }
 }
 
 #terminal-container {
   width: 100%;
-  padding: 5px 0px;
+  height: 100%;
+}
+
+#terminal-container .terminal {
+  padding-bottom: 4px;
+}
+
+#terminal-container .terminal .xterm-rows {
+  z-index: 10;
+}
+
+.status-bar {
+  background-color: #004561;
+  position: absolute;
+  bottom: -30px;
+  color: white;
+  width: 100%;
+  height: 25px;
+  font-weight: bold;
+  font-family: inconsolata;
+}
+
+.status-bar .left-bar {
+  display: inline-block;
+}
+
+.status-bar .left-bar-content {
+  display: none;
+}
+
+.hidden {
+  display: none;
+}
+
+.status-bar .bar-item {
+  display: inline-block;
+  height: 25px;
+  padding: 0px 8px;
+}
+
+.status-bar .bar-item .bar-item-content {
+  display: table-cell;
+  height: 25px;
+  vertical-align: middle;
+}
+
+.status-bar .task_id a {
+  color: white;
+  text-decoration: none;
+}
+
+.status-bar .task_id a:hover {
+  color: #cccccc;
+}
+
+.status-bar .copy-btn {
+  padding: 0;
+  height: 0px;
+  display: inline-block;
+}
+
+.status-bar .brand {
+  float: right;
+  background: #2eaadc;
+  border-left: 2px solid black;
+}
+
+.status-bar .brand .content {
+  padding-left: 6px;
+}
+
+.status-bar .brand a {
+  color: white;
+  text-decoration: none;
+}
+
+.status-bar .brand a:hover {
+  color: #cccccc;
+}
+
+.background-watermark {
+  width: 400px;
+  height: 200px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -200px;
+  margin-top: -100px;
+  padding: 20px;
+  color: white;
+  text-align: center;
+  opacity: 1;
+}
+
+/*
+ * Mesos colors
+ * light blue: #2eaadc
+ * dark blue: #004561
+ */
+.background-watermark img {
+  width: 400px;
+}
+
+.error-splash {
+  width: 400px;
+  height: 150px;
+  background: #ff0000de;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -200px;
+  margin-top: -75px;
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+  font-size: 1.3em;
+  display: none;
+  z-index: 20;
+  opacity: 0.9;
+}
+
+.error-splash table {
+  height: 100%;
+  width: 100%;
+}
+
+.error-splash .error-cell {
+  width: 100%;
+}
+
+.error-splash span {
+  width: 100%;
+  vertical-align: middle;
+}
+
+.error-splash .icon {
+  width: 64px;
+  height: 64px;
+  float: left;
+}
+
+
+/* Tooltip */
+
+/* setup tooltips */
+.tooltip {
+  position: relative;
+}
+.tooltip:before,
+.tooltip:after {
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+}
+.tooltip:before {
+  background: #2eaadc;
+  border-radius: 2px;
+  color: #fff;
+  content: attr(data-title);
+  font-size: 14px;
+  padding: 6px 10px;
+  top: -30px;
+  white-space: nowrap;
+}
+
+/* the animations */
+
+/* fade */
+.tooltip.fade:after,
+.tooltip.fade:before {
+  transform: translate3d(0,-10px,0);
+  transition: all .05s ease-in-out;
+}
+.tooltip.fade.click:after,
+.tooltip.fade.click:before {
+  opacity: 1;
+  transform: translate3d(0,0,0);
+}
+
+
+/* Scrollbar */
+
+/* width */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #004561;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #147298;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #2eaadc;
+}
+
+/* Progress spin */
+.sk-circle {
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  margin-top: -50px;
+  margin-left: -50px;
+}
+.sk-circle .sk-child {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.sk-circle .sk-child:before {
+  content: '';
+  display: block;
+  margin: 0 auto;
+  width: 15%;
+  height: 15%;
+  background-color: #2eaadc99;
+  border-radius: 100%;
+  -webkit-animation: sk-circleBounceDelay 1.2s infinite ease-in-out both;
+          animation: sk-circleBounceDelay 1.2s infinite ease-in-out both;
+}
+.sk-circle .sk-circle2 {
+  -webkit-transform: rotate(30deg);
+      -ms-transform: rotate(30deg);
+          transform: rotate(30deg); }
+.sk-circle .sk-circle3 {
+  -webkit-transform: rotate(60deg);
+      -ms-transform: rotate(60deg);
+          transform: rotate(60deg); }
+.sk-circle .sk-circle4 {
+  -webkit-transform: rotate(90deg);
+      -ms-transform: rotate(90deg);
+          transform: rotate(90deg); }
+.sk-circle .sk-circle5 {
+  -webkit-transform: rotate(120deg);
+      -ms-transform: rotate(120deg);
+          transform: rotate(120deg); }
+.sk-circle .sk-circle6 {
+  -webkit-transform: rotate(150deg);
+      -ms-transform: rotate(150deg);
+          transform: rotate(150deg); }
+.sk-circle .sk-circle7 {
+  -webkit-transform: rotate(180deg);
+      -ms-transform: rotate(180deg);
+          transform: rotate(180deg); }
+.sk-circle .sk-circle8 {
+  -webkit-transform: rotate(210deg);
+      -ms-transform: rotate(210deg);
+          transform: rotate(210deg); }
+.sk-circle .sk-circle9 {
+  -webkit-transform: rotate(240deg);
+      -ms-transform: rotate(240deg);
+          transform: rotate(240deg); }
+.sk-circle .sk-circle10 {
+  -webkit-transform: rotate(270deg);
+      -ms-transform: rotate(270deg);
+          transform: rotate(270deg); }
+.sk-circle .sk-circle11 {
+  -webkit-transform: rotate(300deg);
+      -ms-transform: rotate(300deg);
+          transform: rotate(300deg); }
+.sk-circle .sk-circle12 {
+  -webkit-transform: rotate(330deg);
+      -ms-transform: rotate(330deg);
+          transform: rotate(330deg); }
+.sk-circle .sk-circle2:before {
+  -webkit-animation-delay: -1.1s;
+          animation-delay: -1.1s; }
+.sk-circle .sk-circle3:before {
+  -webkit-animation-delay: -1s;
+          animation-delay: -1s; }
+.sk-circle .sk-circle4:before {
+  -webkit-animation-delay: -0.9s;
+          animation-delay: -0.9s; }
+.sk-circle .sk-circle5:before {
+  -webkit-animation-delay: -0.8s;
+          animation-delay: -0.8s; }
+.sk-circle .sk-circle6:before {
+  -webkit-animation-delay: -0.7s;
+          animation-delay: -0.7s; }
+.sk-circle .sk-circle7:before {
+  -webkit-animation-delay: -0.6s;
+          animation-delay: -0.6s; }
+.sk-circle .sk-circle8:before {
+  -webkit-animation-delay: -0.5s;
+          animation-delay: -0.5s; }
+.sk-circle .sk-circle9:before {
+  -webkit-animation-delay: -0.4s;
+          animation-delay: -0.4s; }
+.sk-circle .sk-circle10:before {
+  -webkit-animation-delay: -0.3s;
+          animation-delay: -0.3s; }
+.sk-circle .sk-circle11:before {
+  -webkit-animation-delay: -0.2s;
+          animation-delay: -0.2s; }
+.sk-circle .sk-circle12:before {
+  -webkit-animation-delay: -0.1s;
+          animation-delay: -0.1s; }
+
+@-webkit-keyframes sk-circleBounceDelay {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+  } 40% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+
+@keyframes sk-circleBounceDelay {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+  } 40% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
 }
