@@ -5,8 +5,12 @@ import Bluebird = require('bluebird');
 export function withChrome<T>(
   fn: (driver: webdriver.WebDriver) => Bluebird<T>): Bluebird<T> {
 
+  let pref = new webdriver.logging.Preferences();
+  pref.setLevel('browser', webdriver.logging.Level.SEVERE);
+
   const driver = new webdriver.Builder()
     .forBrowser('chrome')
+    .setLoggingPrefs(pref)
     .build();
 
   driver.manage().logs().get(webdriver.logging.Type.BROWSER)
