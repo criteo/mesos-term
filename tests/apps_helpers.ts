@@ -25,7 +25,7 @@ export function testInteractionsWithTerminal(
             driver.wait(webdriver.until.elementLocated(webdriver.By.css(".terminal")), 10000));
         })
         .then(function(el: webdriver.WebElement) {
-          return el.sendKeys('ls\n');
+          return Bluebird.resolve(el.sendKeys('ls\n'));
         })
         .then(function() {
           return Bluebird.resolve(
