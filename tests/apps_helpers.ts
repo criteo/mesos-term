@@ -2,7 +2,7 @@ import Bluebird = require('bluebird');
 import webdriver = require('selenium-webdriver');
 import helpers = require('./helpers');
 
-const TIMEOUT = 300000;
+const TIMEOUT = 10000;
 
 export function testInteractionsWithTerminal(
   port: number,
