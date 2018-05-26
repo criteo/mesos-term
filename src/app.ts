@@ -14,6 +14,7 @@ import TerminalController from './controllers/terminal';
 import { setup } from './express_helpers';
 import authentication from './authentication';
 import { AuthenticatedLogger, AnonymousLogger } from './logger';
+import { setupAutoFetch } from './mesos';
 
 const app = Express();
 const expressWs = ExpressWs(app);
@@ -34,6 +35,7 @@ app.use('/static', Express.static(__dirname + '/public_html'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use(session(sessionOptions));
+setupAutoFetch(env.MESOS_MASTER_URL, env.MESOS_STATE_CACHE_TIME);
 
 if (env.AUTHORIZATIONS_ENABLED) {
   console.log('Authorizations are enabled.');

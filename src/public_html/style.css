@@ -89,6 +89,10 @@ body, html {
   border-left: 2px solid black;
 }
 
+.status-bar .brand .content {
+  padding-left: 6px;
+}
+
 .status-bar .brand a {
   color: white;
   text-decoration: none;

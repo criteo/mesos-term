@@ -18,9 +18,10 @@
   function resizeTerminal(fn) {
     if (!window.token || !term) return;
 
-    var initialGeometry = term.proposeGeometry(),
-        cols = initialGeometry.cols,
-        rows = initialGeometry.rows;
+    const initialGeometry = term.proposeGeometry();
+    const cols = initialGeometry.cols;
+    const rows = initialGeometry.rows;
+
     $.ajax({
         url: `/terminals/resize?cols=${cols}&rows=${rows}&token=${window.token}`,
         method: 'POST',
@@ -45,10 +46,6 @@
     term.open(terminalContainer, true);
     resize();
 
-    var initialGeometry = term.proposeGeometry(),
-        cols = initialGeometry.cols,
-        rows = initialGeometry.rows;
-
     $.ajax({
         url: `/terminals/create/${taskId}`,
         method: 'POST',
@@ -59,10 +56,9 @@
       .done(function (data) {
         console.log(data);
         window.token = data.token;
-        fillTaskInfo(data.task, data.master_url);
         socketURL += window.token;
         socket = new WebSocket(socketURL);
-        socket.onopen = runRealTerminal;
+        socket.onopen = runRealTerminal(data);
         socket.onclose = onSocketClose;
         socket.onerror = onSocketError;
         resizeTerminal();
@@ -82,7 +78,8 @@
     // fill missing fields
     $('.hostname .content').text(task.slave_hostname);
     $('.user .content').text(task.user);
-    $('.task_id a').attr('href', `${master_url}/#/agents/${task.slave_id}/frameworks/${task.framework_id}/executors/${task.task_id}`);
+    $('.task_id a').attr('href', 
+      `${master_url}/#/agents/${task.slave_id}/frameworks/${task.framework_id}/executors/${task.task_id}`);
 
     // display the status bar
     $('.status-bar').removeClass('hidden');
@@ -99,21 +96,25 @@
     });
   }
   
-  function runRealTerminal() {
-    var timerId = 0; 
-    function keepAlive() { 
-        var timeout = 20000;  
-        if (socket.readyState == socket.OPEN) {  
-            socket.send('');  
-        }  
-        timerId = setTimeout(keepAlive, timeout);  
-    }  
-    keepAlive();
-    term.attach(socket);
-    term._initialized = true;
+  function runRealTerminal(data) {
+    return function() {
+      var timerId = 0; 
+      function keepAlive() { 
+          var timeout = 20000;  
+          if (socket.readyState == socket.OPEN) {  
+              socket.send('');  
+          }  
+          timerId = setTimeout(keepAlive, timeout);  
+      }  
+      keepAlive();
+      term.attach(socket);
+      term._initialized = true;
+      fillTaskInfo(data.task, data.master_url);
+    };
   }
 
   function clipboard() {
+    new ClipboardJS('.copy-btn');
     $('.copy-btn').mousedown(function() {
       $(this).addClass('click');
     });
@@ -126,12 +127,10 @@
   }
 
   $(document).ready(function() {
-    var terminalContainer = $('#terminal-container').get(0);
+    const terminalContainer = $('#terminal-container').get(0);
     const taskId = terminalContainer.getAttribute('data-taskid');
-    console.log(taskId);
     createTerminal(terminalContainer, taskId);
     $(window).resize(resize);
-    new ClipboardJS('.copy-btn');
     clipboard(); 
   });
 })()

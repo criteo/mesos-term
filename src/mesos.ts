@@ -63,6 +63,8 @@ export interface Task {
   task_id: string;
 }
 
+let mesosState: MesosState;
+
 function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
   if (!mesosLabels) {
     return {};
@@ -75,34 +77,40 @@ function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
   return labels;
 }
 
-export function getTaskInfo(taskId: string): Bluebird<Task> {
-  return Request({ uri: `${env.MESOS_MASTER_URL}/master/state`, json: true })
-    .then(function(mesosState: MesosState) {
-      const mesosTasks = mesosState.frameworks
-        .reduce(function(acc: MesosTask[], framework: MesosFramework) {
-          return acc.concat(framework.tasks);
-        }, [] as MesosTask[]);
+function getMesosTask(
+  mesos_master_url: string,
+  taskId: string,
+  canFetch: boolean): Bluebird<MesosTask> {
 
-      const slaves = mesosState.slaves
-        .reduce(function(acc: SlaveById, slave: MesosSlave) {
-          acc[slave.id] = slave;
-          return acc;
-        }, {} as SlaveById);
+  const mesosTasks = mesosState.frameworks
+    .reduce(function(acc: MesosTask[], framework: MesosFramework) {
+      return acc.concat(framework.tasks);
+    }, [] as MesosTask[]);
 
-      const tasks = mesosTasks.filter((task) => {
-        return task.id === taskId && task.state == 'TASK_RUNNING';
-      });
+  const tasks = mesosTasks.filter((task) => {
+    return task.id === taskId && task.state == 'TASK_RUNNING';
+  });
 
-      if (tasks.length == 0) {
-        return Bluebird.reject(new Error(`No info found for task ID ${taskId}`));
-      }
+  if (tasks.length == 0) {
+    if (canFetch) {
+      return fetchMesosState(mesos_master_url)
+        .then(() => getMesosTask(mesos_master_url, taskId, false));
+    }
+    else {
+      return Bluebird.reject(new Error(`No info found for task ID ${taskId}`));
+    }
+  }
 
-      if (tasks.length > 1) {
-        return Bluebird.reject(new Error(`Several task details found for task ID ${taskId}`));
-      }
+  if (tasks.length > 1) {
+    return Bluebird.reject(new Error(`Several task details found for task ID ${taskId}`));
+  }
 
-      const taskInfo = tasks[0];
+  return Bluebird.resolve(tasks[0]);
+}
 
+export function getTaskInfo(mesos_master_url: string, taskId: string): Bluebird<Task> {
+  return getMesosTask(mesos_master_url, taskId, true)
+    .then(function(taskInfo: MesosTask) {
       const statuses = taskInfo.statuses.filter(function(status: MesosStatus) {
         return status.state == 'TASK_RUNNING';
       });
@@ -118,6 +126,11 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
       const containerId = statuses[0].container_status.container_id.value;
       const labels = fromMesosLabels(taskInfo.labels);
 
+      const slaves = mesosState.slaves
+        .reduce(function(acc: SlaveById, slave: MesosSlave) {
+          acc[slave.id] = slave;
+          return acc;
+        }, {} as SlaveById);
       const slave = slaves[taskInfo.slave_id];
       const slave_pid = slave.pid;
       const address = slave_pid.split('@')[1];
@@ -142,4 +155,18 @@ export function getTaskInfo(taskId: string): Bluebird<Task> {
         task_id: taskId
       });
     });
+}
+
+function fetchMesosState(mesos_master_url: string) {
+  return Request({ uri: `${mesos_master_url}/master/state`, json: true })
+    .then(function(state: MesosState) {
+      mesosState = state;
+    });
+}
+
+export function setupAutoFetch(mesos_master_url: string, refreshSeconds: number) {
+  fetchMesosState(mesos_master_url);
+  setInterval(function() {
+    fetchMesosState(mesos_master_url);
+  }, 1000 * refreshSeconds);
 }

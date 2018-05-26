@@ -25,7 +25,7 @@ declare global {
         task: Task;
         terminal: NodePty.IPty;
         logs: string;
-      }
+      };
     }
   }
 }
@@ -38,6 +38,10 @@ function VerifyBearer(req: Express.Request) {
   const token = req.query[BEARER_KEY];
   return JwtAsync.verifyAsync(token, env.JWT_SECRET)
     .then(function(decoded: any) {
+      const pid = decoded.pid;
+      if (!(pid in taskByPid) || !(pid in terminalsByPid) || !(pid in logsByPid)) {
+        return Bluebird.reject(new Error(`No terminal found for PID ${pid}.`));
+      }
       req.term = {
         task: taskByPid[decoded.pid],
         terminal: terminalsByPid[decoded.pid],
@@ -54,6 +58,7 @@ function TerminalBearer(
   VerifyBearer(req)
     .then(next)
     .catch(function(err: Error) {
+      console.log(err);
       res.status(403);
       res.send(err);
     });
@@ -143,7 +148,7 @@ function createTerminal(
     return;
   }
 
-  getTaskInfo(taskId)
+  getTaskInfo(env.MESOS_MASTER_URL, taskId)
     .then(function(task: Task) {
       return Bluebird.join(tryRequestTerminal(req, res, task), task);
     })

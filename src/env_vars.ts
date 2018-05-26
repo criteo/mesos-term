@@ -9,14 +9,15 @@ function getOrExit(var_name: string): string {
 
 export interface EnvVars {
   ADMINS: string[];
+  AUTHORIZATIONS_ENABLED: boolean;
+  JWT_SECRET: string;
   LDAP_URL?: string;
   LDAP_BASE_DN?: string;
   LDAP_USER?: string;
   LDAP_PASSWORD?: string;
   MESOS_MASTER_URL: string;
   SESSION_SECRET: string;
-  JWT_SECRET: string;
-  AUTHORIZATIONS_ENABLED: boolean;
+  MESOS_STATE_CACHE_TIME: number;
 }
 
 const authorizations_enabled = (process.env['LDAP_URL']) ? true : false;
@@ -33,7 +34,8 @@ export const env: EnvVars = {
   JWT_SECRET: getOrExit('JWT_SECRET'),
   ADMINS: getAdmins(),
   MESOS_MASTER_URL: getOrExit('MESOS_MASTER_URL'),
-  AUTHORIZATIONS_ENABLED: authorizations_enabled
+  AUTHORIZATIONS_ENABLED: authorizations_enabled,
+  MESOS_STATE_CACHE_TIME: parseFloat(getOrExit('MESOS_STATE_CACHE_TIME'))
 };
 
 if (authorizations_enabled) {
