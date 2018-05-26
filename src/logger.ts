@@ -39,7 +39,7 @@ export class AuthenticatedLogger extends Logger {
   }
 
   open(req: Express.Request, taskId: string, terminalPid: number): void {
-    console.log('User "%s" opened a session in container "%s." (pid=%s)',
+    console.log('User "%s" opened a session in container "%s". (pid=%s)',
       req.user.cn, taskId, terminalPid);
   }
 
