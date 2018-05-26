@@ -103,9 +103,8 @@ function spawnTerminal(req: Express.Request, res: Express.Response, task: Task) 
   return Bluebird.resolve(term.pid);
 }
 
-function tryRequestTerminal(
+function checkAuthorizations(
   req: Express.Request,
-  res: Express.Response,
   task: Task) {
 
   const userCN = req.user.cn;
@@ -127,14 +126,23 @@ function tryRequestTerminal(
         superAdmins
       )
     )
-    .then(function() {
-      return spawnTerminal(req, res, task);
-    })
-    .then(function(pid: number) {
-      const payload = { pid: pid };
-      const options = { expiresIn: 10 * 60 };
-      return JwtAsync.signAsync(payload, env.JWT_SECRET, options);
-    });
+}
+
+function tryRequestTerminal(
+  req: Express.Request,
+  res: Express.Response,
+  task: Task) {
+
+  const spawnPromise = (env.AUTHORIZATIONS_ENABLED)
+    ? checkAuthorizations(req, task)
+        .then(() => spawnTerminal(req, res, task))
+    : spawnTerminal(req, res, task)
+
+  return spawnPromise.then(function(pid: number) {
+    const payload = { pid: pid };
+    const options = { expiresIn: 10 * 60 };
+    return JwtAsync.signAsync(payload, env.JWT_SECRET, options);
+  });
 }
 
 function createTerminal(
@@ -149,12 +157,15 @@ function createTerminal(
 
   getTaskInfo(env.MESOS_MASTER_URL, taskId)
     .then(function(task: Task) {
-      return Bluebird.join(tryRequestTerminal(req, res, task), task);
+      return Bluebird.join(
+        tryRequestTerminal(req, res, task),
+        Bluebird.resolve(task)
+      );
     })
-    .then(function(data: any[]) {
+    .spread(function(token: string, task: Task) {
       res.send({
-        token: data[0],
-        task: data[1],
+        token: token,
+        task: task,
         master_url: env.MESOS_MASTER_URL
       });
     })

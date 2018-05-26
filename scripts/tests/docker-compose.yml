@@ -130,6 +130,26 @@ services:
       - JWT_SECRET=abcd
       - MESOS_STATE_CACHE_TIME=60
 
+  mesos-term-no-auth:
+    build:
+      context: ../..
+    ports:
+      - "3001:3000"
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.121.9
+    links:
+      - mesos-master
+      - openldap
+    depends_on:
+      - mesos-master
+      - openldap
+    environment:
+      - MESOS_MASTER_URL=http://mesos-master:5050
+      - SESSION_SECRET=abcd
+      - JWT_SECRET=abcd
+      - MESOS_STATE_CACHE_TIME=60
+
 networks:
   mesos_command_modules_net:
     driver: bridge
