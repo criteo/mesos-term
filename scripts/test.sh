@@ -14,8 +14,6 @@ export MESOS_MASTER_URL=http://localhost:5050
 
 pushd $script_dir/tests
 
-docker-compose build
-docker-compose up -d
 ./setup.sh
 
 set +x
