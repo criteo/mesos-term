@@ -1,6 +1,6 @@
 {
   "name": "mesos-term",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/clems4ever/mesos-task-exec-web.git"
+    "url": "git+https://github.com/clems4ever/mesos-term.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/clems4ever/mesos-task-exec-web/issues"
+    "url": "https://github.com/clems4ever/mesos-term/issues"
   },
-  "homepage": "https://github.com/clems4ever/mesos-task-exec-web#readme",
+  "homepage": "https://github.com/clems4ever/mesos-term#readme",
   "dependencies": {
     "basic-auth": "^2.0.0",
     "bluebird": "^3.5.1",
