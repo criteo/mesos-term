@@ -21,11 +21,11 @@ are installed on your machine and run:
 ./scripts/tests/setup.sh
 ```
 
-And then go to `http://localhost:3000/`.
+And then go to [http://localhost:3000](http://localhost:3000).
 
 To get a task ID for running a terminal, you can get one from Marathon
-available at `http://localhost:8080`. A few applications have already been
-created for you.
+available at [http://localhost:8080](http://localhost:8080). A few
+applications have already been created for you.
 
 ![Retrieve Task ID](doc/images/task-id.png?raw=true "TaskID")
 
@@ -41,11 +41,11 @@ command:
 
 ```
 docker run --name mesos-term --rm -p 3000:3000 -it \
-  -e JWT\_SECRET=your-jwt-secret \
-  -e MESOS\_MASTER\_URL=http://mesos-master:5050 \
-  -e MESOS\_STATE\_CACHE\_TIME=60 \
-  -e NODE\_ENV=production \
-  -e SESSION\_SECRET=your-session-secret \
+  -e JWT_SECRET=your-jwt-secret \
+  -e MESOS_MASTER_URL=http://mesos-master:5050 \
+  -e MESOS_STATE_CACHE_TIME=60 \
+  -e NODE_ENV=production \
+  -e SESSION_SECRET=your-session-secret \
   clems4ever/mesos-term
 ```
 
@@ -56,16 +56,16 @@ command:
 
 ```
 docker run --name mesos-term --rm -p 3000:3000 -it \
-  -e SUPER\_ADMINS=admins,harry \
-  -e JWT\_SECRET=your-jwt-secret \
-  -e LDAP\_BASE\_DN=dc=yourldap,dc=com \
-  -e LDAP\_PASSWORD=the-admin-password \
-  -e LDAP\_URL=ldap://yourldap.com \
-  -e LDAP\_USER=cn=admin,dc=yourldap,dc=com \
-  -e MESOS\_MASTER\_URL=http://mesos-master:5050 \
-  -e MESOS\_STATE\_CACHE\_TIME=60 \
-  -e NODE\_ENV=production \
-  -e SESSION\_SECRET=your-session-secret \
+  -e SUPER_ADMINS=admins,harry \
+  -e JWT_SECRET=your-jwt-secret \
+  -e LDAP_BASE_DN=dc=yourldap,dc=com \
+  -e LDAP_PASSWORD=the-admin-password \
+  -e LDAP_URL=ldap://yourldap.com \
+  -e LDAP_USER=cn=admin,dc=yourldap,dc=com \
+  -e MESOS_MASTER_URL=http://mesos-master:5050 \
+  -e MESOS_STATE_CACHE_TIME=60 \
+  -e NODE_ENV=production \
+  -e SESSION_SECRET=your-session-secret \
   clems4ever/mesos-term
 ```
 
@@ -115,3 +115,29 @@ Though, it is important to know that **MesosTerm** automatically invalidate
 the cache when a terminal is requested for a task that does not exist in
 the cache. It allows users to run terminals in newly created instances that
 might not be yet in the cache.
+
+## License
+**MesosTerm** is **licensed** under the **[MIT License]**. The terms of the license are as follows:
+
+    The MIT License (MIT)
+
+    Copyright (c) 2016 - Clement Michaud
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+[MIT License]: https://opensource.org/licenses/MIT
