@@ -12,7 +12,6 @@
     $('.status-bar').css('height', statusBarHeight);
     $('.status-bar .bar-item').css('height', statusBarHeight);
     $('.status-bar .bar-item span').css('height', statusBarHeight);
-    resizeTerminal();
   }
 
   function resizeTerminal(fn) {
@@ -54,14 +53,12 @@
         }
       })
       .done(function (data) {
-        console.log(data);
         window.token = data.token;
         socketURL += window.token;
         socket = new WebSocket(socketURL);
         socket.onopen = runRealTerminal(data);
         socket.onclose = onSocketClose;
         socket.onerror = onSocketError;
-        resizeTerminal();
       })
       .fail(function(jqXHR, textStatus, errorThrown) {
         throwError(jqXHR.responseText);
@@ -126,6 +123,7 @@
       term.attach(socket);
       term._initialized = true;
       fillTaskInfo(data.task, data.master_url);
+      resizeTerminal();
     };
   }
 
