@@ -29,6 +29,8 @@ then
   docker ps -a
   docker-compose logs mesos-term
   docker-compose logs mesos-term-no-auth
+  docker-compose logs marathon
+  docker-compose logs mesos-slave
   exit 1
 fi
 
