@@ -58,6 +58,7 @@ function TerminalBearer(
   VerifyBearer(req)
     .then(next)
     .catch(function(err: Error) {
+      console.error(err);
       res.status(403);
       res.send(err);
     });

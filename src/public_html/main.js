@@ -27,6 +27,9 @@
         xhrFields: {
           withCredentials: true
         }
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+        throwError(jqXHR.responseText);
       });
   }
   
