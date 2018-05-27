@@ -28,7 +28,7 @@ after_success:
 
 before_deploy:
   - echo "deploying mesos-term-$TRAVIS_TAG.tgz to GitHub releases"
-  - tar czvf mesos-term-$TRAVIS_TAG.tgz package.json package-lock.json src/
+  - tar czvf mesos-term-$TRAVIS_TAG.tgz package.json package-lock.json dist/
 
 deploy:
   provider: releases
