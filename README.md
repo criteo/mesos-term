@@ -6,6 +6,12 @@ docker exec.
 
 ![The interactive web terminal](doc/images/mesos-term.png?raw=true "MesosTerm")
 
+**WARNING**: you might face "Connection has been closed." error messages randomly
+when using MesosTerm against Mesos version lower than 1.5.1. This is due to a
+race condition mentioned in
+[https://issues.apache.org/jira/browse/MESOS-7742](MESOS-7742).
+The solution is to upgrade Mesos to a version higher or equal to 1.5.1.
+
 ## Features
 
 * Web-based container terminal.
