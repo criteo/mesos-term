@@ -88,7 +88,11 @@ export function WsTerminalBearer(
     .catch((err: Error) => console.log(err));
 }
 
-function spawnTerminal(req: Express.Request, res: Express.Response, task: Task) {
+function spawnTerminal(
+  req: Express.Request,
+  res: Express.Response,
+  task: Task) {
+
   const params = [
     Path.resolve(__dirname, '..', 'python/terminal.py'),
     task.agent_url,
@@ -100,9 +104,19 @@ function spawnTerminal(req: Express.Request, res: Express.Response, task: Task) 
     params.push(task.user);
   }
 
-  const term = NodePty.spawn('python3', params, {
-      name: 'terminal'
-    });
+  const options: NodePty.IPtyForkOptions = {
+    name: 'bash'
+  };
+
+  if (req.query.rows && req.query.cols) {
+    options.rows = parseInt(req.query.rows);
+    options.cols = parseInt(req.query.cols);
+  }
+
+  const term = NodePty.spawn(
+    'python3',
+    params,
+    options);
 
   const taskId = req.params.task_id;
   getLogger(req).open(req, taskId, term.pid);
@@ -217,10 +231,10 @@ export function connectTerminal(ws: Ws, req: Express.Request) {
     }
   });
 
-  term.on('exit', function() {
-    getLogger(req).connectionClosed(req, term.pid);
-    ws.close();
-  });
+  // term.on('exit', function() {
+  //   getLogger(req).connectionClosed(req, term.pid);
+  //   ws.close();
+  // });
 
   ws.on('message', function(msg: string) {
     term.write(msg);

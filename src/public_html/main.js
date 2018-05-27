@@ -44,22 +44,24 @@
     term.open(terminalContainer, true);
     resize();
 
+    const initialGeometry = term.proposeGeometry();
+    const cols = initialGeometry.cols;
+    const rows = initialGeometry.rows;
+
     $.ajax({
-        url: `/terminals/create/${taskId}`,
+        url: `/terminals/create/${taskId}?rows=${rows}&cols=${cols}`,
         method: 'POST',
         xhrFields: {
           withCredentials: true
         }
       })
       .done(function (data) {
-        setTimeout(function() {
-          window.token = data.token;
-          socketURL += window.token;
-          socket = new WebSocket(socketURL);
-          socket.onopen = runRealTerminal(data);
-          socket.onclose = onSocketClose;
-          socket.onerror = onSocketError;
-        }, 800);
+        window.token = data.token;
+        socketURL += window.token;
+        socket = new WebSocket(socketURL);
+        socket.onopen = runRealTerminal(data);
+        socket.onclose = onSocketClose;
+        socket.onerror = onSocketError;
       })
       .fail(function(jqXHR, textStatus, errorThrown) {
         throwError(jqXHR.responseText);
@@ -124,7 +126,6 @@
       term.attach(socket);
       term._initialized = true;
       fillTaskInfo(data.task, data.master_url);
-      // resizeTerminal();
     };
   }
 
@@ -145,7 +146,10 @@
     const terminalContainer = $('#terminal-container').get(0);
     const taskId = terminalContainer.getAttribute('data-taskid');
     createTerminal(terminalContainer, taskId);
-    $(window).resize(resize);
+    $(window).resize(function() {
+      resize(); // resize geometry
+      resizeTerminal();
+    });
     clipboard(); 
   });
 })()
