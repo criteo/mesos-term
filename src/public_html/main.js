@@ -52,12 +52,14 @@
         }
       })
       .done(function (data) {
-        window.token = data.token;
-        socketURL += window.token;
-        socket = new WebSocket(socketURL);
-        socket.onopen = runRealTerminal(data);
-        socket.onclose = onSocketClose;
-        socket.onerror = onSocketError;
+        setTimeout(function() {
+          window.token = data.token;
+          socketURL += window.token;
+          socket = new WebSocket(socketURL);
+          socket.onopen = runRealTerminal(data);
+          socket.onclose = onSocketClose;
+          socket.onerror = onSocketError;
+        }, 800);
       })
       .fail(function(jqXHR, textStatus, errorThrown) {
         throwError(jqXHR.responseText);
