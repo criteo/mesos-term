@@ -231,10 +231,10 @@ export function connectTerminal(ws: Ws, req: Express.Request) {
     }
   });
 
-  // term.on('exit', function() {
-  //   getLogger(req).connectionClosed(req, term.pid);
-  //   ws.close();
-  // });
+  term.on('exit', function() {
+    getLogger(req).connectionClosed(req, term.pid);
+    ws.close();
+  });
 
   ws.on('message', function(msg: string) {
     term.write(msg);
