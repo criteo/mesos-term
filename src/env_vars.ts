@@ -1,10 +1,20 @@
 
-function getOrExit(var_name: string): string {
-  const v = process.env[var_name];
+function getOrExit(varName: string): string {
+  const v = process.env[varName];
   if (v) return v;
 
-  console.log(`${var_name} env const must be provided`);
+  console.log(`${varName} env const must be provided`);
   process.exit(1);
+}
+
+function getOrElse(varName: string, defaultValue: string): string {
+  const v = process.env[varName];
+  if (v) {
+    return v;
+  }
+  else {
+    return defaultValue;
+  }
 }
 
 export interface EnvVars {
@@ -20,6 +30,7 @@ export interface EnvVars {
   SUPER_ADMINS: string[];
   ENABLE_PER_APP_ADMINS?: boolean;
   ENABLE_RIGHTS_DELEGATION?: boolean;
+  COMMAND: string;
 }
 
 const authorizations_enabled = (process.env['LDAP_URL']) ? true : false;
@@ -37,7 +48,8 @@ export const env: EnvVars = {
   SUPER_ADMINS: getSuperAdmins(),
   MESOS_MASTER_URL: getOrExit('MESOS_MASTER_URL'),
   AUTHORIZATIONS_ENABLED: authorizations_enabled,
-  MESOS_STATE_CACHE_TIME: parseFloat(getOrExit('MESOS_STATE_CACHE_TIME'))
+  MESOS_STATE_CACHE_TIME: parseFloat(getOrExit('MESOS_STATE_CACHE_TIME')),
+  COMMAND: getOrElse('COMMAND', '/bin/sh')
 };
 
 if (authorizations_enabled) {
