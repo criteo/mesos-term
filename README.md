@@ -75,6 +75,20 @@ docker run --name mesos-term --rm -p 3000:3000 -it \
   clems4ever/mesos-term
 ```
 
+### With https only mesos and internal CA
+
+```
+docker run --name mesos-term --rm -p 3000:3000 -it \
+  -v /path/to/my-ca.pem:/ca.pem \
+  -e CA_FILE=/ca.pem \
+  -e JWT_SECRET=your-jwt-secret \
+  -e MESOS_MASTER_URL=https://mesos-master:5050 \
+  -e MESOS_STATE_CACHE_TIME=60 \
+  -e NODE_ENV=production \
+  -e SESSION_SECRET=your-session-secret \
+  clems4ever/mesos-term
+```
+
 ## Option details
 
 Here are the details of available options.
@@ -91,6 +105,7 @@ Here are the details of available options.
 | MESOS\_STATE\_CACHE\_TIME | Time in seconds before invalidating the cache containing Mesos state.                    |
 | NODE\_ENV                 | Must be "production" for express to run in production mode.                              |
 | SESSION\_SECRET           | Secret used to encrypt session cookie.                                                   |
+| CA\_FILE                  | CA file in pem format.                                                   |
 
 ## Authorizations model
 
