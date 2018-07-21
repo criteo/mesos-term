@@ -19,6 +19,7 @@ export interface EnvVars {
   SESSION_SECRET: string;
   SUPER_ADMINS: string[];
   ENABLE_PER_APP_ADMINS?: boolean;
+  ENABLE_RIGHTS_DELEGATION?: boolean;
 }
 
 const authorizations_enabled = (process.env['LDAP_URL']) ? true : false;
@@ -45,4 +46,5 @@ if (authorizations_enabled) {
   env['LDAP_USER'] = getOrExit('LDAP_USER');
   env['LDAP_PASSWORD'] = getOrExit('LDAP_PASSWORD');
   env['ENABLE_PER_APP_ADMINS'] = process.env['ENABLE_PER_APP_ADMINS'] === 'true';
+  env['ENABLE_RIGHTS_DELEGATION'] = process.env['ENABLE_RIGHTS_DELEGATION'] === 'true';
 }

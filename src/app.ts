@@ -3,6 +3,7 @@ import ExpressWs = require('express-ws');
 import os = require('os');
 import path = require('path');
 import session = require('express-session');
+import BodyParser = require('body-parser');
 
 import { env } from './env_vars';
 
@@ -10,8 +11,9 @@ import index from './controllers/index';
 import ping from './controllers/ping';
 import GetTaskId from './controllers/get_task_id';
 import TerminalController from './controllers/terminal';
+import { DelegateGet, DelegatePost } from './controllers/delegate';
 
-import { setup } from './express_helpers';
+import { setup, SuperAdminsOnly } from './express_helpers';
 import authentication from './authentication';
 import { AuthenticatedLogger, AnonymousLogger } from './logger';
 import { setupAutoFetch } from './mesos';
@@ -35,6 +37,7 @@ app.use('/static', Express.static(__dirname + '/public_html'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use(session(sessionOptions));
+app.use(BodyParser.json());
 setupAutoFetch(env.MESOS_MASTER_URL, env.MESOS_STATE_CACHE_TIME);
 
 if (env.AUTHORIZATIONS_ENABLED) {
@@ -49,12 +52,15 @@ else {
 
 app.get('/', index);
 app.get('/ping', ping);
-app.get('/:task_id', GetTaskId);
+app.get('/login/:task_id', GetTaskId);
 TerminalController(app, env.AUTHORIZATIONS_ENABLED);
 
+if (env.AUTHORIZATIONS_ENABLED && env.ENABLE_RIGHTS_DELEGATION) {
+  app.get('/delegate', SuperAdminsOnly, DelegateGet);
+  app.post('/delegate', SuperAdminsOnly, DelegatePost);
+}
 
 // Start server
-
 const port: number = Number(process.env.PORT) || 3000;
 const host: string = (os.platform() === 'win32')
   ? '127.0.0.1'

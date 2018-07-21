@@ -8,7 +8,10 @@
     </head>
     <body>
         <div class="term">
-          <div id="terminal-container" data-taskid="<%= task_id %>"></div>
+          <div id="terminal-container"
+               data-taskid="<%= task_id %>"
+               data-access-token="<%= access_token %>">
+          </div>
         </div>
         <div class="status-bar hidden">
           <div class="left-bar">
@@ -45,6 +48,20 @@
             </span>
           </div>
         </div>
+        <div class="unauthorized-splash">
+          <table>
+            <tr>
+              <td><i class="fas fa-times-circle icon"></i></td>
+              <td class="error-cell">
+                <span class="error">Unauthorized access to container.</span>
+                <% if (rights_delegation_enabled) { %>
+                <input type="text" placeholder="Provide your access token..." class="access-token-field"></input>
+                <input type="button" value="Go" class="access-token-button"></input>
+                <% } %>
+              </td>
+            </tr>
+          </table>
+        </div>
         <div class="error-splash">
           <table>
             <tr>
@@ -54,7 +71,7 @@
           </table>
         </div>
         <div class="background-watermark">
-          <img src="static/images/mesos.png"/>
+          <img src="/static/images/mesos.png"/>
         </div>
         <div class="sk-circle progress-spin">
           <div class="sk-circle1 sk-child"></div>
@@ -71,12 +88,12 @@
           <div class="sk-circle12 sk-child"></div>
         </div>
 
-        <script src="static/clipboard.min.js"></script>
-        <script src="static/fontawesome-all.min.js"></script>
-        <script src="static/jquery-3.3.1.min.js"></script>
-        <script src="static/xterm.js" ></script>
-        <script src="static/addons/attach/attach.js" ></script>
-        <script src="static/addons/fit/fit.js" ></script>
-        <script src="static/main.js"></script>
+        <script src="/static/clipboard.min.js"></script>
+        <script src="/static/fontawesome-all.min.js"></script>
+        <script src="/static/jquery-3.3.1.min.js"></script>
+        <script src="/static/xterm.js" ></script>
+        <script src="/static/addons/attach/attach.js" ></script>
+        <script src="/static/addons/fit/fit.js" ></script>
+        <script src="/static/main.js"></script>
     </body>
 </html>

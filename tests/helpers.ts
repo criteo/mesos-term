@@ -1,6 +1,7 @@
 require('chromedriver');
 import webdriver = require('selenium-webdriver');
 import Bluebird = require('bluebird');
+import Request = require('request-promise');
 
 export function withChrome<T>(
   fn: (driver: webdriver.WebDriver) => Bluebird<T>): Bluebird<T> {
@@ -24,4 +25,17 @@ export function withChrome<T>(
     .finally(function() {
       return driver.quit();
     });
+}
+
+export function getDelegation(port: number, from: string, to: string, instanceId: string) {
+  const body = {
+    'task_id': instanceId,
+    'delegate_to': to
+  };
+  return Request({
+    uri: `http://${from}:password@localhost:${port}/delegate`,
+    body: body,
+    json: true,
+    method: 'POST'
+  });
 }

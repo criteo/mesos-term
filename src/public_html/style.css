@@ -172,6 +172,56 @@ body, html {
   float: left;
 }
 
+/* Unauthorized splash */
+
+.unauthorized-splash {
+  width: 400px;
+  height: 150px;
+  background: #ff0000de;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -200px;
+  margin-top: -75px;
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+  font-size: 1.3em;
+  display: none;
+  z-index: 20;
+  opacity: 0.9;
+}
+
+.unauthorized-splash table {
+  height: 100%;
+  width: 100%;
+}
+
+.unauthorized-splash .error-cell {
+  width: 100%;
+}
+
+.unauthorized-splash span {
+  width: 100%;
+  vertical-align: middle;
+}
+
+.unauthorized-splash .icon {
+  width: 64px;
+  height: 64px;
+  float: left;
+}
+
+.unauthorized-splash .access-token-field {
+  margin-top: 10px;
+  padding: 10px;
+}
+
+.unauthorized-splash .access-token-button {
+  padding: 10px;
+}
+
 
 /* Tooltip */
 

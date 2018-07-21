@@ -15,7 +15,7 @@
   }
 
   function resizeTerminal() {
-    if (!window.token || !term) return;
+    if (!window.token) return;
 
     const initialGeometry = term.proposeGeometry();
     const cols = initialGeometry.cols;
@@ -33,7 +33,7 @@
       });
   }
   
-  function createTerminal(terminalContainer, taskId) {
+  function createTerminal(terminalContainer, taskId, accessToken) {
     while (terminalContainer.children.length) {
       terminalContainer.removeChild(terminalContainer.children[0]);
     }
@@ -48,8 +48,13 @@
     const cols = initialGeometry.cols;
     const rows = initialGeometry.rows;
 
+    let url = `/terminals/create/${taskId}?`;
+    if(accessToken) {
+      url += `&access_token=${accessToken}`;
+    }
+
     $.ajax({
-        url: `/terminals/create/${taskId}?rows=${rows}&cols=${cols}`,
+        url: url, 
         method: 'POST',
         xhrFields: {
           withCredentials: true
@@ -57,14 +62,22 @@
       })
       .done(function (data) {
         window.token = data.token;
-        socketURL += window.token;
-        socket = new WebSocket(socketURL);
-        socket.onopen = runRealTerminal(data);
-        socket.onclose = onSocketClose;
-        socket.onerror = onSocketError;
+        resizeTerminal();
+        setTimeout(function() {
+          socketURL += window.token;
+          socket = new WebSocket(socketURL);
+          socket.onopen = runRealTerminal(data);
+          socket.onclose = onSocketClose;
+          socket.onerror = onSocketError;
+        }, 100);
       })
       .fail(function(jqXHR, textStatus, errorThrown) {
-        throwError(jqXHR.responseText);
+        if(jqXHR.responseText.indexOf('Unauthorized access to container.') > -1
+           || jqXHR.responseText.indexOf('Unauthorized access to root container.') > -1) {
+          throwUnauthorized();
+        } else {
+          throwError(jqXHR.responseText);
+        }
       });
   }
 
@@ -72,6 +85,12 @@
     $('.progress-spin').css({ display: 'none' });
     $('.error-splash .error').text(error);
     $('.error-splash').show();
+    showStatusBar(false);
+  }
+
+  function throwUnauthorized() {
+    $('.progress-spin').css({ display: 'none' });
+    $('.unauthorized-splash').show();
     showStatusBar(false);
   }
 
@@ -142,14 +161,32 @@
     });
   }
 
+  function setupAccessTokenSplash() {
+    $('.access-token-field').keyup(function(e) {
+      e.preventDefault();
+      if(e.keyCode == 13) {
+        $('.access-token-button').click();
+      }
+    });
+    $('.access-token-button').click(function() {
+      const urlWithoutParameters = location.protocol + '//' + location.host + location.pathname;
+      const accessToken = $('.access-token-field').val();
+      if(accessToken) {
+        window.location.href = urlWithoutParameters + `?access_token=${accessToken}`;
+      }
+    });
+  }
+
   $(document).ready(function() {
     const terminalContainer = $('#terminal-container').get(0);
     const taskId = terminalContainer.getAttribute('data-taskid');
-    createTerminal(terminalContainer, taskId);
+    const accessToken = terminalContainer.getAttribute('data-access-token');
+    createTerminal(terminalContainer, taskId, accessToken);
     $(window).resize(function() {
       resize(); // resize geometry
       resizeTerminal();
     });
     clipboard(); 
+    setupAccessTokenSplash();
   });
 })()

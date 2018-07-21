@@ -1,14 +1,15 @@
 import Express = require('express');
 import Constants = require('../constants');
 import { getLogger } from '../express_helpers';
+import { env } from '../env_vars';
 
 export default function(req: Express.Request, res: Express.Response) {
-  if (req.url == '/favicon.ico') {
-    res.status(404);
-    return;
-  }
-
   const taskId = req.params.task_id;
   getLogger(req).request(req, taskId);
-  res.render('terminal', { task_id: taskId, });
+  const renderOptions: any = { task_id: taskId };
+  renderOptions['access_token'] = (req.query.access_token)
+    ? req.query.access_token : '';
+  renderOptions['rights_delegation_enabled'] = env.ENABLE_RIGHTS_DELEGATION;
+
+  res.render('terminal', renderOptions);
 }
