@@ -18,6 +18,7 @@ export interface EnvVars {
   MESOS_STATE_CACHE_TIME: number;
   SESSION_SECRET: string;
   SUPER_ADMINS: string[];
+  ENABLE_PER_APP_ADMINS?: boolean;
 }
 
 const authorizations_enabled = (process.env['LDAP_URL']) ? true : false;
@@ -43,4 +44,5 @@ if (authorizations_enabled) {
   env['LDAP_BASE_DN'] = getOrExit('LDAP_BASE_DN');
   env['LDAP_USER'] = getOrExit('LDAP_USER');
   env['LDAP_PASSWORD'] = getOrExit('LDAP_PASSWORD');
+  env['ENABLE_PER_APP_ADMINS'] = process.env['ENABLE_PER_APP_ADMINS'] === 'true';
 }

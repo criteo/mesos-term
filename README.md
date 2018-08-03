@@ -81,6 +81,8 @@ Here are the details of available options.
 
 | Parameter                 | Description                                                                              |
 |---------------------------|------------------------------------------------------------------------------------------|
+| ENABLE\_PER\_APP\_ADMINS  | If 'true', admins are enabled meaning DEBUG\_GRANTED\_TO label is used to declare        |
+|                           | per app admins who can log into the app containers. (Default: false)                     |
 | SUPER\_ADMINS             | Comma-separated list of LDAP users and groups having all rights on all containers.       |
 | JWT\_SECRET               | Secret used to generate and validate JWT tokens.                                         |
 | LDAP\_BASE\_DN            | Base distinguished name from which to search users for authentication.                   |

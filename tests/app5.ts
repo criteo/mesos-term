@@ -8,7 +8,7 @@ describe('app5 (no label, root user)', function() {
   });
 
   describe('authorizations enabled', function() {
-    describe('admin user', function() {
+    describe('super admin user', function() {
       AppsHelpers.testInteractionsWithTerminal(3000, 'john', 'app5');
     });
 

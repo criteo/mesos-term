@@ -138,7 +138,7 @@ function checkAuthorizations(
 
   const userCN = req.user.cn;
   const userLdapGroups = req.user.memberOf;
-  const admins = task.admins;
+  const admins = env.ENABLE_PER_APP_ADMINS ? task.admins : [];
   const superAdmins = env.SUPER_ADMINS;
 
   return Bluebird.join(
