@@ -6,7 +6,7 @@
   "disk": 0,
   "user": "myuser",
   "labels": {
-    "DEBUG_GRANTED_TO": "dev"
+    "MESOS_TERM_DEBUG_GRANTED_TO": "dev"
   },
   "instances": 1,
   "portDefinitions": [
