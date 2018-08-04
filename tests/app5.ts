@@ -1,4 +1,5 @@
 import AppsHelpers = require('./apps_helpers');
+import Helpers = require('./helpers');
 
 describe('app5 (no label, root user)', function() {
   describe('authorizations disabled', function() {
@@ -13,11 +14,24 @@ describe('app5 (no label, root user)', function() {
     });
 
     describe('user harry', function() {
-      AppsHelpers.testUnauthorizedUserInRootContainer(3000, 'harry', 'app5');
+      AppsHelpers.testUnauthorizedUser(3000, 'harry', 'app5');
     });
 
     describe('user bob', function() {
-      AppsHelpers.testUnauthorizedUserInRootContainer(3000, 'bob', 'app5');
+      AppsHelpers.testUnauthorizedUser(3000, 'bob', 'app5');
+    });
+  });
+
+  describe('delegation enabled', function() {
+    describe('non admin user harry has delegated rights', function() {
+      it('should be able to interact with terminal', function() {
+        this.timeout(10000);
+        const instanceId = this.mesosTaskIds['app1'];
+        return Helpers.getDelegation(3000, 'john', 'harry', instanceId)
+          .then(function(accessToken: string) {
+            return AppsHelpers.checkInteractionsWithTerminalUsingAccessToken(3000, 'harry', accessToken, instanceId);
+          });
+      });
     });
   });
 });

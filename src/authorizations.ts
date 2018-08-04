@@ -1,4 +1,8 @@
 import Bluebird = require('bluebird');
+import Jwt = require('jsonwebtoken');
+import { env } from './env_vars';
+
+const JwtAsync: any = Bluebird.promisifyAll(Jwt);
 
 function intersection(array1: string[], array2: string[]) {
   return array1.filter(function(n) {
@@ -48,5 +52,35 @@ export function CheckRootContainer(
   return (isUserAdmin || (taskUser && taskUser !== 'root'))
     ? Bluebird.resolve()
     : Bluebird.reject(new Error('Unauthorized access to root container.'));
+}
+
+export function CheckDelegation(
+  userCN: string,
+  userLdapGroups: string[],
+  taskId: string,
+  delegationToken: string) {
+
+  return JwtAsync.verifyAsync(delegationToken, env.JWT_SECRET)
+    .then(function(payload: {task_id: string, delegate_to: string[]}) {
+      const userGroups = extractCN(userLdapGroups);
+      const userAndGroups = [userCN].concat(userGroups);
+      const isUserDelegated = (intersection(userAndGroups, payload.delegate_to).length > 0);
+
+      if (taskId != payload.task_id || !isUserDelegated) {
+        return Bluebird.reject(new Error('Invalid access delegation.'));
+      }
+      return Bluebird.resolve();
+    })
+    .catch(function(err: Error) {
+      return Bluebird.reject(new Error('Invalid access delegation.'));
+    });
+}
+
+export function isSuperAdmin(
+  userCN: string,
+  userLdapGroups: string[],
+  superAdmins: string[]): boolean {
+  const userGroups = extractCN(userLdapGroups);
+  return intersection([userCN].concat(userGroups), superAdmins).length > 0;
 }
 

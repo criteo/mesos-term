@@ -122,6 +122,7 @@ services:
     environment:
       - SUPER_ADMINS=admins
       - ENABLE_PER_APP_ADMINS=true
+      - ENABLE_RIGHTS_DELEGATION=true
       - LDAP_URL=ldap://openldap
       - LDAP_BASE_DN=dc=example,dc=com
       - LDAP_USER=cn=admin,dc=example,dc=com
@@ -169,6 +170,7 @@ services:
     environment:
       - SUPER_ADMINS=admins
       - ENABLE_PER_APP_ADMINS=false
+      - ENABLE_RIGHTS_DELEGATION=false
       - LDAP_URL=ldap://openldap
       - LDAP_BASE_DN=dc=example,dc=com
       - LDAP_USER=cn=admin,dc=example,dc=com
