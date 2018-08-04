@@ -7,7 +7,7 @@
   "instances": 1,
   "user": "myuser",
   "labels": {
-    "DEBUG_GRANTED_TO": "harry"
+    "MESOS_TERM_DEBUG_GRANTED_TO": "harry"
   },
   "portDefinitions": [
     {

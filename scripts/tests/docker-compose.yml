@@ -120,18 +120,18 @@ services:
       - mesos-master
       - openldap
     environment:
-      - COMMAND=/bin/bash
-      - SUPER_ADMINS=admins
-      - ENABLE_PER_APP_ADMINS=true
-      - ENABLE_RIGHTS_DELEGATION=true
-      - LDAP_URL=ldap://openldap
-      - LDAP_BASE_DN=dc=example,dc=com
-      - LDAP_USER=cn=admin,dc=example,dc=com
-      - LDAP_PASSWORD=password
-      - MESOS_MASTER_URL=http://mesos-master:5050
-      - SESSION_SECRET=abcd
-      - JWT_SECRET=abcd
-      - MESOS_STATE_CACHE_TIME=60
+      - MESOS_TERM_COMMAND=/bin/bash
+      - MESOS_TERM_ENABLE_PER_APP_ADMINS=true
+      - MESOS_TERM_ENABLE_RIGHTS_DELEGATION=true
+      - MESOS_TERM_LDAP_URL=ldap://openldap
+      - MESOS_TERM_LDAP_BASE_DN=dc=example,dc=com
+      - MESOS_TERM_LDAP_USER=cn=admin,dc=example,dc=com
+      - MESOS_TERM_LDAP_PASSWORD=password
+      - MESOS_TERM_JWT_SECRET=abcd
+      - MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050
+      - MESOS_TERM_MESOS_STATE_CACHE_TIME=60
+      - MESOS_TERM_SESSION_SECRET=abcd
+      - MESOS_TERM_SUPER_ADMINS=admins
 
   mesos-term-no-auth:
     build:
@@ -148,11 +148,11 @@ services:
       - mesos-master
       - openldap
     environment:
-      - COMMAND=/bin/bash
-      - MESOS_MASTER_URL=http://mesos-master:5050
-      - SESSION_SECRET=abcd
-      - JWT_SECRET=abcd
-      - MESOS_STATE_CACHE_TIME=60
+      - MESOS_TERM_COMMAND=/bin/bash
+      - MESOS_TERM_JWT_SECRET=abcd
+      - MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050
+      - MESOS_TERM_MESOS_STATE_CACHE_TIME=60
+      - MESOS_TERM_SESSION_SECRET=abcd
 
   # Admins have been disabled here. Labels in tasks are not taken into account.
   mesos-term-no-admins:
@@ -170,18 +170,18 @@ services:
       - mesos-master
       - openldap
     environment:
-      - COMMAND=/bin/bash
-      - SUPER_ADMINS=admins
-      - ENABLE_PER_APP_ADMINS=false
-      - ENABLE_RIGHTS_DELEGATION=false
-      - LDAP_URL=ldap://openldap
-      - LDAP_BASE_DN=dc=example,dc=com
-      - LDAP_USER=cn=admin,dc=example,dc=com
-      - LDAP_PASSWORD=password
-      - MESOS_MASTER_URL=http://mesos-master:5050
-      - SESSION_SECRET=abcd
-      - JWT_SECRET=abcd
-      - MESOS_STATE_CACHE_TIME=60
+      - MESOS_TERM_COMMAND=/bin/bash
+      - MESOS_TERM_ENABLE_PER_APP_ADMINS=false
+      - MESOS_TERM_ENABLE_RIGHTS_DELEGATION=false
+      - MESOS_TERM_LDAP_URL=ldap://openldap
+      - MESOS_TERM_LDAP_BASE_DN=dc=example,dc=com
+      - MESOS_TERM_LDAP_USER=cn=admin,dc=example,dc=com
+      - MESOS_TERM_LDAP_PASSWORD=password
+      - MESOS_TERM_JWT_SECRET=abcd
+      - MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050
+      - MESOS_TERM_MESOS_STATE_CACHE_TIME=60
+      - MESOS_TERM_SESSION_SECRET=abcd
+      - MESOS_TERM_SUPER_ADMINS=admins
 
 networks:
   mesos_command_modules_net:

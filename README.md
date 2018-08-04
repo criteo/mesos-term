@@ -15,8 +15,8 @@ The solution is to upgrade Mesos to a version higher or equal to 1.5.1.
 ## Features
 
 * Web-based container terminal.
-* Authentication againt LDAP.
-* Authorizations based on Mesos executor labels.
+* Authentication against LDAP.
+* Authorizations based on Mesos labels.
 * Permissions delegation.
 
 ## Getting started
@@ -48,11 +48,11 @@ command:
 
 ```
 docker run --name mesos-term --rm -p 3000:3000 -it \
-  -e JWT_SECRET=your-jwt-secret \
-  -e MESOS_MASTER_URL=http://mesos-master:5050 \
-  -e MESOS_STATE_CACHE_TIME=60 \
-  -e NODE_ENV=production \
-  -e SESSION_SECRET=your-session-secret \
+  -e MESOS_TERM_JWT_SECRET=your-jwt-secret \
+  -e MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050 \
+  -e MESOS_TERM_MESOS_STATE_CACHE_TIME=60 \
+  -e MESOS_TERM_NODE_ENV=production \
+  -e MESOS_TERM_SESSION_SECRET=your-session-secret \
   clems4ever/mesos-term
 ```
 
@@ -63,18 +63,18 @@ command:
 
 ```
 docker run --name mesos-term --rm -p 3000:3000 -it \
-  -e SUPER_ADMINS=admins,harry \
-  -e ENABLE_PER_APP_ADMINS=true \ 
-  -e ENABLE_RIGHTS_DELEGATION=true \ 
-  -e JWT_SECRET=your-jwt-secret \
-  -e LDAP_BASE_DN=dc=yourldap,dc=com \
-  -e LDAP_PASSWORD=the-admin-password \
-  -e LDAP_URL=ldap://yourldap.com \
-  -e LDAP_USER=cn=admin,dc=yourldap,dc=com \
-  -e MESOS_MASTER_URL=http://mesos-master:5050 \
-  -e MESOS_STATE_CACHE_TIME=60 \
-  -e NODE_ENV=production \
-  -e SESSION_SECRET=your-session-secret \
+  -e MESOS_TERM_SUPER_ADMINS=admins,harry \
+  -e MESOS_TERM_ENABLE_PER_APP_ADMINS=true \
+  -e MESOS_TERM_ENABLE_RIGHTS_DELEGATION=true \
+  -e MESOS_TERM_JWT_SECRET=your-jwt-secret \
+  -e MESOS_TERM_LDAP_BASE_DN=dc=yourldap,dc=com \
+  -e MESOS_TERM_LDAP_PASSWORD=the-admin-password \
+  -e MESOS_TERM_LDAP_URL=ldap://yourldap.com \
+  -e MESOS_TERM_LDAP_USER=cn=admin,dc=yourldap,dc=com \
+  -e MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050 \
+  -e MESOS_TERM_MESOS_STATE_CACHE_TIME=60 \
+  -e MESOS_TERM_NODE_ENV=production \
+  -e MESOS_TERM_SESSION_SECRET=your-session-secret \
   clems4ever/mesos-term
 ```
 
@@ -82,23 +82,23 @@ docker run --name mesos-term --rm -p 3000:3000 -it \
 
 Here are the details of available options.
 
-| Parameter                  | Description                                                                              |
-|----------------------------|------------------------------------------------------------------------------------------|
-| COMMAND                    | The command that will be run in the containers when a user logs in.                      |
-| ENABLE\_PER\_APP\_ADMINS   | If 'true', admins are enabled meaning DEBUG\_GRANTED\_TO label is used to declare        |
-|                            | per app admins who can log into the app containers. (Default: false)                     |
-| ENABLE\_RIGHTS\_DELEGATION | If 'true', super admins can delegate rights to log into one specific container to one    |
-|                            | person for a certain amount of time. (Default: false)                                    |
-| JWT\_SECRET                | Secret used to generate and validate JWT tokens.                                         |
-| LDAP\_BASE\_DN             | Base distinguished name from which to search users for authentication.                   |
-| LDAP\_PASSWORD             | Password of the LDAP user to bind against LDAP server.                                   |
-| LDAP\_URL                  | Url of the LDAP server. Authorizations are disabled if this env variable is not set.     |
-| LDAP\_USER                 | User DN of the LDAP user to bind against LDAP server.                                    |
-| MESOS\_MASTER\_URL         | Url of the Mesos master to fetch the state from.                                         |
-| MESOS\_STATE\_CACHE\_TIME  | Time in seconds before invalidating the cache containing Mesos state.                    |
-| NODE\_ENV                  | Must be "production" for express to run in production mode.                              |
-| SESSION\_SECRET            | Secret used to encrypt session cookie.                                                   |
-| SUPER\_ADMINS              | Comma-separated list of LDAP users and groups having all rights on all containers.       |
+| Parameter                               | Description                                                                              |
+|-----------------------------------------|------------------------------------------------------------------------------------------|
+| MESOS\_TERM\_COMMAND                    | The command that will be run in the containers when a user logs in.                      |
+| MESOS\_TERM\_ENABLE\_PER\_APP\_ADMINS   | If 'true', admins are enabled meaning DEBUG\_GRANTED\_TO label is used to declare        |
+|                                         | per app admins who can log into the app containers. (Default: false)                     |
+| MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', super admins can delegate rights to log into one specific container to one    |
+|                                         | person for a certain amount of time. (Default: false)                                    |
+| MESOS\_TERM\_JWT\_SECRET                | Secret used to generate and validate JWT tokens.                                         |
+| MESOS\_TERM\_LDAP\_BASE\_DN             | Base distinguished name from which to search users for authentication.                   |
+| MESOS\_TERM\_LDAP\_PASSWORD             | Password of the LDAP user to bind against LDAP server.                                   |
+| MESOS\_TERM\_LDAP\_URL                  | Url of the LDAP server. Authorizations are disabled if this env variable is not set.     |
+| MESOS\_TERM\_LDAP\_USER                 | User DN of the LDAP user to bind against LDAP server.                                    |
+| MESOS\_TERM\_MESOS\_MASTER\_URL         | Url of the Mesos master to fetch the state from.                                         |
+| MESOS\_TERM\_MESOS\_STATE\_CACHE\_TIME  | Time in seconds before invalidating the cache containing Mesos state.                    |
+| MESOS\_TERM\_NODE\_ENV                  | Must be "production" for express to run in production mode.                              |
+| MESOS\_TERM\_SESSION\_SECRET            | Secret used to encrypt session cookie.                                                   |
+| MESOS\_TERM\_SUPER\_ADMINS              | Comma-separated list of LDAP users and groups having all rights on all containers.       |
 
 ## Authorizations model
 
@@ -109,9 +109,9 @@ their own applications.
 
 ### Super administrators
 
-Super administrators must be mentionned in the SUPER\_ADMINS environment
-as a comma-separated list of LDAP users and/or groups. They have all
-permissions in MesosTerm, i.e., they are able to debug any container
+Super administrators must be mentionned in the MESOS\_TERM\_SUPER\_ADMINS
+environment as a comma-separated list of LDAP users and/or groups. They have
+full permissions in MesosTerm, i.e., they are able to debug any container
 be it root or not. They are also able to produce access tokens to delegate
 rights to log into a container.
 
@@ -119,7 +119,7 @@ rights to log into a container.
 
 Application administrators are able to debug their own applications and
 therefore they must be mentionned as a comma-separated list of LDAP users
-and groups in the DEBUG\_GRANTED\_TO task labels. Here is an
+and groups in the MESOS\_TERM\_DEBUG\_GRANTED\_TO task labels. Here is an
 example using Marathon.
 
 ![authorized users](doc/images/authorizations.png?raw=true "Authorizations")
@@ -155,7 +155,7 @@ and get the task information in order to verify the permissions of a user
 to log into a container. In order to improve the user experience,
 the Mesos state is fetched regularly and cached. The cache is invalidated
 after some time defined by the environment variable called
-MESOS\_STATE\_CACHE\_TIME and expressed in seconds.
+MESOS\_TERM\_MESOS\_STATE\_CACHE\_TIME and expressed in seconds.
 
 You can set a big number in order to reduce the load of your Mesos cluster.
 Though, it is important to know that **MesosTerm** automatically invalidate
