@@ -491,7 +491,7 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   t = TaskIO(agent_url=args.agent_url, parent_container_id=args.container_id,
-             tty=True, user=args.user, interactive=True, cmd="/bin/bash",
+             tty=True, user=args.user, interactive=True, cmd="/bin/sh",
              args=[])
   t.run()
 
