@@ -63,7 +63,6 @@ command:
 
 ```
 docker run --name mesos-term --rm -p 3000:3000 -it \
-  -e MESOS_TERM_SUPER_ADMINS=admins,harry \
   -e MESOS_TERM_ENABLE_PER_APP_ADMINS=true \
   -e MESOS_TERM_ENABLE_RIGHTS_DELEGATION=true \
   -e MESOS_TERM_JWT_SECRET=your-jwt-secret \
@@ -75,6 +74,7 @@ docker run --name mesos-term --rm -p 3000:3000 -it \
   -e MESOS_TERM_MESOS_STATE_CACHE_TIME=60 \
   -e MESOS_TERM_NODE_ENV=production \
   -e MESOS_TERM_SESSION_SECRET=your-session-secret \
+  -e MESOS_TERM_SUPER_ADMINS=admins,harry \
   clems4ever/mesos-term
 ```
 
@@ -84,11 +84,9 @@ Here are the details of available options.
 
 | Parameter                               | Description                                                                              |
 |-----------------------------------------|------------------------------------------------------------------------------------------|
-| MESOS\_TERM\_COMMAND                    | The command that will be run in the containers when a user logs in.                      |
-| MESOS\_TERM\_ENABLE\_PER\_APP\_ADMINS   | If 'true', admins are enabled meaning DEBUG\_GRANTED\_TO label is used to declare        |
-|                                         | per app admins who can log into the app containers. (Default: false)                     |
-| MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', super admins can delegate rights to log into one specific container to one    |
-|                                         | person for a certain amount of time. (Default: false)                                    |
+| MESOS\_TERM\_COMMAND                    | The command that will be run in the container when a user logs in.                       |
+| MESOS\_TERM\_ENABLE\_PER\_APP\_ADMINS   | If 'true', admins are enabled meaning DEBUG\_GRANTED\_TO label is used to declare per app admins who can log into the app containers. (Default: false) |
+| MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', super admins can delegate rights to log into one specific container to one person for a certain amount of time. (Default: false) |
 | MESOS\_TERM\_JWT\_SECRET                | Secret used to generate and validate JWT tokens.                                         |
 | MESOS\_TERM\_LDAP\_BASE\_DN             | Base distinguished name from which to search users for authentication.                   |
 | MESOS\_TERM\_LDAP\_PASSWORD             | Password of the LDAP user to bind against LDAP server.                                   |
