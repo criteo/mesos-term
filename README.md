@@ -84,7 +84,7 @@ Here are the details of available options.
 
 | Parameter                               | Description                                                                              |
 |-----------------------------------------|------------------------------------------------------------------------------------------|
-| MESOS\_TERM\_COMMAND                    | The command that will be run in the container when a user logs in.                       |
+| MESOS\_TERM\_COMMAND                    | The command that will be run in the container when a user logs in. (Default: /bin/sh)    |
 | MESOS\_TERM\_ENABLE\_PER\_APP\_ADMINS   | If 'true', admins are enabled meaning DEBUG\_GRANTED\_TO label is used to declare per app admins who can log into the app containers. (Default: false) |
 | MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', super admins can delegate rights to log into one specific container to one person for a certain amount of time. (Default: false) |
 | MESOS\_TERM\_JWT\_SECRET                | Secret used to generate and validate JWT tokens.                                         |
