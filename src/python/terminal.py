@@ -488,10 +488,11 @@ if __name__ == '__main__':
   parser.add_argument('agent_url', type=str, help='The url of the agent to connect to.')
   parser.add_argument('container_id', type=str, help='The container id to connect to.')
   parser.add_argument('--user', type=str, help='The user to run the command as.')
+  parser.add_argument('--cmd', type=str, default="/bin/sh", help='The command to run in the container.')
   args = parser.parse_args()
 
   t = TaskIO(agent_url=args.agent_url, parent_container_id=args.container_id,
-             tty=True, user=args.user, interactive=True, cmd="/bin/bash",
+             tty=True, user=args.user, interactive=True, cmd=args.cmd,
              args=[])
   t.run()
 

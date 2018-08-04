@@ -84,6 +84,7 @@ Here are the details of available options.
 
 | Parameter                  | Description                                                                              |
 |----------------------------|------------------------------------------------------------------------------------------|
+| COMMAND                    | The command that will be run in the containers when a user logs in.                      |
 | ENABLE\_PER\_APP\_ADMINS   | If 'true', admins are enabled meaning DEBUG\_GRANTED\_TO label is used to declare        |
 |                            | per app admins who can log into the app containers. (Default: false)                     |
 | ENABLE\_RIGHTS\_DELEGATION | If 'true', super admins can delegate rights to log into one specific container to one    |

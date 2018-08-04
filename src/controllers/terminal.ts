@@ -97,6 +97,8 @@ function spawnTerminal(
     Path.resolve(__dirname, '..', 'python/terminal.py'),
     task.agent_url,
     task.container_id,
+    '--cmd',
+    env.COMMAND
   ];
 
   if (task.user) {

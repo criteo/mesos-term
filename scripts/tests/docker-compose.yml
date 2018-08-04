@@ -120,6 +120,7 @@ services:
       - mesos-master
       - openldap
     environment:
+      - COMMAND=/bin/bash
       - SUPER_ADMINS=admins
       - ENABLE_PER_APP_ADMINS=true
       - ENABLE_RIGHTS_DELEGATION=true
@@ -147,6 +148,7 @@ services:
       - mesos-master
       - openldap
     environment:
+      - COMMAND=/bin/bash
       - MESOS_MASTER_URL=http://mesos-master:5050
       - SESSION_SECRET=abcd
       - JWT_SECRET=abcd
@@ -168,6 +170,7 @@ services:
       - mesos-master
       - openldap
     environment:
+      - COMMAND=/bin/bash
       - SUPER_ADMINS=admins
       - ENABLE_PER_APP_ADMINS=false
       - ENABLE_RIGHTS_DELEGATION=false
