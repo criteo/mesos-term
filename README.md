@@ -84,9 +84,9 @@ Here are the details of available options.
 
 | Parameter                               | Description                                                                              |
 |-----------------------------------------|------------------------------------------------------------------------------------------|
-| MESOS\_TERM\_COMMAND                    | The command that will be run in the container when a user logs in. (Default: /bin/sh)    |
-| MESOS\_TERM\_ENABLE\_PER\_APP\_ADMINS   | If 'true', admins are enabled meaning DEBUG\_GRANTED\_TO label is used to declare per app admins who can log into the app containers. (Default: false) |
-| MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', super admins can delegate rights to log into one specific container to one person for a certain amount of time. (Default: false) |
+| MESOS\_TERM\_COMMAND                    | The command to be run in the container when a user logs in. (Default: /bin/sh)           |
+| MESOS\_TERM\_ENABLE\_PER\_APP\_ADMINS   | If 'true', application administrators can be declared with the Mesos label MESOS\_TERM\_DEBUG\_GRANTED\_TO label. It means those users can log into the application containers. An example is provided below. (Default: false) |
+| MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', super administrators can delegate rights to log into one specific container to one person for a certain amount of time. (Default: false) |
 | MESOS\_TERM\_JWT\_SECRET                | Secret used to generate and validate JWT tokens.                                         |
 | MESOS\_TERM\_LDAP\_BASE\_DN             | Base distinguished name from which to search users for authentication.                   |
 | MESOS\_TERM\_LDAP\_PASSWORD             | Password of the LDAP user to bind against LDAP server.                                   |
@@ -122,7 +122,7 @@ example using Marathon.
 
 ![authorized users](doc/images/authorizations.png?raw=true "Authorizations")
 
-For security reasons, it has been decided to not allow admins of an application
+For security reasons, it has been decided to not allow administrators of an application
 to log in a container in the case the Mesos task runs as `root` or no user
 (meaning the user running Mesos, i.e., most probably `root`). Only super
 administrators can debug those containers.
