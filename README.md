@@ -25,6 +25,7 @@ To set up a complete environment for testing, ensure docker and docker-compose
 are installed on your machine and run:
 
 ```
+./scripts/build.sh
 ./scripts/tests/setup.sh
 ```
 
