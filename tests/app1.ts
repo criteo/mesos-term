@@ -20,6 +20,10 @@ describe('app1 (no label, no root)', function() {
     });
 
     describe('admins are disabled', function() {
+      describe('grant access button is not displayed', function() {
+        AppsHelpers.testShouldNotSeeGrantAccessButton(3002, 'john', 'app1');
+      })
+
       describe('super admin user john', function() {
         AppsHelpers.testInteractionsWithTerminal(3002, 'john', 'app1');
       });
@@ -31,6 +35,22 @@ describe('app1 (no label, no root)', function() {
   });
 
   describe('delegation enabled', function() {
+    describe('grant access button should be displayed', function() {
+      AppsHelpers.testShouldSeeGrantAccessButton(3000, 'john', 'app1');
+    });
+
+    describe('john use grant access button to delegate rights to harry', function() {
+      AppsHelpers.testShouldGrantAccessViaButton(3000, 'john', 'harry', 'app1');
+    });
+
+    describe('cannot grant access is username is empty', function() {
+      AppsHelpers.testShouldNotGrantAccessWhenUserIsEmpty(3000, 'john', 'app1');
+    });
+
+    describe('abort access delegation', function() {
+      AppsHelpers.testShouldAbortAccessDelegation(3000, 'john', 'app1');
+    });
+
     describe('non admin user harry has delegated rights', function() {
       it('should be able to interact with terminal', function() {
         this.timeout(10000);
@@ -56,7 +76,7 @@ describe('app1 (no label, no root)', function() {
       });
     });
 
-    describe.only('token produced for another person', function() {
+    describe('token produced for another person', function() {
       it('should be unauthorized', function() {
         this.timeout(10000);
         const instanceId = this.mesosTaskIds['app1'];

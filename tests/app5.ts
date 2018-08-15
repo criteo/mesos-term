@@ -23,10 +23,10 @@ describe('app5 (no label, root user)', function() {
   });
 
   describe('delegation enabled', function() {
-    describe('non admin user harry has delegated rights', function() {
+    describe('non admin user harry has delegated rights to root container', function() {
       it('should be able to interact with terminal', function() {
-        this.timeout(10000);
-        const instanceId = this.mesosTaskIds['app1'];
+        this.timeout(20000);
+        const instanceId = this.mesosTaskIds['app5'];
         return Helpers.getDelegation(3000, 'john', 'harry', instanceId)
           .then(function(accessToken: string) {
             return AppsHelpers.checkInteractionsWithTerminalUsingAccessToken(3000, 'harry', accessToken, instanceId);

@@ -62,13 +62,15 @@
       })
       .done(function (data) {
         window.token = data.token;
-        resizeTerminal();
         setTimeout(function() {
-          socketURL += window.token;
-          socket = new WebSocket(socketURL);
-          socket.onopen = runRealTerminal(data);
-          socket.onclose = onSocketClose;
-          socket.onerror = onSocketError;
+          resizeTerminal();
+          setTimeout(function() {
+            socketURL += window.token;
+            socket = new WebSocket(socketURL);
+            socket.onopen = runRealTerminal(data);
+            socket.onclose = onSocketClose;
+            socket.onerror = onSocketError;
+          }, 200);
         }, 100);
       })
       .fail(function(jqXHR, textStatus, errorThrown) {
@@ -177,6 +179,84 @@
     });
   }
 
+  function clearDelegationForm() {
+    $('.delegate-form-user').val('');
+    $('.delegate-form-duration').val('1h');
+  }
+
+  function clearAndHideDelegationForm() {
+    clearDelegationForm();
+    $('.delegation-form').hide();
+  }
+
+  function generateAccessToken(taskId) {
+    const username = $('.delegate-form-user').val();
+    const duration = $('.delegate-form-duration').val();
+
+    const payload = {
+      delegate_to: username,
+      task_id: taskId,
+      duration: duration
+    };
+    
+    $.ajax('/delegate', {
+      data : JSON.stringify(payload),
+      contentType : 'application/json',
+      type : 'POST'
+    })
+    .then(function(accessToken) {
+      showDelegationAccessToken(accessToken)
+    })
+    .catch(function(err) {
+      showDelegationErrorToken(err.responseText);
+    })
+  }
+
+  function showDelegationForm() {
+    $('.delegation-form').show();
+    $('.delegation-form .form-body').show();
+    $('.delegation-form .access-token').hide();
+    $('.delegation-form .error').hide();
+  }
+
+  function showDelegationAccessToken(accessToken) {
+    $('.delegation-form').show();
+    $('.delegation-form .form-body').hide();
+    $('.delegation-form .access-token').show();
+    $('.delegation-form .error').hide();
+    $('.delegation-form .access-token textarea').val(accessToken);
+  }
+
+  function showDelegationErrorToken(errorMessage) {
+    console.log(errorMessage);
+    $('.delegation-form').show();
+    $('.delegation-form .form-body').hide();
+    $('.delegation-form .access-token').hide();
+    $('.delegation-form .error').show();
+    $('.delegation-form .error p').html(errorMessage);
+  }
+
+  function setupDelegationForm(taskId) {
+    $('.delegate-button').click(showDelegationForm);
+
+    $('.delegate-form-abort').click(function() {
+      clearAndHideDelegationForm();
+    });
+
+    $('.delegate-form-delegate').click(function() {
+      generateAccessToken(taskId);
+    });
+
+    $('.delegate-form-retry').click(function() {
+      clearDelegationForm();
+      showDelegationForm();
+    });
+
+    $('.delegate-form-ok').click(function() {
+      clearAndHideDelegationForm();
+    });
+  }
+
   $(document).ready(function() {
     const terminalContainer = $('#terminal-container').get(0);
     const taskId = terminalContainer.getAttribute('data-taskid');
@@ -188,5 +268,6 @@
     });
     clipboard(); 
     setupAccessTokenSplash();
+    setupDelegationForm(taskId);
   });
 })()
