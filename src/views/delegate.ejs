@@ -8,7 +8,7 @@
     <p>This endpoint allows super admins to delegate rights to login into a specific container.</p>
     <p>In order to delegate rights to log into task ID <b>XXXX</b> to <b>john</b> during <b>1h</b>, you can type the following command:</p>
     <p style="border: 1px solid black; background-color: #ececec; padding: 20px; vertical-align: middle;">
-      curl -u "myusername:mypassword" -XPOST -d '{"task_id": "XXXX", "delegate_to": "john", "expires_in": "1h"}' -H "Content-Type: application/json" http://localhost:3000/delegate
+      curl -u "<%= user %>" -XPOST -d '{"task_id": "XXXX", "delegate_to": "john", "expires_in": "1h"}' -H "Content-Type: application/json" <%= url %>/delegate
     </p>
   </body>
 </html>

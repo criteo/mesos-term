@@ -132,20 +132,13 @@ administrators can debug those containers.
 
 In some cases, super administrators might want to allow access to a
 specific container to a user for a certain amount of time. This is possible
-in MesosTerm by producing an access token by using the endpoint /delegate.
-Once the access token is generated, give it to the user and let him use it
-to log into the container he is allowed to.
+in MesosTerm by producing an access token and giving it to the delegated user.
+He will then be able to access this specific container for the time provided.
 
-The documentation for how to produce an access token is available by sending
-a GET on /delegate.
+The access delegation is only available to super admins via the button called
+`Grant access` in the UI or via the endpoint /delegate.
 
-Basically, given you are `john` and you want to allow `bob` to access container
-`XYZ` for `1 hour`, in order to produce the token you can perform the following
-command:
-
-```
-curl -u "john:mypassword" -XPOST -d '{"task_id": "XYZ", "delegate_to": "bob", "expires_in": "1h"}' -H "Content-Type: application/json" http://localhost:3000/delegate
-```
+![access delegation](doc/images/grant-access.png?raw=true "Access Delegation")
 
 ## Mesos state caching
 
