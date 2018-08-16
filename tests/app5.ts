@@ -23,7 +23,7 @@ describe('app5 (no label, root user)', function() {
   });
 
   describe('delegation enabled', function() {
-    describe('non admin user harry has delegated rights', function() {
+    describe('non admin user harry has delegated rights to root container', function() {
       it('should be able to interact with terminal', function() {
         this.timeout(10000);
         const instanceId = this.mesosTaskIds['app1'];

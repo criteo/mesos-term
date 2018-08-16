@@ -38,6 +38,15 @@
                   <div class="tooltip fade copy-btn" data-title="Copied!" data-clipboard-text=""><i class="far fa-copy"></i></div>
                 </span>
               </div>
+              <% if (is_super_admin && rights_delegation_enabled) { %>
+                <div class="delegate-button bar-item">
+                  <span class="bar-item-content">
+                    <div class="button">
+                      Grant access
+                    </div>
+                  </span>
+                </div>
+              <% } %>
             </div>
           </div>
           <div class="brand bar-item">
@@ -69,6 +78,44 @@
               <td class="error-cell"><span class="error"></span></td>
             </tr>
           </table>
+        </div>
+        <div class="delegation-form">
+          <h3>Access delegation</h3>
+          <div class="form-body">
+            <p>Fill in the form to generate an access token.</p>
+            <table>
+              <tr>
+                <td class="label">Task ID</td>
+                <td><input class="delegate-form-taskid" type="text" disabled="disabled" value="<%= task_id %>"></input></td>
+              </tr>
+              <tr>
+                <td class="label">Delegate to</td>
+                <td><input class="delegate-form-user" type="text" placeholder="Username"></input></td>
+              </tr>
+              <tr>
+                <td class="label">Duration</td>
+                <td><input class="delegate-form-duration" type="text" value="1h"></input></td>
+              </tr>
+            </table>
+            <div class="buttons-area">
+              <button class="delegate-form-delegate" name="delegate" type="button">Delegate</button>
+              <button class="delegate-form-abort" name="abort" type="button">Abort</button>
+            </div>
+          </div>
+          <div class="access-token">
+              <p>Give this access token to the delegated user.</p>
+            <textarea></textarea>
+            <div class="buttons-area">
+              <button class="delegate-form-ok" name="ok" type="button">Ok</button>
+            </div>
+          </div>
+          <div class="error">
+              <p></p>
+              <div class="buttons-area">
+                <button class="delegate-form-retry" name="retry" type="button">Retry</button>
+                <button class="delegate-form-abort" name="abort" type="button">Abort</button>
+              </div>
+            </div>
         </div>
         <div class="background-watermark">
           <img src="/static/images/mesos.png"/>

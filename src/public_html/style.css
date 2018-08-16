@@ -91,6 +91,14 @@ body, html {
   display: inline-block;
 }
 
+.status-bar .delegate-button .button {
+  background: red;
+  padding: 2px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
 .status-bar .brand {
   float: right;
   background: #2eaadc;
@@ -131,6 +139,76 @@ body, html {
  */
 .background-watermark img {
   width: 400px;
+}
+
+.delegation-form {
+  width: 400px;
+  top: 50%;
+  left: 50%;
+  margin-left: -210px;
+  margin-top: -150px;
+  display: none;
+  position: absolute;
+  z-index: 100;
+  background: #004561;
+  opacity: 0.9;
+  border-radius: 15px;
+  padding: 20px;
+  color: white;
+}
+
+.delegation-form p {
+  text-align: center;
+}
+
+.delegation-form .form-body {
+  margin: 10px 30px;
+}
+
+.delegation-form h3 {
+  text-align: center;
+  margin-top: 0px;
+  color: #2eaadc;
+}
+
+.delegation-form table {
+  margin: auto;
+  margin-bottom: 20px;
+  width: 100%;
+  background-color: #2eaadc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.delegation-form table .label {
+  font-size: 0.9em;
+}
+
+.delegation-form table input {
+  padding: 7px;
+  border-radius: 4px;
+  width: 90%;
+  border: 0px;
+}
+
+.delegation-form .buttons-area {
+  text-align: center;
+}
+
+.delegation-form .buttons-area button {
+  padding: 5px 20px;
+  border: 0px;
+  border-radius: 5px;
+}
+
+.delegation-form textarea {
+  width: 95%;
+  height: 100px;
+  resize: none;
+  border-radius: 10px;
+  padding: 10px;
+  margin: auto;
+  margin-bottom: 10px;
 }
 
 .error-splash {

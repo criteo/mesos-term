@@ -9,7 +9,10 @@ const JwtAsync: any = Bluebird.promisifyAll(Jwt);
 export function DelegateGet(
   req: Express.Request,
   res: Express.Response) {
-  res.render('delegate');
+  res.render('delegate', {
+    user: req.user.cn,
+    url: req.protocol + '://' + req.get('host')
+  });
 }
 
 export function DelegatePost(
