@@ -18,7 +18,7 @@ RUN npm install --production
 ADD scripts/entrypoint.sh /entrypoint.sh
 ADD dist dist
 
-RUN cd dist/python && pip3 install -r requirements.yml
+RUN cd dist/python && pip3 install -r requirements.txt
 
 # The URL to the Mesos master to retrieve the state from.
 ENV MESOS_MASTER_URL=http://localhost:5050

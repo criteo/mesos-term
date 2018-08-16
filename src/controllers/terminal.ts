@@ -174,7 +174,9 @@ function checkAuthorizations(
       for (let i = 0; i < errors.length; ++i) {
         reasons.push('"' + errors[i].message + '"');
       }
-      return Bluebird.reject(new Error('Reasons: [' + reasons.join(', ') + ']'));
+      const errorMessage = 'Reasons: [' + reasons.join(', ') + ']';
+      console.error(errorMessage);
+      return Bluebird.reject(new Error(errorMessage));
     });
 }
 

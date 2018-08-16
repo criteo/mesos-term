@@ -5,6 +5,8 @@ import Bluebird = require('bluebird');
 
 describe('access delegation', function() {
   it('should allow access to super admin', function() {
+    this.timeout(10000);
+
     return helpers.withChrome(function(driver) {
       return Bluebird.resolve(driver.get(`http://john:password@localhost:3000/delegate`))
         .then(function() {
@@ -18,6 +20,8 @@ describe('access delegation', function() {
   });
 
   it('should deny access to non super admin', function() {
+    this.timeout(10000);
+    
     return helpers.withChrome(function(driver) {
       return Bluebird.resolve(driver.get(`http://harry:password@localhost:3000/delegate`))
         .then(function() {
