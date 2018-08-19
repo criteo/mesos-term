@@ -224,11 +224,14 @@
     $('.delegation-form .form-body').hide();
     $('.delegation-form .access-token').show();
     $('.delegation-form .error').hide();
-    $('.delegation-form .access-token textarea').val(accessToken);
+    var newURL = 
+      window.location.protocol + "//" + window.location.host +
+      "" + window.location.pathname + window.location.search;
+    $('.delegation-form .access-token textarea').val(
+      newURL + '?access_token=' + accessToken);
   }
 
   function showDelegationErrorToken(errorMessage) {
-    console.log(errorMessage);
     $('.delegation-form').show();
     $('.delegation-form .form-body').hide();
     $('.delegation-form .access-token').hide();

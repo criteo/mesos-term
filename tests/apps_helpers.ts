@@ -265,7 +265,7 @@ function waitUntilElementIsNotVisible(driver: any, cssClass: string, timeout: nu
       .then((el) => Bluebird.resolve(driver.wait(webdriver.until.elementIsNotVisible(el), timeout)));
 }
 
-function delegateAccess(driver: any, port: number, delegatedUser: string, instanceId: string) {
+function delegateAccessToken(driver: any, port: number, delegatedUser: string, instanceId: string) {
   let token: string;
   return waitUntilElementIsVisible(driver, '.delegation-form', TIMEOUT)
     .then(() => waitUntilElementIsVisible(driver, '.delegate-form-user', TIMEOUT))
@@ -275,7 +275,7 @@ function delegateAccess(driver: any, port: number, delegatedUser: string, instan
     .then(() => Bluebird.resolve(driver.sleep(1000)))
     .then(() => waitUntilElementIsVisible(driver, '.access-token textarea', TIMEOUT))
     .then((el) => Bluebird.resolve(el.getAttribute("value")))
-    .then((accessToken) => { token = accessToken; return Bluebird.resolve(); })
+    .then((accessUrl: string) => { token = accessUrl.match(/access_token=(.*)$/)[1]; return Bluebird.resolve(); })
     .then(() => waitUntilElementIsVisible(driver, '.delegate-form-ok', TIMEOUT))
     .then((el) => Bluebird.resolve(el.click()))
     .then(() => waitUntilElementIsNotVisible(driver, '.delegation-form', TIMEOUT))
@@ -287,7 +287,25 @@ function delegateAccess(driver: any, port: number, delegatedUser: string, instan
     .then(() => interactWithTerminal(driver));
 }
 
-export function testShouldGrantAccessViaButton(port: number, admin: string, delegatedUser: string, appName: string) {
+function delegateAccessUrl(driver: any, port: number, delegatedUser: string, instanceId: string) {
+  let url: string;
+  return waitUntilElementIsVisible(driver, '.delegation-form', TIMEOUT)
+    .then(() => waitUntilElementIsVisible(driver, '.delegate-form-user', TIMEOUT))
+    .then((el) => Bluebird.resolve(el.sendKeys(delegatedUser)))
+    .then(() => waitUntilElementIsVisible(driver, '.delegate-form-delegate', TIMEOUT))
+    .then((el) => Bluebird.resolve(el.click()))
+    .then(() => Bluebird.resolve(driver.sleep(1000)))
+    .then(() => waitUntilElementIsVisible(driver, '.access-token textarea', TIMEOUT))
+    .then((el) => Bluebird.resolve(el.getAttribute("value")))
+    .then((accessUrl) => { url = accessUrl; return Bluebird.resolve(); })
+    .then(() => waitUntilElementIsVisible(driver, '.delegate-form-ok', TIMEOUT))
+    .then((el) => Bluebird.resolve(el.click()))
+    .then(() => waitUntilElementIsNotVisible(driver, '.delegation-form', TIMEOUT))
+    .then(() => Bluebird.resolve(driver.get(url)))
+    .then(() => interactWithTerminal(driver));
+}
+
+export function testShouldGrantAccessViaButtonAndToken(port: number, admin: string, delegatedUser: string, appName: string) {
   it(`should allow ${admin} to delegate access to ${delegatedUser} via button`, function() {
     this.timeout(20000);
     const instanceId = this.mesosTaskIds[appName];
@@ -297,10 +315,26 @@ export function testShouldGrantAccessViaButton(port: number, admin: string, dele
       return Bluebird.resolve(driver.get(`http://${admin}:password@localhost:${port}/login/${instanceId}`))
         .then(() => waitUntilElementIsVisible(driver, '.delegate-button', TIMEOUT))
         .then((el) => Bluebird.resolve(el.click()))
-        .then(() => delegateAccess(driver, port, delegatedUser, instanceId));
+        .then(() => delegateAccessToken(driver, port, delegatedUser, instanceId));
     });
   });
 }
+
+export function testShouldGrantAccessViaButtonAndUrl(port: number, admin: string, delegatedUser: string, appName: string) {
+  it(`should allow ${admin} to delegate access to ${delegatedUser} via button`, function() {
+    this.timeout(20000);
+    const instanceId = this.mesosTaskIds[appName];
+
+    return helpers.withChrome(function(driver) {
+      
+      return Bluebird.resolve(driver.get(`http://${admin}:password@localhost:${port}/login/${instanceId}`))
+        .then(() => waitUntilElementIsVisible(driver, '.delegate-button', TIMEOUT))
+        .then((el) => Bluebird.resolve(el.click()))
+        .then(() => delegateAccessUrl(driver, port, delegatedUser, instanceId));
+    });
+  });
+}
+
 
 export function testShouldNotGrantAccessWhenUserIsEmpty(port: number, admin: string, appName: string) {
   it(`should face an error when user is not provided`, function() {
