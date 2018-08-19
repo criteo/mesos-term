@@ -39,8 +39,12 @@ describe('app1 (no label, no root)', function() {
       AppsHelpers.testShouldSeeGrantAccessButton(3000, 'john', 'app1');
     });
 
-    describe('john use grant access button to delegate rights to harry', function() {
-      AppsHelpers.testShouldGrantAccessViaButton(3000, 'john', 'harry', 'app1');
+    describe('john use grant access button to delegate rights to harry by giving token', function() {
+      AppsHelpers.testShouldGrantAccessViaButtonAndToken(3000, 'john', 'harry', 'app1');
+    });
+
+    describe('john use grant access button to delegate rights to harry by giving url', function() {
+      AppsHelpers.testShouldGrantAccessViaButtonAndUrl(3000, 'john', 'harry', 'app1');
     });
 
     describe('cannot grant access is username is empty', function() {
