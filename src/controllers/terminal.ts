@@ -136,7 +136,10 @@ function checkAuthorizations(
 
   const userCN = req.user.cn;
   const userLdapGroups = req.user.memberOf;
-  const admins = env.ENABLE_PER_APP_ADMINS ? task.admins : [];
+  const admins = Authorizations.FilterTaskAdmins(
+    env.ENABLE_PER_APP_ADMINS,
+    env.ALLOWED_TASK_ADMINS,
+    task.admins);
   const superAdmins = env.SUPER_ADMINS;
 
   const authorizationsPromise =
@@ -163,7 +166,8 @@ function checkAuthorizations(
         userCN,
         userLdapGroups,
         task.task_id,
-        accessToken
+        accessToken,
+        env.JWT_SECRET
       );
     promises.push(delegationPromise);
   }
