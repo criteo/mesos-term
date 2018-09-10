@@ -25,6 +25,7 @@ function extractCN(groups: string[]): string[] {
   }).filter(m => m !== undefined);
 }
 
+// TODO: integrate all public methods in one authorizer class
 export function FilterTaskAdmins(
   task_admins_enabled: boolean,
   allowed_task_admins: string[],
