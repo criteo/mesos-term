@@ -103,6 +103,7 @@ export function testInteractionsWithTerminal(
   appName: string) {
 
   it('should be able to interact with terminal', function() {
+    this.retries(3);
     this.timeout(TIMEOUT);
     const instanceId = this.mesosTaskIds[appName];
     return checkInteractionsWithTerminal(port, user, instanceId);

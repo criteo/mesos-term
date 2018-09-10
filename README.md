@@ -87,6 +87,7 @@ Here are the details of available options.
 |-----------------------------------------|------------------------------------------------------------------------------------------|
 | MESOS\_TERM\_COMMAND                    | The command to be run in the container when a user logs in. (Default: /bin/sh)           |
 | MESOS\_TERM\_ENABLE\_PER\_APP\_ADMINS   | If 'true', application administrators can be declared with the Mesos label MESOS\_TERM\_DEBUG\_GRANTED\_TO label. It means those users can log into the application containers. An example is provided below. (Default: false) |
+| MESOS\_TERM\_ALLOWED\_TASK\_ADMINS      | White list of application administrators (users or groups) allowed to override application configuration through Mesos label |
 | MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', super administrators can delegate rights to log into one specific container to one person for a certain amount of time. (Default: false) |
 | MESOS\_TERM\_JWT\_SECRET                | Secret used to generate and validate JWT tokens.                                         |
 | MESOS\_TERM\_LDAP\_BASE\_DN             | Base distinguished name from which to search users for authentication.                   |
@@ -122,6 +123,11 @@ and groups in the MESOS\_TERM\_DEBUG\_GRANTED\_TO task labels. Here is an
 example using Marathon.
 
 ![authorized users](doc/images/authorizations.png?raw=true "Authorizations")
+
+If needed, an optional layer of security can be added by using the MESOS\_TERM\_ALLOWED\_TASK\_ADMINS
+parameter. This is a comma-separated whitelist of users/groups allowed to use the
+MESOS\_TERM\_DEBUG\_GRANTED_TO label in their Mesos applications. If empty, all users/groups
+are allowed to use the label.
 
 For security reasons, it has been decided to not allow administrators of an application
 to log in a container in the case the Mesos task runs as `root` or no user
