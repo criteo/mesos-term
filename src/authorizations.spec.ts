@@ -1,5 +1,3 @@
-// import Assert = require('assert');
-// import Sinon = require('sinon');
 import { expect } from 'chai';
 import { FilterTaskAdmins } from './authorizations';
 
@@ -22,7 +20,7 @@ describe('authorizations', function() {
         const allowed_task_admins: string[] = [];
         const task_admins = ['foo'];
         expect(FilterTaskAdmins(task_admins_enabled, allowed_task_admins, task_admins))
-          .to.contain('foo');
+          .to.deep.equal(['foo']);
       });
     });
 
@@ -32,7 +30,7 @@ describe('authorizations', function() {
         const allowed_task_admins = ['foo'];
         const task_admins = ['foo'];
         expect(FilterTaskAdmins(task_admins_enabled, allowed_task_admins, task_admins))
-          .to.contain('foo');
+          .to.deep.equal(['foo']);
       });
     });
     describe('all admins are authorized', function() {
