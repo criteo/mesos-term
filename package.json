@@ -48,6 +48,8 @@
     "@types/request-promise": "^4.1.41",
     "@types/selenium-webdriver": "^3.0.8",
     "@types/sinon": "^4.3.3",
+    "@types/chai": "",
+    "chai": "",
     "chromedriver": "^2.38.3",
     "mocha": "^5.1.1",
     "selenium-webdriver": "^4.0.0-alpha.1",

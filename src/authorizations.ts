@@ -25,6 +25,22 @@ function extractCN(groups: string[]): string[] {
   }).filter(m => m !== undefined);
 }
 
+// TODO: integrate all public methods in one authorizer class
+export function FilterTaskAdmins(
+  task_admins_enabled: boolean,
+  allowed_task_admins: string[],
+  task_admins: string[]): string[] {
+  if (!task_admins_enabled) {
+    return [];
+  }
+
+  if (allowed_task_admins.length == 0) {
+    return task_admins;
+  }
+
+  return intersection(allowed_task_admins, task_admins);
+}
+
 export function CheckUserAuthorizations(
   userCN: string,
   userLdapGroups: string[],
@@ -58,9 +74,10 @@ export function CheckDelegation(
   userCN: string,
   userLdapGroups: string[],
   taskId: string,
-  delegationToken: string) {
+  delegationToken: string,
+  jwt_secret: string) {
 
-  return JwtAsync.verifyAsync(delegationToken, env.JWT_SECRET)
+  return JwtAsync.verifyAsync(delegationToken, jwt_secret)
     .then(function(payload: {task_id: string, delegate_to: string[]}) {
       const userGroups = extractCN(userLdapGroups);
       const userAndGroups = [userCN].concat(userGroups);
