@@ -32,6 +32,14 @@ mail: bob.dylan@authelia.com
 sn: Bob Dylan
 userpassword: {CRYPT}$6$rounds=500000$jgiCMRyGXzoqpxS3$w2pJeZnnH8bwW3zzvoMWtTRfQYsHbWbD/hquuQ5vUeIyl9gdwBIt6RWk2S6afBA0DPakbeWgD/4SZPiS0hYtU/
 
+dn: cn=alice,ou=users,dc=example,dc=com
+cn: alice
+objectclass: inetOrgPerson
+objectclass: top
+mail: alice@authelia.com
+sn: Alic Dylan
+userpassword: {CRYPT}$6$rounds=500000$jgiCMRyGXzoqpxS3$w2pJeZnnH8bwW3zzvoMWtTRfQYsHbWbD/hquuQ5vUeIyl9gdwBIt6RWk2S6afBA0DPakbeWgD/4SZPiS0hYtU/
+
 dn: cn=james,ou=users,dc=example,dc=com
 cn: james
 objectclass: inetOrgPerson
@@ -52,12 +60,19 @@ dn: cn=dev,ou=groups,dc=example,dc=com
 cn: dev
 member: cn=bob,ou=users,dc=example,dc=com
 member: cn=james,ou=users,dc=example,dc=com
+member: cn=alice,ou=users,dc=example,dc=com
 objectclass: groupOfNames
 objectclass: top
 
 dn: cn=users,ou=groups,dc=example,dc=com
 cn: users
 member: cn=james,ou=users,dc=example,dc=com
+objectclass: groupOfNames
+objectclass: top
+
+dn: cn=devops,ou=groups,dc=example,dc=com
+cn: users
+member: cn=alice,ou=users,dc=example,dc=com
 objectclass: groupOfNames
 objectclass: top
 

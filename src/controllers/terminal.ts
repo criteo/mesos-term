@@ -136,7 +136,7 @@ function checkAuthorizations(
 
   const userCN = req.user.cn;
   const userLdapGroups = req.user.memberOf;
-  const admins = Authorizations.FilterTaskAdmins(
+  const admins_constraints = Authorizations.FilterTaskAdmins(
     env.ENABLE_PER_APP_ADMINS,
     env.ALLOWED_TASK_ADMINS,
     task.admins);
@@ -147,7 +147,7 @@ function checkAuthorizations(
       Authorizations.CheckUserAuthorizations(
         userCN,
         userLdapGroups,
-        admins,
+        admins_constraints,
         superAdmins
       ),
       Authorizations.CheckRootContainer(
