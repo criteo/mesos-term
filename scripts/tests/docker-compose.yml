@@ -7,7 +7,7 @@ services:
       - "2181:2181"
     networks:
       mesos_command_modules_net:
-        ipv4_address: 172.16.121.2
+        ipv4_address: 172.16.130.2
 
   mesos-master:
     image: mesosphere/mesos-master:1.6.0-rc1
@@ -17,7 +17,7 @@ services:
       - "5050:5050"
     networks:
       mesos_command_modules_net:
-        ipv4_address: 172.16.121.3
+        ipv4_address: 172.16.130.3
     links:
       - zookeeper
     depends_on:
@@ -29,7 +29,7 @@ services:
       MESOS_HOSTNAME: localhost
       MESOS_WORK_DIR: /var/tmp/mesos
       MESOS_LOG_DIR: /var/log/mesos
-      LIBPROCESS_IP: 172.16.121.3
+      LIBPROCESS_IP: 172.16.130.3
 
   mesos-slave:
     build:
@@ -41,7 +41,7 @@ services:
       - "5051:5051"
     networks:
       mesos_command_modules_net:
-        ipv4_address: 172.16.121.4
+        ipv4_address: 172.16.130.4
     links:
       - zookeeper:zookeeper
       - mesos-master:master.mesos
@@ -60,7 +60,7 @@ services:
       MESOS_FRAMEWORKS_HOME: /var/tmp/mesos/frameworks
       MESOS_IMAGE_PROVIDERS: docker
       MESOS_ISOLATION: filesystem/linux,docker/runtime
-      LIBPROCESS_IP: 172.16.121.4
+      LIBPROCESS_IP: 172.16.130.4
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -76,7 +76,7 @@ services:
      - "8080:8080"
     networks:
       mesos_command_modules_net:
-        ipv4_address: 172.16.121.5
+        ipv4_address: 172.16.130.5
     links:
       - zookeeper
       - mesos-master
@@ -87,7 +87,7 @@ services:
     environment:
       - MARATHON_ZK=zk://zookeeper:2181/marathon
       - MARATHON_MASTER=zk://zookeeper:2181/mesos
-      - LIBPROCESS_IP=172.16.121.5
+      - LIBPROCESS_IP=172.16.130.5
 
   openldap:
     image: clems4ever/openldap
@@ -95,7 +95,7 @@ services:
       - "389:389"
     networks:
       mesos_command_modules_net:
-        ipv4_address: 172.16.121.6
+        ipv4_address: 172.16.130.6
     environment:
       - SLAPD_ORGANISATION=MyCompany
       - SLAPD_DOMAIN=example.com
@@ -112,7 +112,7 @@ services:
       - "3000:3000"
     networks:
       mesos_command_modules_net:
-        ipv4_address: 172.16.121.8
+        ipv4_address: 172.16.130.8
     links:
       - mesos-master
       - openldap
@@ -140,7 +140,7 @@ services:
       - "3001:3000"
     networks:
       mesos_command_modules_net:
-        ipv4_address: 172.16.121.9
+        ipv4_address: 172.16.130.9
     links:
       - mesos-master
       - openldap
@@ -162,7 +162,7 @@ services:
       - "3002:3000"
     networks:
       mesos_command_modules_net:
-        ipv4_address: 172.16.121.10
+        ipv4_address: 172.16.130.10
     links:
       - mesos-master
       - openldap
@@ -219,4 +219,4 @@ networks:
       driver: default
       config:
       -
-        subnet: 172.16.121.0/24
+        subnet: 172.16.130.0/24
