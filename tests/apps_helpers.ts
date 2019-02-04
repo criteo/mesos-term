@@ -26,6 +26,27 @@ export function interactWithTerminal(driver: any) {
     });
 }
 
+export function testAnswerToCommand(driver: any, command: string, expected: string) {
+  return driver.wait(webdriver.until.elementLocated(webdriver.By.css('.xterm-rows>div')), TIMEOUT)
+    .then(function(el: webdriver.WebElement) {
+      return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'runs'), TIMEOUT));
+    })
+    .then(function() {
+      return Bluebird.resolve(
+        driver.wait(webdriver.until.elementLocated(webdriver.By.css('.terminal')), TIMEOUT));
+    })
+    .then(function(el: webdriver.WebElement) {
+      return Bluebird.resolve(el.sendKeys(command + '\n'));
+    })
+    .then(function() {
+      return Bluebird.resolve(
+        driver.wait(webdriver.until.elementLocated(webdriver.By.css('.xterm-rows')), TIMEOUT));
+    })
+    .then(function(el: webdriver.WebElement) {
+      return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, expected), TIMEOUT));
+    });
+}
+
 export function checkInteractionsWithTerminal(
   port: number,
   user: string,
