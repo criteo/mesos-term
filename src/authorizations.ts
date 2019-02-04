@@ -22,7 +22,7 @@ function extractCN(groups: string[]): string[] {
   return groups.map((m: string) => {
     const matches = m.match(/^(CN|cn)=([a-zA-Z0-9_-]+)/m);
     return (matches.length > 1) ? matches[2] : undefined;
-  }).filter(m => m !== undefined);
+  }).filter(m => m !== undefined).map(m => m.toLowerCase());
 }
 
 // TODO: integrate all public methods in one authorizer class
@@ -47,7 +47,7 @@ export function CheckUserAuthorizations(
   userCN: string,
   userLdapGroups: string[],
   admins_constraints: string[][],
-  superAdmins: string[]) {
+  superAdmins: string[]): Bluebird<void> {
 
   const userGroups = extractCN(userLdapGroups);
   const userAndGroups = [userCN].concat(userGroups);
