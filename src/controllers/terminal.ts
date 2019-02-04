@@ -106,6 +106,11 @@ function spawnTerminal(
     params.push(task.user);
   }
 
+  if (env.EXTRA_ENV) {
+    params.push('--env');
+    params.push(env.EXTRA_ENV);
+  }
+
   const options: NodePty.IPtyForkOptions = {
     name: 'bash'
   };

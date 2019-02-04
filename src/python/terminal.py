@@ -8,6 +8,7 @@ import threading
 import time
 import uuid
 import urllib.parse
+import re
 
 from functools import partial
 from queue import Queue
@@ -31,6 +32,8 @@ class TaskIO(object):
     :type cmd: str
     :param args: Additional arguments for the command
     :type args: str
+    :param env: List of environment variable to enrich the shell with (NAME=value, colon separated)
+    :type env: str
     :param interactive: whether to attach STDIN of the current
                         terminal to the new command being launched
     :type interactive: bool
@@ -45,9 +48,11 @@ class TaskIO(object):
     HEARTBEAT_INTERVAL_NANOSECONDS = HEARTBEAT_INTERVAL * 1000000000
 
     def __init__(self, agent_url, parent_container_id, user=None, cmd=None,
+                 env=None,
                  args=None, interactive=False, tty=False):
         # Store relevant parameters of the call for later.
         self.cmd = cmd
+        self.env = env
         self.interactive = interactive
         self.tty = tty
         self.args = args
@@ -228,6 +233,21 @@ class TaskIO(object):
                     'value': self.cmd,
                     'arguments': [self.cmd] + self.args,
                     'shell': False}}}
+        if self.env is not None:
+            env_vars = []
+            env_var_regex = re.compile('(.*)=(.*)$')
+            for env_var in self.env.split(':'):
+                matches = env_var_regex.match(env_var)
+                if matches and len(matches.groups()) == 2:
+                    env_vars.append({
+                        'name': matches.group(1),
+                        'type': 'VALUE',
+                        'value': matches.group(2)
+                    })
+            message['launch_nested_container_session']['command']['environment'] = {
+                'variables': env_vars
+            }
+
         if not self.user is None:
           message['launch_nested_container_session']['command']['user'] =\
              self.user
@@ -489,10 +509,12 @@ if __name__ == '__main__':
   parser.add_argument('container_id', type=str, help='The container id to connect to.')
   parser.add_argument('--user', type=str, help='The user to run the command as.')
   parser.add_argument('--cmd', type=str, default="/bin/sh", help='The command to run in the container.')
+  parser.add_argument('--env', type=str, help='List of environment variable to enrich the shell with (NAME=value, colon separated).')
   args = parser.parse_args()
 
   t = TaskIO(agent_url=args.agent_url, parent_container_id=args.container_id,
              tty=True, user=args.user, interactive=True, cmd=args.cmd,
+             env=args.env,
              args=[])
   t.run()
 

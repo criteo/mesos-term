@@ -31,6 +31,7 @@ export interface EnvVars {
   ALLOWED_TASK_ADMINS: string[];
   ENABLE_PER_APP_ADMINS?: boolean;
   ENABLE_RIGHTS_DELEGATION?: boolean;
+  EXTRA_ENV: string;
   COMMAND: string;
 }
 
@@ -58,6 +59,7 @@ export const env: EnvVars = {
   MESOS_MASTER_URL: getOrExit('MESOS_TERM_MESOS_MASTER_URL'),
   AUTHORIZATIONS_ENABLED: authorizations_enabled,
   MESOS_STATE_CACHE_TIME: parseFloat(getOrExit('MESOS_TERM_MESOS_STATE_CACHE_TIME')),
+  EXTRA_ENV: getOrElse('MESOS_TERM_ENVIRONMENT', ''),
   COMMAND: getOrElse('MESOS_TERM_COMMAND', '/bin/sh')
 };
 

@@ -86,6 +86,7 @@ Here are the details of available options.
 | Parameter                               | Description                                                                              |
 |-----------------------------------------|------------------------------------------------------------------------------------------|
 | MESOS\_TERM\_COMMAND                    | The command to be run in the container when a user logs in. (Default: /bin/sh)           |
+| MESOS\_TERM\_ENVIRONMENT                | List of environment variable to enrich the shell with (NAME=value, colon separated)      |
 | MESOS\_TERM\_ENABLE\_PER\_APP\_ADMINS   | If 'true', application administrators can be declared with the Mesos label MESOS\_TERM\_DEBUG\_GRANTED\_TO label. It means those users can log into the application containers. An example is provided below. (Default: false) |
 | MESOS\_TERM\_ALLOWED\_TASK\_ADMINS      | White list of application administrators (users or groups) allowed to override application configuration through Mesos label |
 | MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', super administrators can delegate rights to log into one specific container to one person for a certain amount of time. (Default: false) |
