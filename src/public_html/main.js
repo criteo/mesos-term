@@ -37,10 +37,12 @@
     while (terminalContainer.children.length) {
       terminalContainer.removeChild(terminalContainer.children[0]);
     }
+    Terminal.applyAddon(attach);
+    Terminal.applyAddon(fit);
     term = new Terminal();
     protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
     socketURL = protocol + location.hostname + ((location.port) ? (':' + location.port) : '') + '/terminals/ws?token=';
-  
+
     term.open(terminalContainer, true);
     resize();
 
