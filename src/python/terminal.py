@@ -235,7 +235,7 @@ class TaskIO(object):
                     'shell': False}}}
         if self.env is not None:
             env_vars = []
-            env_var_regex = re.compile('(.*)=(.*)$')
+            env_var_regex = re.compile('^([A-Z_][A-Z0-9_]*)=(.*)$')
             for env_var in self.env.split(':'):
                 matches = env_var_regex.match(env_var)
                 if matches and len(matches.groups()) == 2:
