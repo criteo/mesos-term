@@ -132,6 +132,7 @@ services:
       - MESOS_TERM_MESOS_STATE_CACHE_TIME=60
       - MESOS_TERM_SESSION_SECRET=abcd
       - MESOS_TERM_SUPER_ADMINS=admins
+      - 'MESOS_TERM_ENVIRONMENT=TOTO=tata:Bad=var'
 
   mesos-term-no-auth:
     build:
