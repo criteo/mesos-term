@@ -2,6 +2,7 @@ import { env } from './env_vars';
 import Request = require('request-promise');
 import Bluebird = require('bluebird');
 import Constants = require('./constants');
+import fs = require('fs');
 
 type Labels = {[key: string]: string};
 
@@ -144,7 +145,7 @@ export function getTaskInfo(mesos_master_url: string, taskId: string): Bluebird<
       const slave = slaves[taskInfo.slave_id];
       const slave_pid = slave.pid;
       const address = slave_pid.split('@')[1];
-      const slave_url = `http://${address}`;
+      const slave_url = (mesos_master_url.indexOf('https') === 0) ? `https://${address}` : `http://${address}`;
       const slave_hostname = slave.hostname;
       let admins: string[] = [];
 
@@ -168,7 +169,8 @@ export function getTaskInfo(mesos_master_url: string, taskId: string): Bluebird<
 }
 
 function fetchMesosState(mesos_master_url: string) {
-  return Request({ uri: `${mesos_master_url}/master/state`, json: true })
+  const agentOptions =  (env.CA_FILE) ? { ca: fs.readFileSync(env.CA_FILE) } : {};
+  return Request( { uri: `${mesos_master_url}/master/state`, json: true, agentOptions: agentOptions})
     .then(function(state: MesosState) {
       mesosState = state;
     });

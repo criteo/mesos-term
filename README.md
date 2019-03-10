@@ -79,6 +79,23 @@ docker run --name mesos-term --rm -p 3000:3000 -it \
   clems4ever/mesos-term
 ```
 
+### Connect to Mesos over https
+
+In order to connect to Mesos over https, you need to provide the certificate that
+MesosTerm should trust using the MESOS_TERM_CA_FILE environment variable.
+
+```
+docker run --name mesos-term --rm -p 3000:3000 -it \
+  -v /path/to/my-ca.pem:/ca.pem \
+  -e NODE_ENV=production \
+  -e MESOS_TERM_CA_FILE=/ca.pem \
+  -e MESOS_TERM_JWT_SECRET=your-jwt-secret \
+  -e MESOS_TERM_MESOS_MASTER_URL=https://mesos-master:5050 \
+  -e MESOS_TERM_MESOS_STATE_CACHE_TIME=60 \
+  -e MESOS_TERM_SESSION_SECRET=your-session-secret \
+  clems4ever/mesos-term
+```
+
 ## Option details
 
 Here are the details of available options.
@@ -100,6 +117,7 @@ Here are the details of available options.
 | MESOS\_TERM\_NODE\_ENV                  | Must be "production" for express to run in production mode.                              |
 | MESOS\_TERM\_SESSION\_SECRET            | Secret used to encrypt session cookie.                                                   |
 | MESOS\_TERM\_SUPER\_ADMINS              | Comma-separated list of LDAP users and groups having all rights on all containers.       |
+| MESOS\_TERM\_CA\_FILE                   | CA file to connect to Mesos agent  in pem format.                                        |
 
 ## Authorizations model
 
