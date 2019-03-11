@@ -33,6 +33,7 @@ export interface EnvVars {
   ENABLE_RIGHTS_DELEGATION?: boolean;
   EXTRA_ENV: string;
   COMMAND: string;
+  CA_FILE?: string;
 }
 
 const authorizations_enabled = (process.env['MESOS_TERM_LDAP_URL']) ? true : false;
@@ -62,6 +63,11 @@ export const env: EnvVars = {
   EXTRA_ENV: getOrElse('MESOS_TERM_ENVIRONMENT', ''),
   COMMAND: getOrElse('MESOS_TERM_COMMAND', '/bin/sh')
 };
+
+
+if ('MESOS_TERM_CA_FILE' in process.env) {
+  env['CA_FILE'] = process.env['MESOS_TERM_CA_FILE'];
+}
 
 if (authorizations_enabled) {
   env['LDAP_URL'] = getOrExit('MESOS_TERM_LDAP_URL');
