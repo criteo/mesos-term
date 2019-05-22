@@ -61,6 +61,9 @@ export function CheckUserAuthorizations(
     return Bluebird.reject(new Error('Unauthorized access to container. Only super admins can connect to this container.'));
   }
 
+  console.log(`User ${userCN} is part of following entities: ${userAndGroups}`);
+  console.log('Requirement to login to this app are: ' + admins_constraints);
+
   return admins_constraints.every(matches, userAndGroups)
     ? Bluebird.resolve()
     : Bluebird.reject(new Error('Unauthorized access to container.'));
