@@ -52,6 +52,7 @@ export function CheckUserAuthorizations(
   const userGroups = extractCN(userLdapGroups);
   const userAndGroups = [userCN].concat(userGroups);
   const isUserSuperAdmin = (intersection(userAndGroups, superAdmins).length > 0);
+  const admins_constraints_lower = admins_constraints.map(array => array.map(el => el.toLowerCase()));
 
   if (isUserSuperAdmin) {
     return Bluebird.resolve();
@@ -64,7 +65,7 @@ export function CheckUserAuthorizations(
   console.log(`User ${userCN} is part of following entities: ${userAndGroups}`);
   console.log('Requirement to login to this app are: ' + admins_constraints);
 
-  return admins_constraints.every(matches, userAndGroups)
+  return admins_constraints_lower.every(matches, userAndGroups)
     ? Bluebird.resolve()
     : Bluebird.reject(new Error('Unauthorized access to container.'));
 }

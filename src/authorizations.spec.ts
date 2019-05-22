@@ -31,7 +31,7 @@ describe('authorizations', function() {
       it('should authorize anyway', function(done) {
         const userCN = 'foo';
         const userLdapGroups = ['CN=bar', 'CN=aGroupWithCap'];
-        const admins_constraints = [['bar'], ['agroupwithcap']];
+        const admins_constraints = [['bar'], ['agroupwithCap']];
         const superAdmins = ['superadmingroup'];
 
         const promise = CheckUserAuthorizations(userCN, userLdapGroups, admins_constraints, superAdmins);
