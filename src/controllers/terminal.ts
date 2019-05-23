@@ -106,6 +106,11 @@ function spawnTerminal(
     params.push(task.user);
   }
 
+  if (task.parent_container_id) {
+    params.push('--parent');
+    params.push(task.parent_container_id);
+  }
+
   if (env.EXTRA_ENV) {
     params.push('--env');
     params.push(env.EXTRA_ENV);
