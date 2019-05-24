@@ -16,6 +16,9 @@ interface MesosStatus {
   container_status: {
     container_id: {
       value: string;
+      parent: {
+        value: string;
+      }
     }
   };
 }
@@ -56,6 +59,7 @@ export interface Task {
   labels: Labels;
   user: string;
   container_id: string;
+  parent_container_id: string;
   slave_id: string;
   framework_id: string;
   agent_url: string;
@@ -135,6 +139,11 @@ export function getTaskInfo(mesos_master_url: string, taskId: string): Bluebird<
       }
 
       const containerId = statuses[0].container_status.container_id.value;
+      // Nested containers for task groups
+      let parentContainerId: string;
+      if (statuses[0].container_status.container_id.parent) {
+        parentContainerId = statuses[0].container_status.container_id.parent.value;
+      }
       const labels = fromMesosLabels(taskInfo.labels);
 
       const slaves = mesosState.slaves
@@ -158,6 +167,7 @@ export function getTaskInfo(mesos_master_url: string, taskId: string): Bluebird<
         labels: labels,
         user: taskInfo.user,
         container_id: containerId,
+        parent_container_id: parentContainerId,
         slave_id: taskInfo.slave_id,
         framework_id: taskInfo.framework_id,
         agent_url: slave_url,

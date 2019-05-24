@@ -8,7 +8,7 @@ const TIMEOUT = 10000;
 export function interactWithTerminal(driver: any) {
   return driver.wait(webdriver.until.elementLocated(webdriver.By.css(".xterm-rows")), TIMEOUT)
     .then(function(el: webdriver.WebElement) {
-      return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'runs'), TIMEOUT));
+      return Bluebird.resolve(driver.wait(webdriver.until.elementTextMatches(el, /\$|#/), TIMEOUT));
     })
     .then(function() {
       return Bluebird.resolve(

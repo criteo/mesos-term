@@ -8,3 +8,4 @@ $script_dir/mesos/create_app.sh $script_dir/mesos/apps/app3.json
 $script_dir/mesos/create_app.sh $script_dir/mesos/apps/app4.json
 $script_dir/mesos/create_app.sh $script_dir/mesos/apps/app5.json
 $script_dir/mesos/create_app.sh $script_dir/mesos/apps/app6.json
+$script_dir/mesos/create_pod.sh $script_dir/mesos/apps/pod1.json

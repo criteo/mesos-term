@@ -1,0 +1,12 @@
+{
+   "id": "/pod1",
+   "scaling": { "kind": "fixed", "instances": 1 },
+   "containers": [
+     {
+       "name": "pod1",
+       "exec": { "command": { "shell": "env & sleep 3600" } },
+       "resources": { "cpus": 0.1, "mem": 16 }
+     }
+   ],
+   "networks": [ {"mode": "host"} ]
+}

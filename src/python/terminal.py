@@ -47,7 +47,7 @@ class TaskIO(object):
     HEARTBEAT_INTERVAL = 30
     HEARTBEAT_INTERVAL_NANOSECONDS = HEARTBEAT_INTERVAL * 1000000000
 
-    def __init__(self, agent_url, parent_container_id, user=None, cmd=None,
+    def __init__(self, agent_url, container_id, parent_container_id=None, user=None, cmd=None,
                  env=None,
                  args=None, interactive=False, tty=False):
         # Store relevant parameters of the call for later.
@@ -61,7 +61,8 @@ class TaskIO(object):
         self.agent_url = urllib.parse.urljoin(agent_url, 'api/v1')
 
         # Grab a reference to the container ID for the task.
-        self.parent_id = parent_container_id
+        self.parent_id = container_id
+        self.parent_container_id = parent_container_id
         self.user = user
 
         # Generate a new UUID for the nested container
@@ -233,6 +234,9 @@ class TaskIO(object):
                     'value': self.cmd,
                     'arguments': [self.cmd] + self.args,
                     'shell': False}}}
+        # If we have to launch in a task group, we need double nesting
+        if self.parent_container_id is not None:
+            message['launch_nested_container_session']['container_id']['parent']['parent'] = { 'value': self.parent_container_id }
         if self.env is not None:
             env_vars = []
             env_var_regex = re.compile('^([A-Z_][A-Z0-9_]*)=(.*)$')
@@ -328,6 +332,8 @@ class TaskIO(object):
                     'container_id': {
                         'parent': { 'value': self.parent_id },
                         'value': self.container_id}}}
+            if self.parent_container_id is not None:
+                message['attach_container_input']['container_id']['parent']['parent'] = { 'value': self.parent_container_id }
 
             yield self.encoder.encode(message)
 
@@ -510,9 +516,11 @@ if __name__ == '__main__':
   parser.add_argument('--user', type=str, help='The user to run the command as.')
   parser.add_argument('--cmd', type=str, default="/bin/sh", help='The command to run in the container.')
   parser.add_argument('--env', type=str, help='List of environment variable to enrich the shell with (NAME=value, colon separated).')
+  parser.add_argument('--parent', type=str, help='The parent container id if the container id to connect to is nested (task groups)')
   args = parser.parse_args()
 
-  t = TaskIO(agent_url=args.agent_url, parent_container_id=args.container_id,
+  t = TaskIO(agent_url=args.agent_url, container_id=args.container_id,
+             parent_container_id=args.parent,
              tty=True, user=args.user, interactive=True, cmd=args.cmd,
              env=args.env,
              args=[])
