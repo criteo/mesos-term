@@ -1,6 +1,6 @@
 # MesosTerm
 
-**MesosTerm** is a web-based terminal for Mesos. It allows you to execute command
+**MesosTerm** is a web-based terminal for Mesos. It allows you to execute commands
 within Mesos containers (UCR only) from a web interface as you would do with
 docker exec.
 
