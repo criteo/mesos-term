@@ -9,6 +9,7 @@ import time
 import uuid
 import urllib.parse
 import re
+from requests.auth import HTTPBasicAuth
 
 from functools import partial
 from queue import Queue
@@ -48,7 +49,7 @@ class TaskIO(object):
     HEARTBEAT_INTERVAL_NANOSECONDS = HEARTBEAT_INTERVAL * 1000000000
 
     def __init__(self, agent_url, container_id, parent_container_id=None, user=None, cmd=None,
-                 env=None,
+                 env=None, http_principal=None, http_password=None,
                  args=None, interactive=False, tty=False):
         # Store relevant parameters of the call for later.
         self.cmd = cmd
@@ -59,6 +60,9 @@ class TaskIO(object):
 
         # Get the URL to the agent running the task.
         self.agent_url = urllib.parse.urljoin(agent_url, 'api/v1')
+        self.auth = None
+        if http_principal is not None and http_password is not None:
+            self.auth = HTTPBasicAuth(http_principal, http_password)
 
         # Grab a reference to the container ID for the task.
         self.parent_id = container_id
@@ -273,6 +277,7 @@ class TaskIO(object):
         response = http.post(
             self.agent_url,
             data=json.dumps(message),
+            auth=self.auth,
             timeout=None,
             **req_extra_args)
 
@@ -381,6 +386,7 @@ class TaskIO(object):
             http.post(
                 self.agent_url,
                 data=_initial_input_streamer(),
+                auth=self.auth,
                 **req_extra_args)
         except MesosHTTPException as e:
             if not e.response.status_code == 500:
@@ -395,6 +401,7 @@ class TaskIO(object):
             self.agent_url,
             data=_input_streamer(),
             timeout=None,
+            auth=self.auth,
             **req_extra_args)
 
     def _input_thread(self):
@@ -517,12 +524,14 @@ if __name__ == '__main__':
   parser.add_argument('--cmd', type=str, default="/bin/sh", help='The command to run in the container.')
   parser.add_argument('--env', type=str, help='List of environment variable to enrich the shell with (NAME=value, colon separated).')
   parser.add_argument('--parent', type=str, help='The parent container id if the container id to connect to is nested (task groups)')
+  parser.add_argument('--http_principal', type=str, help='The principal to connect to API v1 of the Mesos agent.')
+  parser.add_argument('--http_password', type=str, help='The password to connect to API v1 of the Mesos agent.')
   args = parser.parse_args()
 
   t = TaskIO(agent_url=args.agent_url, container_id=args.container_id,
              parent_container_id=args.parent,
              tty=True, user=args.user, interactive=True, cmd=args.cmd,
-             env=args.env,
-             args=[])
+             env=args.env, http_principal=args.http_principal,
+             http_password=args.http_password, args=[])
   t.run()
 

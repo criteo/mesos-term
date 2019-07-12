@@ -34,6 +34,7 @@ export interface EnvVars {
   EXTRA_ENV: string;
   COMMAND: string;
   CA_FILE?: string;
+  MESOS_AGENT_CREDENTIALS?: {principal: string, password: string};
 }
 
 const authorizations_enabled = (process.env['MESOS_TERM_LDAP_URL']) ? true : false;
@@ -67,6 +68,13 @@ export const env: EnvVars = {
 
 if ('MESOS_TERM_CA_FILE' in process.env) {
   env['CA_FILE'] = process.env['MESOS_TERM_CA_FILE'];
+}
+
+if ('MESOS_TERM_MESOS_AGENT_PRINCIPAL' in process.env && 'MESOS_TERM_MESOS_AGENT_PASSWORD' in process.env) {
+  env['MESOS_AGENT_CREDENTIALS'] = {
+    principal: process.env['MESOS_TERM_MESOS_AGENT_PRINCIPAL'],
+    password: process.env['MESOS_TERM_MESOS_AGENT_PASSWORD']
+  };
 }
 
 if (authorizations_enabled) {

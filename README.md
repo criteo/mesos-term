@@ -42,6 +42,10 @@ applications have already been created for you.
 To run MesosTerm in production you'll need to run the application
 with several environment variables used to configure **MesosTerm**.
 
+WARNING: Make sure that access to the api/v1 endpoint of your Mesos cluster
+is authenticated by using the flag `--authenticate_http_readwrite`. Indeed, not
+doing so could open serious security breaches and lead to privilege escalations.
+
 ### Without authorizations
 
 In order to use MesosTerm without authorizations, execute the following
@@ -96,6 +100,29 @@ docker run --name mesos-term --rm -p 3000:3000 -it \
   clems4ever/mesos-term
 ```
 
+### Connect to an authenticated Mesos
+
+In order to spawn a terminal, MesosTerm needs to query the api/v1 endpoint of Mesos.
+For security reasons, this endpoint should ALWAYS be authenticated. You can use
+MESOS_TERM_MESOS_AGENT_PRINCIPAL and MESOS_TERM_MESOS_AGENT_PASSWORD to make MesosTerm
+authenticate against the Mesos agent in order to run a terminal.
+
+For instance,
+
+```
+docker run --name mesos-term --rm -p 3000:3000 -it \
+  -e NODE_ENV=production \
+  -e MESOS_TERM_JWT_SECRET=your-jwt-secret \
+  -e MESOS_TERM_MESOS_MASTER_URL=https://mesos-master:5050 \
+  -e MESOS_TERM_MESOS_STATE_CACHE_TIME=60 \
+  -e MESOS_TERM_SESSION_SECRET=your-session-secret \
+  -e MESOS_TERM_MESOS_AGENT_PRINCIPAL=mesosterm \
+  -e MESOS_TERM_MESOS_AGENT_PASSWORD=the_password \
+  clems4ever/mesos-term
+```
+
+
+
 ## Option details
 
 Here are the details of available options.
@@ -118,6 +145,8 @@ Here are the details of available options.
 | MESOS\_TERM\_SESSION\_SECRET            | Secret used to encrypt session cookie.                                                   |
 | MESOS\_TERM\_SUPER\_ADMINS              | Comma-separated list of LDAP users and groups having all rights on all containers.       |
 | MESOS\_TERM\_CA\_FILE                   | CA file to connect to Mesos agent  in pem format.                                        |
+| MESOS\_TERM\_MESOS\_AGENT\_PRINCIPAL    | The principal Mesos term uses to connect to the Mesos agent.                             |
+| MESOS\_TERM\_MESOS\_AGENT\_PASSWORD     | The password Mesos term uses to connect to the Mesos agent.                              |
 
 ## Authorizations model
 
