@@ -152,10 +152,8 @@ def request(method,
     :rtype: Response
     """
 
-    auth = None
-
     response = _request(method, url, is_success, timeout,
-                        auth=auth, verify=verify, toml_config=toml_config,
+                        verify=verify, toml_config=toml_config,
                         **kwargs)
 
     if is_success(response.status_code):

@@ -111,6 +111,13 @@ function spawnTerminal(
     params.push(task.parent_container_id);
   }
 
+  if (env.MESOS_AGENT_CREDENTIALS) {
+    params.push('--http_principal');
+    params.push(env.MESOS_AGENT_CREDENTIALS.principal);
+    params.push('--http_password');
+    params.push(env.MESOS_AGENT_CREDENTIALS.password);
+  }
+
   if (env.EXTRA_ENV) {
     params.push('--env');
     params.push(env.EXTRA_ENV);
