@@ -29,7 +29,7 @@
     "express-session": "^1.15.6",
     "express-ws": "^4.0.0",
     "jsonwebtoken": "^8.2.1",
-    "node-pty": "^0.7.4",
+    "node-pty": "^0.8.1",
     "parse-duration": "^0.1.1",
     "passport": "^0.4.0",
     "passport-ldapauth": "^2.0.0",
