@@ -1,16 +1,21 @@
 require('chromedriver');
 import webdriver = require('selenium-webdriver');
+import chrome = require('selenium-webdriver/chrome');
 import Bluebird = require('bluebird');
 import Request = require('request-promise');
 
 export function withChrome<T>(
   fn: (driver: webdriver.WebDriver) => Bluebird<T>): Bluebird<T> {
 
-  let pref = new webdriver.logging.Preferences();
+  const pref = new webdriver.logging.Preferences();
   pref.setLevel('browser', webdriver.logging.Level.SEVERE);
+
+  const options = new chrome.Options();
+  options.addArguments('--headless', '--no-sandbox');
 
   const driver = new webdriver.Builder()
     .forBrowser('chrome')
+    .setChromeOptions(options)
     .setLoggingPrefs(pref)
     .build();
 
