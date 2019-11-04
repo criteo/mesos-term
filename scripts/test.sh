@@ -12,7 +12,9 @@ pushd $script_dir/tests
 set +x
 set +e
 
-npm run test-int
+docker build -t mesos-term/ci .
+pushd ../..
+docker run -v $(pwd):/in_and_out --network=host  mesos-term/ci && popd
 
 if [ "$?" -ne "0" ];
 then
