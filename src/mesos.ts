@@ -4,7 +4,7 @@ import Bluebird = require('bluebird');
 import Constants = require('./constants');
 import fs = require('fs');
 
-type Labels = {[key: string]: string};
+type Labels = { [key: string]: string };
 
 interface MesosLabel {
   key: string;
@@ -53,7 +53,7 @@ interface MesosState {
   slaves: MesosSlave[];
 }
 
-type SlaveById = {[id: string]: MesosSlave};
+type SlaveById = { [id: string]: MesosSlave };
 
 export interface Task {
   labels: Labels;
@@ -98,7 +98,7 @@ function getMesosTask(
   }
 
   const mesosTasks = mesosState.frameworks
-    .reduce(function(acc: MesosTask[], framework: MesosFramework) {
+    .reduce(function (acc: MesosTask[], framework: MesosFramework) {
       return acc.concat(framework.tasks);
     }, [] as MesosTask[]);
 
@@ -125,8 +125,8 @@ function getMesosTask(
 
 export function getTaskInfo(mesos_master_url: string, taskId: string): Bluebird<Task> {
   return getMesosTask(mesos_master_url, taskId, true)
-    .then(function(taskInfo: MesosTask) {
-      const statuses = taskInfo.statuses.filter(function(status: MesosStatus) {
+    .then(function (taskInfo: MesosTask) {
+      const statuses = taskInfo.statuses.filter(function (status: MesosStatus) {
         return status.state == 'TASK_RUNNING';
       });
 
@@ -147,7 +147,7 @@ export function getTaskInfo(mesos_master_url: string, taskId: string): Bluebird<
       const labels = fromMesosLabels(taskInfo.labels);
 
       const slaves = mesosState.slaves
-        .reduce(function(acc: SlaveById, slave: MesosSlave) {
+        .reduce(function (acc: SlaveById, slave: MesosSlave) {
           acc[slave.id] = slave;
           return acc;
         }, {} as SlaveById);
@@ -179,16 +179,16 @@ export function getTaskInfo(mesos_master_url: string, taskId: string): Bluebird<
 }
 
 function fetchMesosState(mesos_master_url: string) {
-  const agentOptions =  (env.CA_FILE) ? { ca: fs.readFileSync(env.CA_FILE) } : {};
-  return Request( { uri: `${mesos_master_url}/master/state`, json: true, agentOptions: agentOptions})
-    .then(function(state: MesosState) {
+  const agentOptions = (env.CA_FILE) ? { ca: fs.readFileSync(env.CA_FILE) } : {};
+  return Request({ uri: `${mesos_master_url}/master/state`, json: true, agentOptions: agentOptions })
+    .then(function (state: MesosState) {
       mesosState = state;
     });
 }
 
 export function setupAutoFetch(mesos_master_url: string, refreshSeconds: number) {
   fetchMesosState(mesos_master_url);
-  setInterval(function() {
+  setInterval(function () {
     fetchMesosState(mesos_master_url);
   }, 1000 * refreshSeconds);
 }

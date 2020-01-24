@@ -5,7 +5,7 @@ import { env } from './env_vars';
 const JwtAsync: any = Bluebird.promisifyAll(Jwt);
 
 function intersection(array1: string[], array2: string[]) {
-  return array1.filter(function(n) {
+  return array1.filter(function (n) {
     return array2.indexOf(n) !== -1;
   });
 }
@@ -97,7 +97,7 @@ export function CheckDelegation(
   jwt_secret: string) {
 
   return JwtAsync.verifyAsync(delegationToken, jwt_secret)
-    .then(function(payload: {task_id: string, delegate_to: string[]}) {
+    .then(function (payload: { task_id: string, delegate_to: string[] }) {
       const userGroups = extractCN(userLdapGroups);
       const userAndGroups = [userCN].concat(userGroups);
       const isUserDelegated = (intersection(userAndGroups, payload.delegate_to).length > 0);
@@ -107,7 +107,7 @@ export function CheckDelegation(
       }
       return Bluebird.resolve();
     })
-    .catch(function(err: Error) {
+    .catch(function (err: Error) {
       return Bluebird.reject(new Error('Invalid access delegation.'));
     });
 }

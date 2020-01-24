@@ -1,14 +1,5 @@
 #!/bin/bash
 
-set -x
-set -e
-
-script_dir=`dirname "$0"`
-
-pushd $script_dir/tests
-
-./setup.sh
-
 set +x
 set +e
 
@@ -27,6 +18,3 @@ fi
 
 set -x
 set -e
-
-./cleanup.sh
-popd

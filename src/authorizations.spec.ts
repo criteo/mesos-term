@@ -2,11 +2,11 @@ import { expect } from 'chai';
 import { FilterTaskAdmins } from './authorizations';
 import { CheckUserAuthorizations } from './authorizations';
 
-describe('authorizations', function() {
+describe('authorizations', function () {
 
-  describe('CheckUserAuthorizations', function() {
-    describe('when groups are matching', function() {
-      it('should authorize', function(done) {
+  describe('CheckUserAuthorizations', function () {
+    describe('when groups are matching', function () {
+      it('should authorize', function (done) {
         const userCN = 'foo';
         const userLdapGroups = ['CN=bar', 'CN=agroup'];
         const admins_constraints = [['bar'], ['agroup']];
@@ -16,8 +16,8 @@ describe('authorizations', function() {
         promise.then(() => done(), done);
       });
     });
-    describe('when groups are not matching', function() {
-      it('should authorize', function(done) {
+    describe('when groups are not matching', function () {
+      it('should authorize', function (done) {
         const userCN = 'foo';
         const userLdapGroups = ['CN=bar'];
         const admins_constraints = [['bar'], ['agroup']];
@@ -27,8 +27,8 @@ describe('authorizations', function() {
         promise.then(() => done('Should not authorize'), (err) => done());
       });
     });
-    describe('when capitalization is different', function() {
-      it('should authorize anyway', function(done) {
+    describe('when capitalization is different', function () {
+      it('should authorize anyway', function (done) {
         const userCN = 'foo';
         const userLdapGroups = ['CN=bar', 'CN=aGroupWithCap'];
         const admins_constraints = [['bar'], ['agroupwithCap']];
@@ -40,9 +40,9 @@ describe('authorizations', function() {
     });
   });
 
-  describe('FilterTaskAdmins', function() {
-    describe('per app admins is disabled', function() {
-      it('should return empty array', function() {
+  describe('FilterTaskAdmins', function () {
+    describe('per app admins is disabled', function () {
+      it('should return empty array', function () {
         const task_admins_enabled = false;
         const allowed_task_admins = ['foo', 'bar'];
         const task_admins = ['foo'];
@@ -51,8 +51,8 @@ describe('authorizations', function() {
       });
     });
 
-    describe('all admins are allowed', function() {
-      it('should return array with "foo"', function() {
+    describe('all admins are allowed', function () {
+      it('should return array with "foo"', function () {
         const task_admins_enabled = true;
         const allowed_task_admins: string[] = [];
         const task_admins = ['foo'];
@@ -61,8 +61,8 @@ describe('authorizations', function() {
       });
     });
 
-    describe('"foo" is explicitly allowed', function() {
-      it('should return array with "foo"', function() {
+    describe('"foo" is explicitly allowed', function () {
+      it('should return array with "foo"', function () {
         const task_admins_enabled = true;
         const allowed_task_admins = ['foo'];
         const task_admins = ['foo'];
@@ -70,8 +70,8 @@ describe('authorizations', function() {
           .to.deep.equal([['foo'], ['foo']]);
       });
     });
-    describe('all admins are authorized', function() {
-      it('should return array without "foo"', function() {
+    describe('all admins are authorized', function () {
+      it('should return array without "foo"', function () {
         const task_admins_enabled = true;
         const allowed_task_admins: string[] = ['bar'];
         const task_admins = ['foo'];

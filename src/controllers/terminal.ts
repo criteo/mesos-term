@@ -9,14 +9,15 @@ import { env } from '../env_vars';
 import { getLogger } from '../express_helpers';
 import { getTaskInfo, Task } from '../mesos';
 import Authorizations = require('../authorizations');
+import { Request } from '../express_helpers';
 
 const JwtAsync: any = Bluebird.promisifyAll(Jwt);
 
 const BEARER_KEY = 'token';
 
-const taskByPid: {[pid: string]: Task} = {};
-const terminalsByPid: {[pid: number]: NodePty.IPty} = {};
-const logsByPid: {[pid: number]: string} = {};
+const taskByPid: { [pid: string]: Task } = {};
+const terminalsByPid: { [pid: number]: NodePty.IPty } = {};
+const logsByPid: { [pid: number]: string } = {};
 
 declare global {
   namespace Express {
@@ -30,14 +31,14 @@ declare global {
   }
 }
 
-function VerifyBearer(req: Express.Request) {
+function VerifyBearer(req: Request) {
   if (!(BEARER_KEY in req.query)) {
     return Bluebird.reject(new Error('Unauthorized due to missing bearer.'));
   }
 
   const token = req.query[BEARER_KEY];
   return JwtAsync.verifyAsync(token, env.JWT_SECRET)
-    .then(function(decoded: any) {
+    .then(function (decoded: any) {
       const pid = decoded.pid;
 
       if (!pid) {
@@ -65,13 +66,13 @@ function VerifyBearer(req: Express.Request) {
 }
 
 function TerminalBearer(
-  req: Express.Request,
+  req: Request,
   res: Express.Response,
   next: Express.NextFunction) {
 
   VerifyBearer(req)
     .then(next)
-    .catch(function(err: Error) {
+    .catch(function (err: Error) {
       console.error(`Error with URL ${req.originalUrl}: ${err}`);
       res.status(403);
       res.send(err);
@@ -80,7 +81,7 @@ function TerminalBearer(
 
 export function WsTerminalBearer(
   ws: Ws,
-  req: Express.Request,
+  req: Request,
   next: Express.NextFunction) {
 
   VerifyBearer(req)
@@ -89,7 +90,7 @@ export function WsTerminalBearer(
 }
 
 function spawnTerminal(
-  req: Express.Request,
+  req: Request,
   res: Express.Response,
   task: Task) {
 
@@ -139,7 +140,7 @@ function spawnTerminal(
   logsByPid[term.pid] = '';
   taskByPid[term.pid] = task;
 
-  term.on('data', function(data) {
+  term.on('data', function (data) {
     logsByPid[term.pid] += data;
   });
 
@@ -147,7 +148,7 @@ function spawnTerminal(
 }
 
 function checkAuthorizations(
-  req: Express.Request,
+  req: Request,
   task: Task,
   accessToken: string) {
 
@@ -190,7 +191,7 @@ function checkAuthorizations(
   }
 
   return Bluebird.any(promises)
-    .catch(Bluebird.AggregateError, function(errors: Bluebird.AggregateError) {
+    .catch(Bluebird.AggregateError, function (errors: Bluebird.AggregateError) {
       const reasons: string[] = [];
       for (let i = 0; i < errors.length; ++i) {
         reasons.push('"' + errors[i].message + '"');
@@ -202,7 +203,7 @@ function checkAuthorizations(
 }
 
 function tryRequestTerminal(
-  req: Express.Request,
+  req: Request,
   res: Express.Response,
   task: Task) {
 
@@ -210,10 +211,10 @@ function tryRequestTerminal(
 
   const spawnPromise = (env.AUTHORIZATIONS_ENABLED)
     ? checkAuthorizations(req, task, accessToken)
-        .then(() => spawnTerminal(req, res, task))
+      .then(() => spawnTerminal(req, res, task))
     : spawnTerminal(req, res, task);
 
-  return spawnPromise.then(function(pid: number) {
+  return spawnPromise.then(function (pid: number) {
     const payload = { pid: pid };
     const options = { expiresIn: 10 * 60 };
     return JwtAsync.signAsync(payload, env.JWT_SECRET, options);
@@ -221,7 +222,7 @@ function tryRequestTerminal(
 }
 
 function createTerminal(
-  req: Express.Request,
+  req: Request,
   res: Express.Response) {
 
   const taskId = req.params.task_id;
@@ -231,27 +232,27 @@ function createTerminal(
   }
 
   getTaskInfo(env.MESOS_MASTER_URL, taskId)
-    .then(function(task: Task) {
+    .then(function (task: Task) {
       return Bluebird.join(
         tryRequestTerminal(req, res, task),
         Bluebird.resolve(task)
       );
     })
-    .spread(function(token: string, task: Task) {
+    .spread(function (token: string, task: Task) {
       res.send({
         token: token,
         task: task,
         master_url: env.MESOS_MASTER_URL
       });
     })
-    .catch(function(err: Error) {
+    .catch(function (err: Error) {
       res.status(503);
       res.send(err.message);
     });
 
 }
 
-export function resizeTerminal(req: Express.Request, res: Express.Response) {
+export function resizeTerminal(req: Request, res: Express.Response) {
   const term = req.term.terminal;
   const cols = parseInt(req.query.cols);
   const rows = parseInt(req.query.rows);
@@ -260,14 +261,14 @@ export function resizeTerminal(req: Express.Request, res: Express.Response) {
   res.end();
 }
 
-export function connectTerminal(ws: Ws, req: Express.Request) {
+export function connectTerminal(ws: Ws, req: Request) {
   const term = req.term.terminal;
   const logs = req.term.logs;
 
   getLogger(req).connect(req, term.pid);
   ws.send(logs);
 
-  term.on('data', function(data) {
+  term.on('data', function (data) {
     try {
       ws.send(data);
     }
@@ -277,12 +278,12 @@ export function connectTerminal(ws: Ws, req: Express.Request) {
     }
   });
 
-  term.on('exit', function() {
+  term.on('exit', function () {
     getLogger(req).connectionClosed(req, term.pid);
     ws.close();
   });
 
-  ws.on('message', function(msg: string) {
+  ws.on('message', function (msg: string) {
     term.write(msg);
   });
 
@@ -297,7 +298,7 @@ export function connectTerminal(ws: Ws, req: Express.Request) {
   });
 }
 
-export default function(
+export default function (
   app: Express.Application,
   authorizationsEnabled: boolean) {
 

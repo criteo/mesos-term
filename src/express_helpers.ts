@@ -7,6 +7,15 @@ import { isSuperAdmin } from './authorizations';
 const ENV_VARS_KEY = 'env_vars';
 const LOGGER_KEY = 'logger';
 
+export interface User {
+  cn: string;
+  memberOf: string[];
+}
+
+export interface Request extends Express.Request {
+  user: User;
+}
+
 export function setup(app: Express.Application, logger: Logger) {
   app.set(ENV_VARS_KEY, env);
   app.set(LOGGER_KEY, logger);
@@ -21,12 +30,14 @@ export function getLogger(req: Express.Request): Logger {
 }
 
 export function SuperAdminsOnly(
-  req: Express.Request,
+  req: Request,
   res: Express.Response,
   next: Express.NextFunction) {
 
-  if (req.user.cn && req.user.memberOf && isSuperAdmin(
-    req.user.cn, req.user.memberOf, env.SUPER_ADMINS)) {
+  const user = req.user as User;
+
+  if (user.cn && user.memberOf && isSuperAdmin(
+    user.cn, user.memberOf, env.SUPER_ADMINS)) {
     next();
     return;
   }

@@ -1,10 +1,10 @@
 import Express = require('express');
-import Constants = require('../constants');
 import { getLogger } from '../express_helpers';
 import { env } from '../env_vars';
 import { isSuperAdmin } from '../authorizations';
+import { Request } from '../express_helpers';
 
-export default function(req: Express.Request, res: Express.Response) {
+export default function (req: Request, res: Express.Response) {
   const taskId = req.params.task_id;
   getLogger(req).request(req, taskId);
   const renderOptions: any = { task_id: taskId };

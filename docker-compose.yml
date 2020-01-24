@@ -33,7 +33,7 @@ services:
 
   mesos-slave:
     build:
-      context: mesos
+      context: tests/resources
       dockerfile: Dockerfile.slave
     privileged: true
     hostname: localhost
@@ -112,9 +112,21 @@ services:
       - SLAPD_ADDITIONAL_SCHEMAS=openldap
       - SLAPD_FORCE_RECONFIGURE=true
 
+  openldap-admin:
+    image: osixia/phpldapadmin:0.6.11
+    ports:
+      - 9090:80
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - PHPLDAPADMIN_HTTPS=false
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.130.12
+
   mesos-term:
     build:
-      context: ../..
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "3000:3000"
     networks:
@@ -126,6 +138,8 @@ services:
     depends_on:
       - mesos-master
       - openldap
+    volumes:
+      - ./src:/usr/app/src
     environment:
       - MESOS_TERM_COMMAND=/bin/bash
       - MESOS_TERM_ENABLE_PER_APP_ADMINS=true
@@ -145,7 +159,8 @@ services:
 
   mesos-term-no-auth:
     build:
-      context: ../..
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "3001:3000"
     networks:
@@ -157,6 +172,8 @@ services:
     depends_on:
       - mesos-master
       - openldap
+    volumes:
+      - ./src:/usr/app/src
     environment:
       - MESOS_TERM_COMMAND=/bin/bash
       - MESOS_TERM_JWT_SECRET=abcd
@@ -169,7 +186,8 @@ services:
   # Admins have been disabled here. Labels in tasks are not taken into account.
   mesos-term-no-admins:
     build:
-      context: ../..
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "3002:3000"
     networks:
@@ -181,6 +199,8 @@ services:
     depends_on:
       - mesos-master
       - openldap
+    volumes:
+      - ./src:/usr/app/src
     environment:
       - MESOS_TERM_COMMAND=/bin/bash
       - MESOS_TERM_ENABLE_PER_APP_ADMINS=false
@@ -199,7 +219,8 @@ services:
 
   mesos-term-allowed-admin:
     build:
-      context: ../..
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "3003:3000"
     networks:
@@ -211,6 +232,8 @@ services:
     depends_on:
       - mesos-master
       - openldap
+    volumes:
+      - ./src:/usr/app/src
     environment:
       - MESOS_TERM_COMMAND=/bin/bash
       - MESOS_TERM_ENABLE_PER_APP_ADMINS=true
