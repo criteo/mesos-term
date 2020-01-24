@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/clems4ever/mesos-term#readme",
   "dependencies": {
+    "@types/react-router-dom": "^5.1.3",
     "basic-auth": "^2.0.0",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.3",
@@ -33,8 +34,11 @@
     "parse-duration": "^0.1.1",
     "passport": "^0.4.1",
     "passport-ldapauth": "^2.1.3",
+    "react-router-dom": "^5.1.2",
     "request": "^2.86.0",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "xterm-addon-attach": "^0.4.0",
+    "xterm-addon-fit": "^0.3.0"
   },
   "devDependencies": {
     "@types/basic-auth": "^1.1.2",

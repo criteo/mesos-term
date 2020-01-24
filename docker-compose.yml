@@ -127,6 +127,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
     ports:
       - "3000:3000"
     networks:
@@ -161,6 +164,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
     ports:
       - "3001:3000"
     networks:
@@ -188,6 +194,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
     ports:
       - "3002:3000"
     networks:
@@ -221,6 +230,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
     ports:
       - "3003:3000"
     networks:
@@ -250,6 +262,20 @@ services:
       - MESOS_TERM_SESSION_SECRET=abcd
       - MESOS_TERM_SUPER_ADMINS=admins
       - MESOS_TERM_ALLOWED_TASK_ADMINS=devops
+
+  mesos-term-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    volumes:
+      - ./web:/usr/app
+    working_dir: /usr/app
+    ports:
+      - 5000:3000
+    command: /bin/bash -c 'npm ci && npm run start'
 
 networks:
   mesos_command_modules_net:

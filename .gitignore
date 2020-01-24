@@ -6,3 +6,5 @@ node_modules/
 mesos-term-*.tgz
 
 dist/
+
+.vscode/
