@@ -6,3 +6,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.xterm-viewport {
+  overflow-y: hidden;
+}
+
+.hidden {
+  visibility: hidden;
+}

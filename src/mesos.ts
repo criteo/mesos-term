@@ -82,6 +82,15 @@ function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
   return labels;
 }
 
+export class TaskNotFoundError extends Error {
+  constructor(m: string) {
+    super(m);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, TaskNotFoundError.prototype);
+  }
+}
+
 function getMesosTask(
   mesos_master_url: string,
   taskId: string,
@@ -112,7 +121,7 @@ function getMesosTask(
         .then(() => getMesosTask(mesos_master_url, taskId, false));
     }
     else {
-      return Bluebird.reject(new Error(`Task not found.`));
+      return Bluebird.reject(new TaskNotFoundError(taskId));
     }
   }
 

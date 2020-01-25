@@ -3,7 +3,8 @@ import { Request } from './express_helpers';
 
 export abstract class Logger {
   abstract request(req: Request, taskId: string): void;
-  abstract open(req: Request, taskId: string, terminalPid: number): void;
+  abstract openContainer(req: Request, taskId: string, terminalPid: number): void;
+  abstract open(req: Request, terminalPid: number): void;
   abstract connect(req: Request, terminalPid: number): void;
   abstract disconnect(req: Request, terminalPid: number): void;
   abstract connectionClosed(req: Request, terminalPid: number): void;
@@ -15,9 +16,13 @@ export class AnonymousLogger extends Logger {
       taskId);
   }
 
-  open(req: Request, taskId: string, terminalPid: number): void {
+  openContainer(req: Request, taskId: string, terminalPid: number): void {
     console.log('Anonymous user opened a session in container "%s." (pid=%s)',
       taskId, terminalPid);
+  }
+
+  open(req: Request, terminalPid: number): void {
+    console.log('Websocket for terminal %s of anonymous user is open.', terminalPid);
   }
 
   connect(req: Request, terminalPid: number): void {
@@ -39,9 +44,13 @@ export class AuthenticatedLogger extends Logger {
       req.user.cn, taskId);
   }
 
-  open(req: Request, taskId: string, terminalPid: number): void {
+  openContainer(req: Request, taskId: string, terminalPid: number): void {
     console.log('User "%s" opened a session in container "%s". (pid=%s)',
       req.user.cn, taskId, terminalPid);
+  }
+
+  open(req: Request, terminalPid: number): void {
+    console.log('Websocket for terminal %s of of user "%s" user is open.', req.user.cn, terminalPid);
   }
 
   connect(req: Request, terminalPid: number): void {

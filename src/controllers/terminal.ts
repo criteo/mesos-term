@@ -3,15 +3,13 @@ import NodePty = require('node-pty');
 import * as Ws from 'ws';
 import Path = require('path');
 import Bluebird = require('bluebird');
-import Jwt = require('jsonwebtoken');
+import * as Jwt from 'jsonwebtoken';
 
 import { env } from '../env_vars';
 import { getLogger } from '../express_helpers';
-import { getTaskInfo, Task } from '../mesos';
+import { getTaskInfo, Task, TaskNotFoundError } from '../mesos';
 import Authorizations = require('../authorizations');
 import { Request } from '../express_helpers';
-
-const JwtAsync: any = Bluebird.promisifyAll(Jwt);
 
 const BEARER_KEY = 'token';
 
@@ -31,62 +29,65 @@ declare global {
   }
 }
 
-function VerifyBearer(req: Request) {
+async function VerifyBearer(req: Request) {
   if (!(BEARER_KEY in req.query)) {
-    return Bluebird.reject(new Error('Unauthorized due to missing bearer.'));
+    throw new Error('Unauthorized due to missing bearer.');
   }
 
-  const token = req.query[BEARER_KEY];
-  return JwtAsync.verifyAsync(token, env.JWT_SECRET)
-    .then(function (decoded: any) {
-      const pid = decoded.pid;
+  const decoded = Jwt.verify(req.query[BEARER_KEY], env.JWT_SECRET) as any;
+  const pid = decoded.pid;
 
-      if (!pid) {
-        return Bluebird.reject(new Error('No terminal PID in bearer'));
-      }
+  if (!pid) {
+    throw new Error('No terminal PID in bearer');
+  }
 
-      if (!(pid in taskByPid)) {
-        return Bluebird.reject(new Error(`No PID ${pid} in tasks repository.`));
-      }
+  if (!(pid in taskByPid)) {
+    throw new Error(`No PID ${pid} in tasks repository.`);
+  }
 
-      if (!(pid in terminalsByPid)) {
-        return Bluebird.reject(new Error(`No PID ${pid} in terminals repository.`));
-      }
+  if (!(pid in terminalsByPid)) {
+    throw new Error(`No PID ${pid} in terminals repository.`);
+  }
 
-      if (!(pid in logsByPid)) {
-        return Bluebird.reject(new Error(`No PID ${pid} in logs repository.`));
-      }
+  if (!(pid in logsByPid)) {
+    throw new Error(`No PID ${pid} in logs repository.`);
+  }
 
-      req.term = {
-        task: taskByPid[decoded.pid],
-        terminal: terminalsByPid[decoded.pid],
-        logs: logsByPid[decoded.pid]
-      };
-    });
+  req.term = {
+    task: taskByPid[decoded.pid],
+    terminal: terminalsByPid[decoded.pid],
+    logs: logsByPid[decoded.pid]
+  };
 }
 
-function TerminalBearer(
+async function TerminalBearer(
   req: Request,
   res: Express.Response,
   next: Express.NextFunction) {
 
-  VerifyBearer(req)
-    .then(next)
-    .catch(function (err: Error) {
-      console.error(`Error with URL ${req.originalUrl}: ${err}`);
-      res.status(403);
-      res.send(err);
-    });
+  try {
+    await VerifyBearer(req);
+    await next();
+  }
+  catch (err) {
+    console.error(`Error with URL ${req.originalUrl}: ${err}`);
+    res.status(403);
+    res.send(err);
+  }
 }
 
-export function WsTerminalBearer(
+export async function WsTerminalBearer(
   ws: Ws,
   req: Request,
   next: Express.NextFunction) {
 
-  VerifyBearer(req)
-    .then(next)
-    .catch((err: Error) => console.log(err));
+  try {
+    await VerifyBearer(req);
+    await next();
+  }
+  catch (err) {
+    console.error(err);
+  }
 }
 
 function spawnTerminal(
@@ -134,7 +135,7 @@ function spawnTerminal(
     options);
 
   const taskId = req.params.task_id;
-  getLogger(req).open(req, taskId, term.pid);
+  getLogger(req).openContainer(req, taskId, term.pid);
 
   terminalsByPid[term.pid] = term;
   logsByPid[term.pid] = '';
@@ -147,7 +148,7 @@ function spawnTerminal(
   return Bluebird.resolve(term.pid);
 }
 
-function checkAuthorizations(
+async function checkAuthorizations(
   req: Request,
   task: Task,
   accessToken: string) {
@@ -160,68 +161,53 @@ function checkAuthorizations(
     task.admins);
   const superAdmins = env.SUPER_ADMINS;
 
-  const authorizationsPromise =
-    Bluebird.all([
-      Authorizations.CheckUserAuthorizations(
-        userCN,
-        userLdapGroups,
-        admins_constraints,
-        superAdmins
-      ),
-      Authorizations.CheckRootContainer(
-        task.user,
-        userCN,
-        userLdapGroups,
-        superAdmins
-      )
-    ]);
-
-
-  const promises = [authorizationsPromise];
-  if (env.ENABLE_RIGHTS_DELEGATION && accessToken) {
-    const delegationPromise =
-      Authorizations.CheckDelegation(
+  // First check delegation token granted by an admin
+  if (accessToken && env.ENABLE_RIGHTS_DELEGATION) {
+    try {
+      await Authorizations.CheckDelegation(
         userCN,
         userLdapGroups,
         task.task_id,
         accessToken,
         env.JWT_SECRET
       );
-    promises.push(delegationPromise);
+      // If delegation token is validated, we skip the next checks.
+      return;
+    }
+    catch (err) {
+      // if delegation is not validated though, let's move forward with next checks
+    }
   }
 
-  return Bluebird.any(promises)
-    .catch(Bluebird.AggregateError, function (errors: Bluebird.AggregateError) {
-      const reasons: string[] = [];
-      for (let i = 0; i < errors.length; ++i) {
-        reasons.push('"' + errors[i].message + '"');
-      }
-      const errorMessage = 'Reasons: [' + reasons.join(', ') + ']';
-      console.error(errorMessage);
-      return Bluebird.reject(new Error(errorMessage));
-    });
+  await Promise.all([
+    Authorizations.CheckUserAuthorizations(
+      userCN,
+      userLdapGroups,
+      admins_constraints,
+      superAdmins
+    ),
+    Authorizations.CheckRootContainer(
+      task.user,
+      userCN,
+      userLdapGroups,
+      superAdmins
+    )
+  ]);
 }
 
-function tryRequestTerminal(
+async function tryRequestTerminal(
   req: Request,
   res: Express.Response,
   task: Task) {
 
-  const accessToken = req.query.access_token;
-
-  const spawnPromise = (env.AUTHORIZATIONS_ENABLED)
-    ? checkAuthorizations(req, task, accessToken)
-      .then(() => spawnTerminal(req, res, task))
-    : spawnTerminal(req, res, task);
-
-  return spawnPromise.then(function (pid: number) {
-    const payload = { pid: pid };
-    const options = { expiresIn: 10 * 60 };
-    return JwtAsync.signAsync(payload, env.JWT_SECRET, options);
-  });
+  if (env.AUTHORIZATIONS_ENABLED) {
+    await checkAuthorizations(req, task, req.query.access_token);
+  }
+  const pid = await spawnTerminal(req, res, task);
+  return Jwt.sign({ pid }, env.JWT_SECRET, { expiresIn: 60 * 60 });
 }
 
-function createTerminal(
+async function createTerminal(
   req: Request,
   res: Express.Response) {
 
@@ -231,25 +217,31 @@ function createTerminal(
     return;
   }
 
-  getTaskInfo(env.MESOS_MASTER_URL, taskId)
-    .then(function (task: Task) {
-      return Bluebird.join(
-        tryRequestTerminal(req, res, task),
-        Bluebird.resolve(task)
-      );
-    })
-    .spread(function (token: string, task: Task) {
-      res.send({
-        token: token,
-        task: task,
-        master_url: env.MESOS_MASTER_URL
-      });
-    })
-    .catch(function (err: Error) {
-      res.status(503);
-      res.send(err.message);
-    });
+  try {
+    const task = await getTaskInfo(env.MESOS_MASTER_URL, taskId);
+    const token = await tryRequestTerminal(req, res, task);
 
+    res.send({
+      token: token,
+      task: task,
+      master_url: env.MESOS_MASTER_URL
+    });
+  }
+  catch (err) {
+    console.error(err);
+    if (err instanceof Authorizations.UnauthorizedAccessError) {
+      res.status(403);
+      res.send();
+      return;
+    }
+    else if (err instanceof TaskNotFoundError) {
+      res.status(404);
+      res.send();
+      return;
+    }
+    res.status(503);
+    res.send();
+  }
 }
 
 export function resizeTerminal(req: Request, res: Express.Response) {
@@ -265,6 +257,29 @@ export function connectTerminal(ws: Ws, req: Request) {
   const term = req.term.terminal;
   const logs = req.term.logs;
 
+  term.on('exit', function () {
+    getLogger(req).connectionClosed(req, term.pid);
+    ws.close();
+  });
+
+  ws.onopen = () => {
+    getLogger(req).open(req, term.pid);
+  };
+
+  ws.onmessage = (event: { data: Ws.Data }) => {
+    term.write(event.data.toString());
+  };
+
+  ws.onclose = (event: { code: number, reason: string }) => {
+    term.kill();
+    getLogger(req).disconnect(req, term.pid);
+
+    // Clean things up
+    delete taskByPid[term.pid];
+    delete terminalsByPid[term.pid];
+    delete logsByPid[term.pid];
+  };
+
   getLogger(req).connect(req, term.pid);
   ws.send(logs);
 
@@ -277,32 +292,12 @@ export function connectTerminal(ws: Ws, req: Request) {
       // The WebSocket is not open, ignore
     }
   });
-
-  term.on('exit', function () {
-    getLogger(req).connectionClosed(req, term.pid);
-    ws.close();
-  });
-
-  ws.on('message', function (msg: string) {
-    term.write(msg);
-  });
-
-  ws.on('close', function () {
-    term.kill();
-    getLogger(req).disconnect(req, term.pid);
-
-    // Clean things up
-    delete taskByPid[term.pid];
-    delete terminalsByPid[term.pid];
-    delete logsByPid[term.pid];
-  });
 }
 
 export default function (
-  app: Express.Application,
-  authorizationsEnabled: boolean) {
+  app: Express.Application) {
 
-  app.post('/terminals/create/:task_id', createTerminal);
-  app.post('/terminals/resize', TerminalBearer, resizeTerminal);
-  (app as any).ws('/terminals/ws', WsTerminalBearer, connectTerminal);
+  app.post('/api/terminals/create/:task_id', createTerminal);
+  app.post('/api/terminals/resize', TerminalBearer, resizeTerminal);
+  (app as any).ws('/api/terminals/ws', WsTerminalBearer, connectTerminal);
 }

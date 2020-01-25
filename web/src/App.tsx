@@ -1,23 +1,40 @@
-import React from 'react';
-import XTerm from './components/XTerm';
-import { Grid, makeStyles } from '@material-ui/core';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
+import TerminalView from './views/TerminalView';
+import { ThemeProvider, createMuiTheme } from '@material-ui/core';
+import NotificationsContext, { Notification } from './hooks/NotificationContext';
+import NotificationBar from './components/NotificationBar';
+import MainView from './views/MainView';
 
 const App: React.FC = () => {
-  const classes = useStyles();
+  const [notification, setNotification] = useState(null as Notification | null);
+
+  const darkTheme = createMuiTheme({
+    palette: {
+      type: 'dark',
+    },
+  });
+
   return (
-    <Grid container className={classes.root}>
-      <Grid item xs={12}>
-        <XTerm />
-      </Grid>
-    </Grid>
+    <ThemeProvider theme={darkTheme}>
+      <NotificationsContext.Provider value={{ notification, setNotification }} >
+        <NotificationBar onClose={() => setNotification(null)} />
+        <Router>
+          <Switch>
+            <Route path="/" exact={true}>
+              <MainView />
+            </Route>
+            <Route path="/login/:task_id" exact={true}>
+              <TerminalView />
+            </Route>
+            <Route path="/">
+              <Redirect to="/" />
+            </Route>
+          </Switch>
+        </Router>
+      </NotificationsContext.Provider>
+    </ThemeProvider>
   );
 }
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    width: "100%",
-    height: "100vh",
-  }
-}))
 
 export default App;

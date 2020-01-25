@@ -6,23 +6,6 @@ import { Request } from './express_helpers';
 
 import { env } from './env_vars';
 
-function protectWithBasicAuth(
-  req: Express.Request,
-  res: Express.Response,
-  next: Express.NextFunction) {
-
-  const credentials = basicAuth(req);
-  if (credentials) {
-    next();
-  }
-  else {
-    res.status(401);
-    res.header('WWW-Authenticate', 'Basic realm="must be authenticated"');
-    res.send('Unauthenticated');
-  }
-}
-
-
 export default function (app: Express.Application) {
   const options = {
     server: {
@@ -37,21 +20,24 @@ export default function (app: Express.Application) {
   };
 
   app.use(passport.initialize());
-  app.use(protectWithBasicAuth);
   app.use((req: Request, res, next) => {
     passport.authenticate('ldapauth', { session: true }, (err: Error, user: any, info: any) => {
       if (err) {
         return next(err);
       }
 
-      if (!user) {
+      if (!user && !req.session.user) {
+        console.log(`ldap auth for ${req.method} ${req.path}`);
         res.status(401);
-        res.header('WWW-Authenticate', 'Basic realm="must be authenticated"');
+        res.header('WWW-Authenticate', 'Basic realm="mesos-term"');
         res.send('Unauthenticated');
         return;
       }
 
-      req.user = user;
+      if (!req.session.user) {
+        req.session.user = user;
+      }
+      req.user = req.session.user;
       next();
     })(req, res, next);
   });

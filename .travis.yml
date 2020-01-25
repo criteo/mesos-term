@@ -6,7 +6,7 @@ services:
   - docker
   - ntp
 addons:
-  chrome: stable 
+  chrome: stable
   apt:
     sources:
       - google-chrome
@@ -21,7 +21,7 @@ before_script:
 
 script:
   - ./scripts/build.sh
-  - ./scripts/test.sh
+  - ./tests/resources/run_all_suites.sh
 
 after_success:
   - ./scripts/deploy_dockerhub.sh

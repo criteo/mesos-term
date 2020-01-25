@@ -1,6 +1,6 @@
 {
   "id": "/app1",
-  "cmd": "env && sleep 3600",
+  "cmd": "env && sleep 360000",
   "cpus": 0.1,
   "mem": 16,
   "disk": 0,

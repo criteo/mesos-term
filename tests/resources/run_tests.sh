@@ -3,7 +3,7 @@
 set +x
 set +e
 
-npm run test-int
+./node_modules/.bin/mocha --colors --require ts-node/register --forbid-only --recursive tests/$1/*.ts
 
 if [ "$?" -ne "0" ];
 then

@@ -10,4 +10,9 @@ rm -rf $script_dir/../dist
 
 npm run-script lint
 npm run-script compile
+
+pushd web
+npm run build
+popd
+
 npm run-script dist

@@ -3,8 +3,6 @@ services:
   zookeeper:
     image: zookeeper:3.4.11
     hostname: zookeeper
-    ports:
-      - "2181:2181"
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.2
@@ -37,7 +35,7 @@ services:
       dockerfile: Dockerfile.slave
     privileged: true
     hostname: localhost
-    entrypoint: 'mesos-agent'
+    entrypoint: "mesos-agent"
     ports:
       - "5051:5051"
     networks:
@@ -68,8 +66,8 @@ services:
       LIBPROCESS_IP: 172.16.130.4
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./agent_credential:/etc/mesos/agent_credential
-      - ./secret_key:/etc/mesos/secret_key
+      - ./tests/resources/agent_credential:/etc/mesos/agent_credential
+      - ./tests/resources/secret_key:/etc/mesos/secret_key
 
   marathon:
     image: mesosphere/marathon:v1.5.6
@@ -80,7 +78,7 @@ services:
       - info
     hostname: localhost
     ports:
-     - "8080:8080"
+      - "8080:8080"
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.5
@@ -112,17 +110,6 @@ services:
       - SLAPD_ADDITIONAL_SCHEMAS=openldap
       - SLAPD_FORCE_RECONFIGURE=true
 
-  openldap-admin:
-    image: osixia/phpldapadmin:0.6.11
-    ports:
-      - 9090:80
-    environment:
-      - PHPLDAPADMIN_LDAP_HOSTS=openldap
-      - PHPLDAPADMIN_HTTPS=false
-    networks:
-      mesos_command_modules_net:
-        ipv4_address: 172.16.130.12
-
   mesos-term:
     build:
       context: .
@@ -134,7 +121,7 @@ services:
       - "3000:3000"
     networks:
       mesos_command_modules_net:
-        ipv4_address: 172.16.130.8
+        ipv4_address: 172.16.130.7
     links:
       - mesos-master
       - openldap
@@ -143,125 +130,17 @@ services:
       - openldap
     volumes:
       - ./src:/usr/app/src
-    environment:
-      - MESOS_TERM_COMMAND=/bin/bash
-      - MESOS_TERM_ENABLE_PER_APP_ADMINS=true
-      - MESOS_TERM_ENABLE_RIGHTS_DELEGATION=true
-      - MESOS_TERM_LDAP_URL=ldap://openldap
-      - MESOS_TERM_LDAP_BASE_DN=dc=example,dc=com
-      - MESOS_TERM_LDAP_USER=cn=admin,dc=example,dc=com
-      - MESOS_TERM_LDAP_PASSWORD=password
-      - MESOS_TERM_JWT_SECRET=abcd
-      - MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050
-      - MESOS_TERM_MESOS_STATE_CACHE_TIME=60
-      - MESOS_TERM_MESOS_AGENT_PRINCIPAL=admin
-      - MESOS_TERM_MESOS_AGENT_PASSWORD=password
-      - MESOS_TERM_SESSION_SECRET=abcd
-      - MESOS_TERM_SUPER_ADMINS=admins
-      - 'MESOS_TERM_ENVIRONMENT=TOTO=tata:Bad=var'
 
-  mesos-term-no-auth:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
+  openldap-admin:
+    image: osixia/phpldapadmin:0.6.11
     ports:
-      - "3001:3000"
+      - 9090:80
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - PHPLDAPADMIN_HTTPS=false
     networks:
       mesos_command_modules_net:
-        ipv4_address: 172.16.130.9
-    links:
-      - mesos-master
-      - openldap
-    depends_on:
-      - mesos-master
-      - openldap
-    volumes:
-      - ./src:/usr/app/src
-    environment:
-      - MESOS_TERM_COMMAND=/bin/bash
-      - MESOS_TERM_JWT_SECRET=abcd
-      - MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050
-      - MESOS_TERM_MESOS_STATE_CACHE_TIME=60
-      - MESOS_TERM_MESOS_AGENT_PRINCIPAL=admin
-      - MESOS_TERM_MESOS_AGENT_PASSWORD=password
-      - MESOS_TERM_SESSION_SECRET=abcd
-
-  # Admins have been disabled here. Labels in tasks are not taken into account.
-  mesos-term-no-admins:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
-    ports:
-      - "3002:3000"
-    networks:
-      mesos_command_modules_net:
-        ipv4_address: 172.16.130.10
-    links:
-      - mesos-master
-      - openldap
-    depends_on:
-      - mesos-master
-      - openldap
-    volumes:
-      - ./src:/usr/app/src
-    environment:
-      - MESOS_TERM_COMMAND=/bin/bash
-      - MESOS_TERM_ENABLE_PER_APP_ADMINS=false
-      - MESOS_TERM_ENABLE_RIGHTS_DELEGATION=false
-      - MESOS_TERM_LDAP_URL=ldap://openldap
-      - MESOS_TERM_LDAP_BASE_DN=dc=example,dc=com
-      - MESOS_TERM_LDAP_USER=cn=admin,dc=example,dc=com
-      - MESOS_TERM_LDAP_PASSWORD=password
-      - MESOS_TERM_JWT_SECRET=abcd
-      - MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050
-      - MESOS_TERM_MESOS_STATE_CACHE_TIME=60
-      - MESOS_TERM_MESOS_AGENT_PRINCIPAL=admin
-      - MESOS_TERM_MESOS_AGENT_PASSWORD=password
-      - MESOS_TERM_SESSION_SECRET=abcd
-      - MESOS_TERM_SUPER_ADMINS=admins
-
-  mesos-term-allowed-admin:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
-    ports:
-      - "3003:3000"
-    networks:
-      mesos_command_modules_net:
-        ipv4_address: 172.16.130.11
-    links:
-      - mesos-master
-      - openldap
-    depends_on:
-      - mesos-master
-      - openldap
-    volumes:
-      - ./src:/usr/app/src
-    environment:
-      - MESOS_TERM_COMMAND=/bin/bash
-      - MESOS_TERM_ENABLE_PER_APP_ADMINS=true
-      - MESOS_TERM_ENABLE_RIGHTS_DELEGATION=true
-      - MESOS_TERM_LDAP_URL=ldap://openldap
-      - MESOS_TERM_LDAP_BASE_DN=dc=example,dc=com
-      - MESOS_TERM_LDAP_USER=cn=admin,dc=example,dc=com
-      - MESOS_TERM_LDAP_PASSWORD=password
-      - MESOS_TERM_JWT_SECRET=abcd
-      - MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050
-      - MESOS_TERM_MESOS_STATE_CACHE_TIME=60
-      - MESOS_TERM_MESOS_AGENT_PRINCIPAL=admin
-      - MESOS_TERM_MESOS_AGENT_PASSWORD=password
-      - MESOS_TERM_SESSION_SECRET=abcd
-      - MESOS_TERM_SUPER_ADMINS=admins
-      - MESOS_TERM_ALLOWED_TASK_ADMINS=devops
+        ipv4_address: 172.16.130.12
 
   mesos-term-ui:
     build:
@@ -276,6 +155,9 @@ services:
     ports:
       - 5000:3000
     command: /bin/bash -c 'npm ci && npm run start'
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.130.13
 
 networks:
   mesos_command_modules_net:
@@ -283,5 +165,4 @@ networks:
     ipam:
       driver: default
       config:
-      -
-        subnet: 172.16.130.0/24
+        - subnet: 172.16.130.0/24
