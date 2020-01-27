@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ./tests/resources/run_suite.sh standard
 ./tests/resources/run_suite.sh noauth
 ./tests/resources/run_suite.sh noadmin

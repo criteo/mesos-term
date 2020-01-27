@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set +x
-set +e
+set -e
 
 ./node_modules/.bin/mocha --colors --require ts-node/register --forbid-only --recursive tests/$1/*.ts
 
