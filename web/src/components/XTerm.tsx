@@ -13,6 +13,7 @@ import MesosImage from "../assets/images/mesos.png";
 import { useNotifications } from "../hooks/NotificationContext";
 import queryString from 'query-string';
 import { useLocation } from "react-router";
+import { useMemoizedCallback } from "../hooks/MemoizedCallback";
 
 export interface Props extends React.DOMAttributes<{}> {
     token: string | null;
@@ -60,32 +61,8 @@ export default function (props: Props) {
         }
     }, [dimension, props.token, websocketState]);
 
-    const createTerminal = useCallback(async () => {
-        if (props.token === null || terminalDivRef.current === null) {
-            return;
-        }
-        const protocol = (window.location.protocol === 'https:') ? 'wss://' : 'ws://';
-        const socketURL = protocol + window.location.hostname
-            + ((window.location.port) ? (':' + window.location.port) : '')
-            + '/api/terminals/ws?token=' + props.token;
-        websocket.current = new WebSocket(socketURL);
-        setWebsocketState(WebSocket.CONNECTING);
-
-        websocket.current.onopen = handleSocketOpen;
-        websocket.current.onclose = handleSocketClose;
-        websocket.current.onerror = handleSocketError;
-
-        xtermRef.current.loadAddon(fitAddon.current);
-        xtermRef.current.loadAddon(new AttachAddon(websocket.current));
-        xtermRef.current.open(terminalDivRef.current);
-        handleTerminalResize();
-    }, [props.token]);
-
-    useEffect(() => { resizeRemoteTerminal(); }, [resizeRemoteTerminal]);
-    useEffect(() => { createTerminal(); }, [createTerminal]);
-
-    const handleSocketOpen = function (this: WebSocket, e: Event) {
-        const self = this;
+    const handleSocketOpen = useMemoizedCallback((socket: WebSocket, e: Event) => {
+        const self = socket;
         function keepAlive() {
             var timeout = 2000;
             if (self.readyState === self.OPEN) {
@@ -97,20 +74,45 @@ export default function (props: Props) {
         setWebsocketState(WebSocket.OPEN);
         props.onOpen();
         console.log("Connection is open!");
-    }
+    }, []);
 
-    const handleSocketClose = (e: Event) => {
+    const handleSocketClose = useMemoizedCallback((socket: WebSocket, e: Event) => {
         setWebsocketState(WebSocket.CLOSED);
         console.log("Connection has been closed.");
         createInfoNotification("Connection has been closed.")
         props.onClose();
-    }
+    }, []);
 
-    const handleSocketError = (e: Event) => {
+    const handleSocketError = useMemoizedCallback((socket: WebSocket, e: Event) => {
         setWebsocketState(-1);
         console.log("Error raised by websocket.", e);
         createErrorNotification("Error raised by websocket.");
-    }
+    }, []);
+
+
+    const createTerminal = useCallback(async () => {
+        if (props.token === null || terminalDivRef.current === null) {
+            return;
+        }
+        const protocol = (window.location.protocol === 'https:') ? 'wss://' : 'ws://';
+        const socketURL = protocol + window.location.hostname
+            + ((window.location.port) ? (':' + window.location.port) : '')
+            + '/api/terminals/ws?token=' + props.token;
+        websocket.current = new WebSocket(socketURL);
+        setWebsocketState(WebSocket.CONNECTING);
+
+        websocket.current.onopen = function (this, e) { handleSocketOpen(this, e) };
+        websocket.current.onclose = function (this, e) { handleSocketClose(this, e) };;
+        websocket.current.onerror = function (this, e) { handleSocketError(this, e) };;
+
+        xtermRef.current.loadAddon(fitAddon.current);
+        xtermRef.current.loadAddon(new AttachAddon(websocket.current));
+        xtermRef.current.open(terminalDivRef.current);
+        handleTerminalResize();
+    }, [props.token, handleSocketOpen, handleSocketClose, handleSocketError]);
+
+    useEffect(() => { resizeRemoteTerminal(); }, [resizeRemoteTerminal]);
+    useEffect(() => { createTerminal(); }, [createTerminal]);
 
     const termClassName = classnames(isFocused ? 'xterm-focused' : null, classes.termContainer);
     const isReady = websocketState === WebSocket.OPEN;

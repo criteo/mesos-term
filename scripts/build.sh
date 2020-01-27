@@ -1,7 +1,7 @@
 #!/bin/bash
 
-set -e
-set -x
+set +e
+set +x
 
 script_dir=`dirname "$0"`
 
