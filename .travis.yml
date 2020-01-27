@@ -9,6 +9,7 @@ addons:
   chrome: stable
 
 script:
+  - source bootstrap.sh
   - ./scripts/build.sh
   - ./tests/resources/run_all_suites.sh
 
