@@ -13,6 +13,7 @@ fi
 
 source bootstrap.sh
 docker-compose -f docker-compose.yml -f tests/$1/docker-compose.yml up -d --build
+docker ps -a
 
 
 echo "Wait for LDAP to be ready"
