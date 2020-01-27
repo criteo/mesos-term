@@ -10,6 +10,8 @@ addons:
 
 script:
   - source bootstrap.sh
+  - docker-compose pull
+  - docker pull mbentley/ldap-utils
   - ./scripts/build.sh
   - ./tests/resources/run_all_suites.sh
 

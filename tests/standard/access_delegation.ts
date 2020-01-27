@@ -37,7 +37,7 @@ describe('access delegation', function () {
 
   describe('non admin user harry has delegated rights', function () {
     it('should be able to interact with terminal', function () {
-      this.timeout(10000);
+      this.timeout(20000);
       const instanceId = this.mesosTaskIds['app1'];
       return helpers.getDelegation('john', 'harry', instanceId)
         .then(function (accessToken: string) {

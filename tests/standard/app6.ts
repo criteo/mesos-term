@@ -1,6 +1,8 @@
 import AppsHelpers = require('../apps_helpers');
 
 describe('app6 (label GRANTED_TO dev and harry, no root)', function () {
+    this.retries(3);
+
     describe('super admin user', function () {
         AppsHelpers.testInteractionsWithTerminal('john', 'app6');
     });

@@ -2,6 +2,8 @@ import AppsHelpers = require('../apps_helpers');
 import Helpers = require('../helpers');
 
 describe('app1 (no label, no root)', function () {
+    this.retries(3);
+
     describe('admins are enabled', function () {
         describe('super admin user john', async function () {
             await AppsHelpers.testInteractionsWithTerminal('john', 'app1');
@@ -30,7 +32,7 @@ describe('app1 (no label, no root)', function () {
 
             describe('non admin user harry has delegated rights', function () {
                 it('should be able to interact with terminal', async function () {
-                    this.timeout(10000);
+                    this.timeout(20000);
                     const instanceId = this.mesosTaskIds['app1'];
                     const accessToken = await Helpers.getDelegation('john', 'harry', instanceId);
                     await AppsHelpers.checkInteractionsWithTerminalUsingAccessToken('harry', accessToken, instanceId);
@@ -39,7 +41,7 @@ describe('app1 (no label, no root)', function () {
 
             describe('token produced for another container', function () {
                 it('should be unauthorized', async function () {
-                    this.timeout(10000);
+                    this.timeout(20000);
                     const instanceId1 = this.mesosTaskIds['app1'];
                     const instanceId2 = this.mesosTaskIds['app2'];
 
@@ -51,7 +53,7 @@ describe('app1 (no label, no root)', function () {
 
             describe('token produced for another person', function () {
                 it('should be unauthorized', async function () {
-                    this.timeout(10000);
+                    this.timeout(20000);
                     const instanceId = this.mesosTaskIds['app1'];
 
                     // we authorize instance of app1 for user harry but user bob tries to use it.
