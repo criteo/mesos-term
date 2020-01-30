@@ -131,13 +131,14 @@ export default function (props: Props) {
 
 const useStyles = makeStyles(theme => ({
     root: {
-        width: '100%',
-        height: '100%',
+        display: "flex",
+        flexDirection: "column",
         backgroundColor: 'black',
+        height: "100%",
     },
     termContainer: {
-        width: '100%',
-        height: '100%',
+        flexGrow: 1,
+        margin: theme.spacing(),
     },
     mesosLogo: {
         position: 'absolute',

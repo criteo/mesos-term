@@ -32,7 +32,7 @@ enum Status {
 
 export default function () {
     const classes = useStyles();
-    const match = useRouteMatch<{ task_id: string }>();
+    const match = useRouteMatch<{ taskID: string }>();
     const [termToken, setTermToken] = useState(null as string | null);
     const [context, setContext] = useState(null as Context | null);
     const { createErrorNotification } = useNotifications();
@@ -45,7 +45,7 @@ export default function () {
     const [accessToken, setAccessToken] = useState<string | null>(qs.access_token ? qs.access_token as string : null);
     const [config, setConfig] = useState(null as ConfigResponse | null);
 
-    const taskID = match.params.task_id ? match.params.task_id : null;
+    const taskID = match.params.taskID ? match.params.taskID : null;
 
     const createTerminal = useCallback(async () => {
         if (!taskID) {
@@ -140,14 +140,14 @@ export default function () {
 
 const useStyles = makeStyles(theme => ({
     root: {
-        width: `100vw`,
-        height: `100vh`,
+        width: '100%',
+        height: '100%',
         display: "flex",
         flexDirection: "column",
         background: theme.palette.background.default,
     },
     terminal: {
-        flexGrow: 1,
+        flexGrow: 1
     },
     statusBarContainer: {
         width: '100%',

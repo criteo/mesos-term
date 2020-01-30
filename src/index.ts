@@ -11,11 +11,11 @@ import ping from './controllers/ping';
 import TerminalController from './controllers/terminal';
 import { DelegateGet, DelegatePost } from './controllers/delegate';
 import config from './controllers/config';
+import sandbox from './controllers/sandbox';
 
 import { setup, SuperAdminsOnly } from './express_helpers';
 import authentication from './authentication';
 import { AuthenticatedLogger, AnonymousLogger } from './logger';
-import { setupAutoFetch } from './mesos';
 
 const app = Express();
 const expressWs = ExpressWs(app);
@@ -39,8 +39,6 @@ app.set('views', path.join(__dirname, '/views'));
 app.use(session(sessionOptions));
 app.use(BodyParser.json());
 
-setupAutoFetch(env.MESOS_MASTER_URL, env.MESOS_STATE_CACHE_TIME);
-
 if (env.AUTHORIZATIONS_ENABLED) {
   console.log('Authorizations are enabled.');
   setup(app, new AuthenticatedLogger());
@@ -53,6 +51,7 @@ else {
 
 app.get('/ping', ping);
 TerminalController(app);
+sandbox(app);
 
 app.get('/api/config', config);
 

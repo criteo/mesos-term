@@ -7,13 +7,13 @@ import * as Jwt from 'jsonwebtoken';
 
 import { env } from '../env_vars';
 import { getLogger } from '../express_helpers';
-import { getTaskInfo, Task, TaskNotFoundError } from '../mesos';
+import { TaskNotFoundError, getRunningTaskInfo, TaskInfo, TaskNotRunningError, MesosAgentNotFoundError } from '../mesos';
 import Authorizations = require('../authorizations');
 import { Request } from '../express_helpers';
 
 const BEARER_KEY = 'token';
 
-const taskByPid: { [pid: string]: Task } = {};
+const taskByPid: { [pid: string]: TaskInfo } = {};
 const terminalsByPid: { [pid: number]: NodePty.IPty } = {};
 const logsByPid: { [pid: number]: string } = {};
 
@@ -21,7 +21,7 @@ declare global {
   namespace Express {
     interface Request {
       term?: {
-        task: Task;
+        task: TaskInfo;
         terminal: NodePty.IPty;
         logs: string;
       };
@@ -93,7 +93,7 @@ export async function WsTerminalBearer(
 function spawnTerminal(
   req: Request,
   res: Express.Response,
-  task: Task) {
+  task: TaskInfo) {
 
   const params = [
     Path.resolve(__dirname, '..', 'python/terminal.py'),
@@ -148,60 +148,13 @@ function spawnTerminal(
   return Bluebird.resolve(term.pid);
 }
 
-async function checkAuthorizations(
-  req: Request,
-  task: Task,
-  accessToken: string) {
-
-  const userCN = req.user.cn;
-  const userLdapGroups = req.user.memberOf;
-  const admins_constraints = Authorizations.FilterTaskAdmins(
-    env.ENABLE_PER_APP_ADMINS,
-    env.ALLOWED_TASK_ADMINS,
-    task.admins);
-  const superAdmins = env.SUPER_ADMINS;
-
-  // First check delegation token granted by an admin
-  if (accessToken && env.ENABLE_RIGHTS_DELEGATION) {
-    try {
-      await Authorizations.CheckDelegation(
-        userCN,
-        userLdapGroups,
-        task.task_id,
-        accessToken,
-        env.JWT_SECRET
-      );
-      // If delegation token is validated, we skip the next checks.
-      return;
-    }
-    catch (err) {
-      // if delegation is not validated though, let's move forward with next checks
-    }
-  }
-
-  await Promise.all([
-    Authorizations.CheckUserAuthorizations(
-      userCN,
-      userLdapGroups,
-      admins_constraints,
-      superAdmins
-    ),
-    Authorizations.CheckRootContainer(
-      task.user,
-      userCN,
-      userLdapGroups,
-      superAdmins
-    )
-  ]);
-}
-
 async function tryRequestTerminal(
   req: Request,
   res: Express.Response,
-  task: Task) {
+  task: TaskInfo) {
 
   if (env.AUTHORIZATIONS_ENABLED) {
-    await checkAuthorizations(req, task, req.query.access_token);
+    await Authorizations.CheckTaskAuthorization(req, task, req.query.access_token);
   }
   const pid = await spawnTerminal(req, res, task);
   return Jwt.sign({ pid }, env.JWT_SECRET, { expiresIn: 60 * 60 });
@@ -213,12 +166,13 @@ async function createTerminal(
 
   const taskId = req.params.task_id;
   if (!taskId) {
+    res.status(400);
     res.send('No task ID provided.');
     return;
   }
 
   try {
-    const task = await getTaskInfo(env.MESOS_MASTER_URL, taskId);
+    const task = await getRunningTaskInfo(taskId);
     const token = await tryRequestTerminal(req, res, task);
 
     res.send({
@@ -237,6 +191,16 @@ async function createTerminal(
     else if (err instanceof TaskNotFoundError) {
       res.status(404);
       res.send();
+      return;
+    }
+    else if (err instanceof TaskNotRunningError) {
+      res.status(400);
+      res.send('Task not running');
+      return;
+    }
+    else if (err instanceof MesosAgentNotFoundError) {
+      res.status(400);
+      res.send('Mesos agent not found');
       return;
     }
     res.status(503);

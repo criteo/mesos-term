@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
-import TerminalView from './views/TerminalView';
+import { BrowserRouter as Router, Route, Redirect, Switch } from "react-router-dom";
 import { ThemeProvider, createMuiTheme } from '@material-ui/core';
 import NotificationsContext, { Notification } from './hooks/NotificationContext';
 import NotificationBar from './components/NotificationBar';
+import Layout from './Layout';
 import MainView from './views/MainView';
 
 const App: React.FC = () => {
@@ -24,8 +24,8 @@ const App: React.FC = () => {
             <Route path="/" exact={true}>
               <MainView />
             </Route>
-            <Route path="/login/:task_id" exact={true}>
-              <TerminalView />
+            <Route path="/task/:taskID">
+              <Layout />
             </Route>
             <Route path="/">
               <Redirect to="/" />

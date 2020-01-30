@@ -3,5 +3,5 @@
         "src"
     ],
     "ext": "ts",
-    "exec": "ts-node ./src/index.ts"
+    "exec": "ts-node -P tsconfig.json ./src/index.ts"
 }

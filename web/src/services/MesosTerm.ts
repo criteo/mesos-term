@@ -28,6 +28,10 @@ export async function postCreateTerminal(taskID: string, accessToken: string | n
         withCredentials: true,
     });
 
+    if (res.status === 400) {
+        throw new Error(res.data as any);
+    }
+
     if (res.status === 404) {
         throw new TaskNotFoundError();
     }
@@ -85,5 +89,45 @@ export async function getConfig() {
         throw new Error(`Unexpected status ${res.status}`);
     }
 
+    return res.data;
+}
+
+export interface FileDescription {
+    gid: string;
+    mode: string;
+    mtime: string,
+    path: string;
+    size: number;
+    uid: string;
+}
+
+export async function browseSandbox(taskID: string, path: string) {
+    const res = await Axios.get<FileDescription[]>(`/api/sandbox/browse?taskID=${taskID}&path=${encodeURIComponent(path)}`, {
+        validateStatus: c => true
+    });
+
+    if (res.status === 400) {
+        throw new Error(res.data as any);
+    }
+    return res.data;
+}
+
+export interface FileData {
+    data: string;
+    offset: number;
+}
+
+export async function readSandboxFile(taskID: string, path: string, offset: number, size: number) {
+    const res = await Axios.get<FileData>(`/api/sandbox/read?taskID=${taskID}&path=${encodeURIComponent(path)}&offset=${offset}&size=${size}`);
+    return res.data;
+}
+
+export async function downloadSandboxFile(taskID: string, path: string, directory: boolean) {
+    const res = await Axios.get<string>(`/api/sandbox/download?taskID=${taskID}&path=${encodeURIComponent(path)}&directory=${directory}`, {
+        headers: {
+            'Accept': 'application/octet-stream',
+        },
+        responseType: 'blob',
+    });
     return res.data;
 }

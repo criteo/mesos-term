@@ -1,4 +1,7 @@
 import * as Jwt from 'jsonwebtoken';
+import { Task } from './mesos';
+import { Request } from './express_helpers';
+import { env } from './env_vars';
 
 export class UnauthorizedAccessError extends Error {
   constructor(m: string) {
@@ -118,5 +121,52 @@ export function isSuperAdmin(
   superAdmins: string[]): boolean {
   const userGroups = extractCN(userLdapGroups);
   return intersection([userCN].concat(userGroups), superAdmins).length > 0;
+}
+
+export async function CheckTaskAuthorization(
+  req: Request,
+  task: Task,
+  accessToken: string) {
+
+  const userCN = req.user.cn;
+  const userLdapGroups = req.user.memberOf;
+  const admins_constraints = FilterTaskAdmins(
+    env.ENABLE_PER_APP_ADMINS,
+    env.ALLOWED_TASK_ADMINS,
+    task.admins);
+  const superAdmins = env.SUPER_ADMINS;
+
+  // First check delegation token granted by an admin
+  if (accessToken && env.ENABLE_RIGHTS_DELEGATION) {
+    try {
+      await CheckDelegation(
+        userCN,
+        userLdapGroups,
+        task.task_id,
+        accessToken,
+        env.JWT_SECRET
+      );
+      // If delegation token is validated, we skip the next checks.
+      return;
+    }
+    catch (err) {
+      // if delegation is not validated though, let's move forward with next checks
+    }
+  }
+
+  await Promise.all([
+    CheckUserAuthorizations(
+      userCN,
+      userLdapGroups,
+      admins_constraints,
+      superAdmins
+    ),
+    CheckRootContainer(
+      task.user,
+      userCN,
+      userLdapGroups,
+      superAdmins
+    )
+  ]);
 }
 
