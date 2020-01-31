@@ -2,10 +2,10 @@ import Express = require('express');
 import {
     browseSandbox, getTaskInfo, getMesosSlaveState, readSandboxFile,
     downloadSandboxFile, downloadSandboxDirectory, TaskInfo, MesosAgentNotFoundError
-} from "../mesos";
-import { env } from "../env_vars";
-import * as Moment from "moment";
-import { CheckTaskAuthorization } from "../authorizations";
+} from '../mesos';
+import { env } from '../env_vars';
+import * as Moment from 'moment';
+import { CheckTaskAuthorization } from '../authorizations';
 import { Request } from '../express_helpers';
 
 interface SandboxDescriptor {
@@ -48,9 +48,9 @@ function cacheSandboxDescriptor(fetcher: (taskID: string) => Promise<SandboxDesc
         cache[taskID] = {
             expireAt: Moment(new Date()).add(10, 'second').toDate(),
             locator: res,
-        }
+        };
         return res;
-    }
+    };
 }
 
 
@@ -65,7 +65,7 @@ const sandboxCache = cacheSandboxDescriptor(async (taskID) => {
         frameworkID: taskInfo.framework_id,
         containerID: taskInfo.container_id,
         task: taskInfo,
-    }
+    };
 });
 
 export default function (app: Express.Application) {
@@ -76,7 +76,8 @@ export default function (app: Express.Application) {
                 await CheckTaskAuthorization(req, sandbox.task, req.query.access_token);
             }
             await next();
-        } catch (err) {
+        }
+        catch (err) {
             console.error(err);
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
@@ -86,7 +87,7 @@ export default function (app: Express.Application) {
             res.status(500);
             res.send();
         }
-    })
+    });
 
     app.get('/api/sandbox/browse', async function (req: Express.Request, res: Express.Response) {
         try {
@@ -126,7 +127,8 @@ export default function (app: Express.Application) {
                     sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path);
                 res.set('Content-Type', 'application/octet-stream');
                 res.end(content);
-            } else {
+            }
+            else {
                 const content = await downloadSandboxFile(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
                     sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path);
                 res.set('Content-Type', 'application/octet-stream');

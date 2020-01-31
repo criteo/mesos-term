@@ -24,7 +24,7 @@ export interface EnvVars {
   // receiving the DN of the user provided by the front proxy in the
   // X-Fowarded-User header.
   // MesosTerm then only performs the groups resolution.
-  // 
+  //
   // TODO(c.michaud): shared a secret between the proxy and Authelia int
   // order to trust the X-Forwarded-User header.
   FORWARDED_AUTH_ENABLED: boolean;
@@ -43,7 +43,7 @@ export interface EnvVars {
   // When enabled, all users can see the sandboxes, meaning that
   // the label MESOS_TERM_DEBUG_GRANTED_TO is not honored anymore.
   // Any authenticated user could access any sandbox.
-  AUTHORIZE_ALL_SANDBOXES: boolean
+  AUTHORIZE_ALL_SANDBOXES: boolean;
 
   ENABLE_PER_APP_ADMINS?: boolean;
   ENABLE_RIGHTS_DELEGATION?: boolean;

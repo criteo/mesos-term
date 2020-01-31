@@ -3,7 +3,7 @@ import passport = require('passport');
 import LdapStrategy = require('passport-ldapauth');
 import basicAuth = require('basic-auth');
 import { Request } from './express_helpers';
-import * as LdapJS from "ldapjs";
+import * as LdapJS from 'ldapjs';
 
 import { env } from './env_vars';
 
@@ -47,13 +47,13 @@ export function BasicAuth(app: Express.Application) {
 }
 
 export function ForwardedAuth(app: Express.Application) {
-  var client = LdapJS.createClient({
+  const client = LdapJS.createClient({
     url: env.LDAP_URL,
     bindDN: env.LDAP_USER,
     bindCredentials: env.LDAP_PASSWORD,
   });
 
-  var searchOptions: LdapJS.SearchOptions = {
+  const searchOptions: LdapJS.SearchOptions = {
     scope: 'sub',
     attributes: ['memberof', 'cn'],
   };
@@ -81,7 +81,8 @@ export function ForwardedAuth(app: Express.Application) {
         let memberOf: string[] = [];
         if (typeof res[0].memberOf === 'string') {
           memberOf = [res[0].memberOf];
-        } else if (Array.isArray(res[0].memberOf)) {
+        }
+        else if (Array.isArray(res[0].memberOf)) {
           memberOf = res[0].memberOf;
         }
 
@@ -89,7 +90,8 @@ export function ForwardedAuth(app: Express.Application) {
           cn: res[0].cn,
           memberOf: memberOf,
         };
-      } catch (err) {
+      }
+      catch (err) {
         console.error(err);
         res.status(403);
         res.send();
@@ -98,7 +100,7 @@ export function ForwardedAuth(app: Express.Application) {
     }
     req.user = req.session.user;
     next();
-  })
+  });
 }
 
 async function ldapSearch(client: LdapJS.Client, dn: string, options: LdapJS.SearchOptions) {

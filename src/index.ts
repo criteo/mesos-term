@@ -44,7 +44,8 @@ if (env.AUTHORIZATIONS_ENABLED) {
   setup(app, new AuthenticatedLogger());
   if (env.FORWARDED_AUTH_ENABLED) {
     ForwardedAuth(app);
-  } else {
+  }
+  else {
     BasicAuth(app);
   }
 }

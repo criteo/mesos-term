@@ -2,9 +2,9 @@ import { env } from './env_vars';
 import Request = require('request-promise');
 import Constants = require('./constants');
 import Axios, { AxiosRequestConfig } from 'axios';
-import { promises as Fs } from "fs";
+import { promises as Fs } from 'fs';
 import JSZip = require('jszip');
-import * as https from "https";
+import * as https from 'https';
 
 type Labels = { [key: string]: string };
 
@@ -140,7 +140,7 @@ function taskStatusToTaskContainer(status: MesosStatus): TaskContainer {
   return {
     container_id: containerId,
     parent_container_id: parentContainerId,
-  }
+  };
 }
 
 function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
@@ -231,10 +231,10 @@ export async function getRunningTaskInfo(taskID: string): Promise<TaskInfo> {
 }
 
 function cacheMesosState(mesosMasterURL: string, refreshSeconds: number) {
-  let cache: MesosState | null = null;
+  let cache: MesosState | undefined;
 
   async function refreshCache() {
-    let axiosConfig: AxiosRequestConfig = {};
+    const axiosConfig: AxiosRequestConfig = {};
     if (env.CA_FILE) {
       const httpsAgent = new https.Agent({
         ca: await Fs.readFile(env.CA_FILE),
@@ -258,14 +258,14 @@ function cacheMesosState(mesosMasterURL: string, refreshSeconds: number) {
       return cache;
     }
     return refreshCache();
-  }
+  };
 }
 
 interface MesosSlaveState {
   id: string;
   flags: {
     work_dir: string;
-  }
+  };
 }
 
 export async function getMesosSlaveState(
@@ -277,7 +277,7 @@ export async function getMesosSlaveState(
 interface FileDescription {
   gid: string;
   mode: string;
-  mtime: string,
+  mtime: string;
   path: string;
   size: number;
   uid: string;
@@ -290,7 +290,7 @@ export async function browseSandbox(
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativaPath}`);
   const res = await Axios.get<FileDescription[]>(`${mesosSlaveURL}/files/browse?path=${fullPath}`);
-  const files = res.data.map(f => ({ ...f, path: f.path.replace(basePath, "") }))
+  const files = res.data.map(f => ({ ...f, path: f.path.replace(basePath, '') }));
   return files;
 }
 
@@ -357,7 +357,8 @@ export async function downloadSandboxDirectory(
     for (let i = 0; i < fds.length; i++) {
       if (fds[i].mode.slice(0, 1) === 'd') {
         directories.push(fds[i].path);
-      } else {
+      }
+      else {
         files.push(fds[i].path);
       }
     }
