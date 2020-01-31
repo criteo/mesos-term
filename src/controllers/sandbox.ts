@@ -71,7 +71,7 @@ const sandboxCache = cacheSandboxDescriptor(async (taskID) => {
 export default function (app: Express.Application) {
     app.get('/api/sandbox/*', async function (req: Request, res: Express.Response, next: Express.NextFunction) {
         try {
-            if (env.AUTHORIZATIONS_ENABLED) {
+            if (env.AUTHORIZATIONS_ENABLED && !env.AUTHORIZE_ALL_SANDBOXES) {
                 const sandbox = await sandboxCache(req.query.taskID);
                 await CheckTaskAuthorization(req, sandbox.task, req.query.access_token);
             }

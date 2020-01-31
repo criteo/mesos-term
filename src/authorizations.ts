@@ -33,7 +33,6 @@ function extractCN(groups: string[]): string[] {
   }).filter(m => m !== undefined).map(m => m.toLowerCase());
 }
 
-// TODO: integrate all public methods in one authorizer class
 // returns a list of of list of groups
 // users must be in at least one group of each entry to be allowed to admin of a container
 export function FilterTaskAdmins(
