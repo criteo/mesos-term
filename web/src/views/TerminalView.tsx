@@ -117,6 +117,7 @@ export default function () {
                     <StatusBarItem value={context ? context.agent : "____________________"} icon={faServer} copy />
                     {config && config.can_grant_access && status === Status.Loaded
                         ? <Button style={{ padding: theme.spacing(0.3) }}
+                            variant="outlined"
                             onClick={() => setDelegationDialogOpen(true)}
                             className="grant-permission-button">
                             <div>Grant access</div>
