@@ -1,5 +1,5 @@
 import * as Jwt from 'jsonwebtoken';
-import { Task } from './mesos';
+import { TaskInfo } from './mesos';
 import { Request } from './express_helpers';
 import { env } from './env_vars';
 
@@ -125,7 +125,7 @@ export function isSuperAdmin(
 
 export async function CheckTaskAuthorization(
   req: Request,
-  task: Task,
+  task: TaskInfo,
   accessToken: string) {
 
   const userCN = req.user.cn;
