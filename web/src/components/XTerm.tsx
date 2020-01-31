@@ -39,7 +39,11 @@ export default function (props: Props) {
     const { createErrorNotification, createInfoNotification } = useNotifications();
     const location = useLocation();
     const queryParams = queryString.parse(location.search);
-    const xtermRef = useRef<Terminal>(new Terminal({ screenReaderMode: queryParams.screenReaderMode === "true" }));
+    const xtermRef = useRef<Terminal>(new Terminal({
+        screenReaderMode: queryParams.screenReaderMode === "true",
+        fontFamily: 'roboto',
+        fontWeight: "normal",
+    }));
     const resizeThrottlingTimer = useRef<NodeJS.Timeout | null>(null);
 
     const handleTerminalResize = async () => {
