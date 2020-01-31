@@ -82,7 +82,7 @@ export default function () {
     }) : [];
 
     let breadCrumbRoot = (
-        <Link href={`${location.pathname}?path=${encodeURIComponent('/')}`} key={`path-item-root`}>
+        <Link href={`/#${location.pathname}?path=${encodeURIComponent('/')}`} key={`path-item-root`}>
             Sandbox
         </Link>
     )
@@ -90,7 +90,7 @@ export default function () {
     const restBreadCrumbItems = path.slice(1).split('/').filter(x => x !== '').map((x, i) => {
         const link = path.split('/').slice(0, i + 2).join('/');
         return (
-            <Link href={`${location.pathname}?path=${encodeURIComponent(link)}`} key={`path-item-${i}`}>
+            <Link href={`/#${location.pathname}?path=${encodeURIComponent(link)}`} key={`path-item-${i}`}>
                 {x}
             </Link>
         )
