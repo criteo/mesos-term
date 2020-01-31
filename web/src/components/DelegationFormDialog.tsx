@@ -52,7 +52,7 @@ export default function (props: Props) {
 
     const delegationURL = window.location.protocol + "//" + window.location.hostname
         + ((window.location.port) ? (':' + window.location.port) : '')
-        + '/login/' + props.taskID + '?access_token=' + token;
+        + `/#/task/${props.taskID}/terminal?access_token=${token}`;
 
     return (
         <Dialog open={props.open} id="delegation-dialog">

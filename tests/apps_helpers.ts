@@ -38,7 +38,7 @@ export async function checkInteractionsWithTerminal(
   user: string,
   instanceId: string) {
   await helpers.withChrome(async function (driver) {
-    await driver.get(`http://${user}:password@localhost:5000/login/${instanceId}?screenReaderMode=true`);
+    await driver.get(`http://${user}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
     await interactWithTerminal(driver);
   });
 }
@@ -56,7 +56,7 @@ export async function checkInteractionsWithTerminalUsingAccessToken(
   accessToken: string,
   instanceId: string) {
   await helpers.withChrome(async function (driver) {
-    await driver.get(`http://${user}:password@localhost:5000/login/${instanceId}?screenReaderMode=true`);
+    await driver.get(`http://${user}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
     await enterAccessToken(driver, accessToken);
     await interactWithTerminal(driver);
     await driver.sleep(2);
@@ -69,7 +69,7 @@ export async function checkBadAccessToken(
   instanceId: string) {
 
   await helpers.withChrome(async function (driver) {
-    await driver.get(`http://${user}:password@localhost:5000/login/${instanceId}?screenReaderMode=true`);
+    await driver.get(`http://${user}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
     await enterAccessToken(driver, accessToken);
     await receiveUnauthorizedErrorMessage(driver, 'Unauthorized access to container');
     await driver.sleep(2);
@@ -94,7 +94,7 @@ async function testReceiveErrorMessage(
   expectedError: string) {
 
   await helpers.withChrome(async function (driver) {
-    await driver.get(`http://${user}:password@localhost:5000/login/${instanceId}?screenReaderMode=true`);
+    await driver.get(`http://${user}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
     const el = await driver.wait(until.elementLocated(By.css(".notification-error .message-content")), TIMEOUT_DRIVER);
     await driver.wait(until.elementTextContains(el, expectedError), TIMEOUT_DRIVER);
   });
@@ -126,7 +126,7 @@ export function testCaseUnauthorizedAccessDialogDisplayed(user: string, appName:
       this.timeout(TIMEOUT_TEST);
       const instanceId = this.mesosTaskIds[appName];
       await helpers.withChrome(async function (driver) {
-        await driver.get(`http://${user}:password@localhost:5000/login/${instanceId}?screenReaderMode=true`);
+        await driver.get(`http://${user}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
         const el = await driver.wait(until.elementLocated(By.id("access-request-dialog")), TIMEOUT_DRIVER);
         await driver.wait(until.elementIsVisible(el), TIMEOUT_DRIVER);
       })
@@ -148,7 +148,7 @@ export function testShouldNotSeeGrantAccessButton(user: string, appName: string)
     const instanceId = this.mesosTaskIds[appName];
 
     await helpers.withChrome(async function (driver) {
-      await driver.get(`http://${user}:password@localhost:5000/login/${instanceId}?screenReaderMode=true`);
+      await driver.get(`http://${user}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
       let el = await driver.wait(until.elementLocated(By.css(".user-item")), TIMEOUT_DRIVER);
       await driver.wait(until.elementIsVisible(el), TIMEOUT_DRIVER);
       await driver.sleep(1000);
@@ -168,7 +168,7 @@ export function testShouldSeeGrantAccessButton(user: string, appName: string) {
     const instanceId = this.mesosTaskIds[appName];
 
     await helpers.withChrome(async function (driver) {
-      await driver.get(`http://${user}:password@localhost:5000/login/${instanceId}`)
+      await driver.get(`http://${user}:password@localhost:5000/#/task/${instanceId}/terminal`)
       const el = await driver.wait(until.elementLocated(By.css(".grant-permission-button")), TIMEOUT_DRIVER);
       await driver.wait(until.elementIsVisible(el), TIMEOUT_DRIVER);
     });
@@ -204,13 +204,13 @@ export function testShouldGrantAccessViaButtonAndToken(admin: string, delegatedU
     const instanceId = this.mesosTaskIds[appName];
     let token: string;
     await helpers.withChrome(async function (driver) {
-      await driver.get(`http://${admin}:password@localhost:5000/login/${instanceId}?screenReaderMode=true`);
+      await driver.get(`http://${admin}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
       token = await delegateAccessToken(driver, delegatedUser, instanceId);
       token = token.match(/access_token=(.*)$/)[1];
     });
 
     await helpers.withChrome(async function (driver) {
-      await driver.get(`http://${delegatedUser}:password@localhost:5000/login/${instanceId}?screenReaderMode=true`);
+      await driver.get(`http://${delegatedUser}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
       await driver.wait(until.elementLocated(By.id("access-request-dialog")), TIMEOUT_DRIVER);
       const aTokenEl = await waitUntilElementIsVisible(driver, '#access-request-dialog .token-field .MuiInput-input', TIMEOUT_DRIVER);
       await aTokenEl.sendKeys(token);
@@ -229,7 +229,7 @@ export function testShouldGrantAccessViaButtonAndUrl(admin: string, delegatedUse
 
     let url: string;
     await helpers.withChrome(async function (driver) {
-      await driver.get(`http://${admin}:password@localhost:5000/login/${instanceId}?screenReaderMode=true`);
+      await driver.get(`http://${admin}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
       url = await delegateAccessToken(driver, delegatedUser, instanceId);
     });
 
@@ -249,7 +249,7 @@ export function testShouldAbortAccessDelegation(admin: string, appName: string) 
     const instanceId = this.mesosTaskIds[appName];
 
     await helpers.withChrome(async function (driver) {
-      await driver.get(`http://${admin}:password@localhost:5000/login/${instanceId}?screenReaderMode=true`);
+      await driver.get(`http://${admin}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
       const grantEl = await driver.wait(until.elementLocated(By.css(".grant-permission-button")), TIMEOUT_DRIVER);
       await driver.wait(until.elementIsVisible(grantEl), TIMEOUT_DRIVER);
       await grantEl.click();
