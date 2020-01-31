@@ -119,6 +119,8 @@ services:
         GROUP_ID: ${GROUP_ID}
     ports:
       - "3000:3000"
+    environment:
+      - HOST=127.0.0.1
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.7

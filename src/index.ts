@@ -72,7 +72,7 @@ app.get('*', (req, res) => {
 const port: number = Number(process.env.PORT) || 3000;
 const host: string = (os.platform() === 'win32')
   ? '127.0.0.1'
-  : '0.0.0.0';
+  : process.env.HOST || '0.0.0.0';
 
 app.listen(port, host, function () {
   console.log('App listening to http://' + host + ':' + port);
