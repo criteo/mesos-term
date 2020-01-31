@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { makeStyles } from "@material-ui/core";
 import classnames from "classnames";
-import Measure from "react-measure";
+import Measure, { ContentRect } from "react-measure";
 
 import { Terminal } from 'xterm';
 import "xterm/css/xterm.css";
@@ -40,19 +40,28 @@ export default function (props: Props) {
     const location = useLocation();
     const queryParams = queryString.parse(location.search);
     const xtermRef = useRef<Terminal>(new Terminal({ screenReaderMode: queryParams.screenReaderMode === "true" }));
+    const resizeThrottlingTimer = useRef<NodeJS.Timeout | null>(null);
 
     const handleTerminalResize = async () => {
         fitAddon.current.fit();
-        const dimensions = fitAddon.current.proposeDimensions();
-        if (dimensions) {
-            setDimension(dimensions);
+        console.log('resize');
+        if (resizeThrottlingTimer.current) {
+            clearTimeout(resizeThrottlingTimer.current);
+            resizeThrottlingTimer.current = null;
         }
+        resizeThrottlingTimer.current = setTimeout(() => {
+            const dimensions = fitAddon.current.proposeDimensions();
+            if (dimensions) {
+                setDimension(dimensions);
+            }
+        }, 300);
     }
 
     const resizeRemoteTerminal = useCallback(async () => {
         if (dimension === null || props.token === null) {
             return;
         }
+
         await postResizeTerminal(props.token, dimension.rows, dimension.cols);
         if (websocket.current && websocketState === WebSocket.OPEN) {
             // Workaround: send a space and a backspace to update the length of the current line otherwise the
@@ -138,7 +147,6 @@ const useStyles = makeStyles(theme => ({
     },
     termContainer: {
         flexGrow: 1,
-        margin: theme.spacing(),
     },
     mesosLogo: {
         position: 'absolute',

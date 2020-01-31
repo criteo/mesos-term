@@ -7,6 +7,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.xterm {
+  padding: 8px;
+}
+
 .xterm-viewport {
   overflow-y: hidden;
 }
