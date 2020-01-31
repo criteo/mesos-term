@@ -14,7 +14,7 @@ import config from './controllers/config';
 import sandbox from './controllers/sandbox';
 
 import { setup, SuperAdminsOnly } from './express_helpers';
-import authentication from './authentication';
+import { BasicAuth, ForwardedAuth } from './authentication';
 import { AuthenticatedLogger, AnonymousLogger } from './logger';
 
 const app = Express();
@@ -42,7 +42,11 @@ app.use(BodyParser.json());
 if (env.AUTHORIZATIONS_ENABLED) {
   console.log('Authorizations are enabled.');
   setup(app, new AuthenticatedLogger());
-  authentication(app);
+  if (env.FORWARDED_AUTH_ENABLED) {
+    ForwardedAuth(app);
+  } else {
+    BasicAuth(app);
+  }
 }
 else {
   console.log('Authorizations are disabled.');

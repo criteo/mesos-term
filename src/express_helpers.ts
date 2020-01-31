@@ -1,7 +1,6 @@
 import Express = require('express');
 import { EnvVars, env } from './env_vars';
 import { Logger } from './logger';
-import { Task } from './mesos';
 import { isSuperAdmin } from './authorizations';
 
 const ENV_VARS_KEY = 'env_vars';

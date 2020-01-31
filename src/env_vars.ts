@@ -19,6 +19,15 @@ function getOrElse(varName: string, defaultValue: string): string {
 
 export interface EnvVars {
   AUTHORIZATIONS_ENABLED: boolean;
+  // The authentication is forwarded by a front proxy
+  // In that mode MesosTerm considers the user is authenticated by
+  // receiving the DN of the user provided by the front proxy in the
+  // X-Fowarded-User header.
+  // MesosTerm then only performs the groups resolution.
+  // 
+  // TODO(c.michaud): shared a secret between the proxy and Authelia int
+  // order to trust the X-Forwarded-User header.
+  FORWARDED_AUTH_ENABLED: boolean;
   JWT_SECRET: string;
   LDAP_URL?: string;
   LDAP_BASE_DN?: string;
@@ -34,7 +43,7 @@ export interface EnvVars {
   EXTRA_ENV: string;
   COMMAND: string;
   CA_FILE?: string;
-  MESOS_AGENT_CREDENTIALS?: {principal: string, password: string};
+  MESOS_AGENT_CREDENTIALS?: { principal: string, password: string };
 }
 
 const authorizations_enabled = (process.env['MESOS_TERM_LDAP_URL']) ? true : false;
@@ -62,7 +71,8 @@ export const env: EnvVars = {
   AUTHORIZATIONS_ENABLED: authorizations_enabled,
   MESOS_STATE_CACHE_TIME: parseFloat(getOrExit('MESOS_TERM_MESOS_STATE_CACHE_TIME')),
   EXTRA_ENV: getOrElse('MESOS_TERM_ENVIRONMENT', ''),
-  COMMAND: getOrElse('MESOS_TERM_COMMAND', '/bin/sh')
+  COMMAND: getOrElse('MESOS_TERM_COMMAND', '/bin/sh'),
+  FORWARDED_AUTH_ENABLED: false,
 };
 
 
@@ -84,4 +94,7 @@ if (authorizations_enabled) {
   env['LDAP_PASSWORD'] = getOrExit('MESOS_TERM_LDAP_PASSWORD');
   env['ENABLE_PER_APP_ADMINS'] = process.env['MESOS_TERM_ENABLE_PER_APP_ADMINS'] === 'true';
   env['ENABLE_RIGHTS_DELEGATION'] = process.env['MESOS_TERM_ENABLE_RIGHTS_DELEGATION'] === 'true';
+  env['FORWARDED_AUTH_ENABLED'] =
+    'MESOS_TERM_FORWARDED_AUTH' in process.env &&
+    process.env['MESOS_TERM_FORWARDED_AUTH'] === 'true';
 }
