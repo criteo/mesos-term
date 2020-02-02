@@ -1,4 +1,4 @@
-import { WebDriver, until, By, Condition, WebElement, ActionSequence } from 'selenium-webdriver';
+import { WebDriver, until, By, Condition, WebElement } from 'selenium-webdriver';
 import * as Helpers from "../helpers";
 import { receiveUnauthorizedErrorMessage } from './errors';
 
@@ -6,7 +6,7 @@ const TIMEOUT_TEST = 20000;
 const TIMEOUT_DRIVER = 18000;
 
 const untilSandboxDisplaysFiles = function (names: string[]) {
-    return new Condition<boolean>(
+    return new Condition(
         `for sandbox to display files and directories ${names.join(', ')}`,
         async function (driver) {
             const el = await driver.findElements(By.className("file-item"));
@@ -62,12 +62,12 @@ async function checkCanSeeFilesInSandbox(username: string, instanceID: string) {
 }
 
 const untilSandboxFileIsDetected = function (name: string) {
-    return new Condition<WebElement>(
+    return new Condition<Promise<WebElement>>(
         `for sandbox file ${name} to be detected`,
         async function (driver) {
             const el = await driver.findElements(By.className("file-item"));
             if (el === null) {
-                return false;
+                return null;
             }
 
             for (let i = 0; i < el.length; i += 1) {
@@ -112,7 +112,7 @@ export async function waitFileReaderToBeVisible(driver: WebDriver) {
 }
 
 export function untilFileReaderContains(pattern: string) {
-    return new Condition<boolean>(
+    return new Condition(
         `for file reader to contain ${pattern}`,
         async function (driver) {
             const el = await driver.findElement(By.id("file-reader-content"));
