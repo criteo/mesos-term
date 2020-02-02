@@ -48,7 +48,6 @@ export default function (props: Props) {
 
     const handleTerminalResize = async () => {
         fitAddon.current.fit();
-        console.log('resize');
         if (resizeThrottlingTimer.current) {
             clearTimeout(resizeThrottlingTimer.current);
             resizeThrottlingTimer.current = null;
@@ -67,11 +66,6 @@ export default function (props: Props) {
         }
 
         await postResizeTerminal(props.token, dimension.rows, dimension.cols);
-        if (websocket.current && websocketState === WebSocket.OPEN) {
-            // Workaround: send a space and a backspace to update the length of the current line otherwise the
-            // the line is updated only when the user send new keys.
-            websocket.current.send(" \x1b[D");
-        }
     }, [dimension, props.token, websocketState]);
 
     const handleSocketOpen = useMemoizedCallback((socket: WebSocket, e: Event) => {
