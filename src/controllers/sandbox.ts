@@ -5,7 +5,7 @@ import {
 } from '../mesos';
 import { env } from '../env_vars';
 import * as Moment from 'moment';
-import { CheckTaskAuthorization } from '../authorizations';
+import { CheckTaskAuthorization, UnauthorizedAccessError } from '../authorizations';
 import { Request } from '../express_helpers';
 
 interface SandboxDescriptor {
@@ -83,6 +83,10 @@ export default function (app: Express.Application) {
                 res.status(400);
                 res.send('Mesos agent not found');
                 return;
+            } else if (err instanceof UnauthorizedAccessError) {
+                res.status(403);
+                res.send('Unauthorized');
+                return;
             }
             res.status(500);
             res.send();
@@ -98,6 +102,15 @@ export default function (app: Express.Application) {
         }
         catch (err) {
             console.error(err);
+            if (err instanceof MesosAgentNotFoundError) {
+                res.status(400);
+                res.send('Mesos agent not found');
+                return;
+            } else if (err instanceof UnauthorizedAccessError) {
+                res.status(403);
+                res.send('Unauthorized');
+                return;
+            }
             res.status(503);
             res.send();
             return;
@@ -113,6 +126,15 @@ export default function (app: Express.Application) {
         }
         catch (err) {
             console.error(err);
+            if (err instanceof MesosAgentNotFoundError) {
+                res.status(400);
+                res.send('Mesos agent not found');
+                return;
+            } else if (err instanceof UnauthorizedAccessError) {
+                res.status(403);
+                res.send('Unauthorized');
+                return;
+            }
             res.status(503);
             res.send();
             return;
@@ -137,6 +159,15 @@ export default function (app: Express.Application) {
         }
         catch (err) {
             console.error(err);
+            if (err instanceof MesosAgentNotFoundError) {
+                res.status(400);
+                res.send('Mesos agent not found');
+                return;
+            } else if (err instanceof UnauthorizedAccessError) {
+                res.status(403);
+                res.send('Unauthorized');
+                return;
+            }
             res.status(503);
             res.send();
             return;

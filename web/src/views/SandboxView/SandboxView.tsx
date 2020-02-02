@@ -228,9 +228,9 @@ function FileItem(props: FileItemProps) {
             onClick={e => props.onClick(e, props.fd)}
             onDoubleClick={e => props.onDoubleClick(e, props.fd)}
             className={classnames(classes.paper, props.selected ? classes.selected : '')}>
-            <div className={classes.content}>
+            <div className={classnames(classes.content, "file-item")}>
                 <FontAwesomeIcon icon={isDirectory ? faFolder : faFile} size="3x" />
-                <Typography noWrap className={classes.filename}>{filename}</Typography>
+                <Typography noWrap className={classnames(classes.filename, "filename")}>{filename}</Typography>
             </div>
         </Paper>
     )
@@ -272,6 +272,8 @@ function FileDescriptionBar(props: FileDescriptionBarProps) {
     const size = props.fd ? (props.fd.size / 1000).toFixed(2) : '-';
     const mode = props.fd ? props.fd.mode : '-';
     const isDir = props.fd === null || mode.slice(0, 1) === 'd';
+    const uid = props.fd ? props.fd.uid : '-';
+    const gid = props.fd ? props.fd.gid : '-';
     return (
         <Fragment>
             <Tooltip title="download">
@@ -279,9 +281,11 @@ function FileDescriptionBar(props: FileDescriptionBarProps) {
                     <FontAwesomeIcon icon={isDir ? faFolder : faFile} className={classes.icon} />
                 </span>
             </Tooltip>
-            <span className={classes.item}>name: {filename}</span>{" "}
-            <span className={classes.item}>size: {size}kb</span>{" "}
-            <span className={classes.item}>mode: {mode}</span>
+            <span className={classnames(classes.item, "desc-name", "odd")}>name: {filename}</span>{" "}
+            <span className={classnames(classes.item, "desc-size", "even")}>size: {size}kb</span>{" "}
+            <span className={classnames(classes.item, "desc-mode", "odd")}>mode: {mode}</span>{" "}
+            <span className={classnames(classes.item, "desc-uid", "even")}>uid: {uid}</span>{" "}
+            <span className={classnames(classes.item, "desc-gid", "odd")}>gid: {gid}</span>{" "}
             <Button size="small" variant="outlined" onClick={props.onDownloadClick}>
                 Download
             </Button>
@@ -292,6 +296,9 @@ function FileDescriptionBar(props: FileDescriptionBarProps) {
 const useFileDescriptionBarStyles = makeStyles(theme => ({
     item: {
         marginRight: theme.spacing(2),
+        '&.even': {
+            color: '#b3b3b3',
+        }
     },
     icon: {
         display: 'inline-block',

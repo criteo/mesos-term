@@ -4,7 +4,7 @@ import helpers = require('./helpers');
 const TIMEOUT_TEST = 20000;
 const TIMEOUT_DRIVER = 18000;
 
-const untilTermContains = function (pattern: RegExp) {
+export const untilTermContains = function (pattern: RegExp) {
   return new Condition(
     `for terminal to contain ${pattern.toString()}`,
     async function (driver) {
@@ -15,7 +15,7 @@ const untilTermContains = function (pattern: RegExp) {
     });
 }
 
-async function sendKeysToTerminal(driver: WebDriver, keys: string) {
+export async function sendKeysToTerminal(driver: WebDriver, keys: string) {
   let el = await driver.wait(until.elementLocated(By.css(".xterm")), TIMEOUT_DRIVER);
   await el.click();
   el = await driver.wait(until.elementLocated(By.css(".xterm-helper-textarea")), TIMEOUT_DRIVER);
@@ -71,7 +71,7 @@ export async function checkBadAccessToken(
   await helpers.withChrome(async function (driver) {
     await driver.get(`http://${user}:password@localhost:5000/#/task/${instanceId}/terminal?screenReaderMode=true`);
     await enterAccessToken(driver, accessToken);
-    await receiveUnauthorizedErrorMessage(driver, 'Unauthorized access to container');
+    await receiveUnauthorizedErrorMessage(driver, 'Unauthorized access');
     await driver.sleep(2);
   });
 }

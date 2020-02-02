@@ -32,7 +32,7 @@ export default function (props: FileReaderProps) {
     }
 
     return (
-        <div className={classes.rootRoot}>
+        <div className={classes.rootRoot} id="file-reader">
             <div onClick={() => setFollow(!follow)}
                 className={classnames(classes.follow, follow ? classes.followActive : classes.followInactive)}>
                 <FontAwesomeIcon icon={faCircle} size="lg" />
@@ -110,7 +110,7 @@ function FileContent(props: FileContentProps) {
             }}
             onScroll={props.onScroll}
             ref={props.contentRef}>
-            <div className={classes.inner}>
+            <div className={classes.inner} id="file-reader-content">
                 {items}
             </div>
         </div>

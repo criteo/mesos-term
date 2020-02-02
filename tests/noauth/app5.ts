@@ -1,8 +1,14 @@
 import AppsHelpers = require('../apps_helpers');
-import Helpers = require('../helpers');
+import * as Sandbox from "../common/sandbox";
 
 describe('app5 (no label, root user)', function () {
     describe('user john can interact with terminal', function () {
         AppsHelpers.testInteractionsWithTerminal('john', 'app5');
+    });
+
+    describe("sandbox", () => {
+        describe('user john can open sandbox', () => {
+            Sandbox.testOpenSandbox('john', 'app5');
+        });
     });
 });

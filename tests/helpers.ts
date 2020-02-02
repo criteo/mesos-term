@@ -1,6 +1,7 @@
 require('chromedriver');
 import webdriver = require('selenium-webdriver');
 import Request = require('request-promise');
+import { Options } from 'selenium-webdriver/chrome';
 
 export async function withChrome<T>(
   fn: (driver: webdriver.WebDriver) => Promise<T>) {
@@ -8,9 +9,11 @@ export async function withChrome<T>(
   let pref = new webdriver.logging.Preferences();
   pref.setLevel('browser', webdriver.logging.Level.SEVERE);
 
+  const chromeOptions = new Options();
   const driver = new webdriver.Builder()
     .forBrowser('chrome')
     .setLoggingPrefs(pref)
+    .setChromeOptions(chromeOptions)
     .build();
 
   const entries = await driver.manage().logs().get(webdriver.logging.Type.BROWSER)

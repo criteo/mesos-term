@@ -1,16 +1,27 @@
 import AppsHelpers = require('../apps_helpers');
 import Helpers = require('../helpers');
+import * as Sandbox from "../common/sandbox";
 
 describe('app1 (no label, no root)', function () {
     this.retries(3);
 
     describe('admins are enabled', function () {
-        describe('super admin user john', async function () {
-            await AppsHelpers.testInteractionsWithTerminal('john', 'app1');
+        describe('super admin user john can interact with terminal', function () {
+            AppsHelpers.testInteractionsWithTerminal('john', 'app1');
         });
 
-        describe('non admin user harry', async function () {
-            await AppsHelpers.testUnauthorizedUser('harry', 'app1');
+        describe('non admin user harry is not authorized to open terminal', function () {
+            AppsHelpers.testUnauthorizedUser('harry', 'app1');
+        });
+
+        describe("sandbox", () => {
+            describe('super admin user john can open sandbox', () => {
+                Sandbox.testOpenSandbox('john', 'app1');
+            });
+
+            describe('non admin user harry is not authorized to open sandbox', () => {
+                Sandbox.testSandboxUnauthorized('harry', 'app1');
+            });
         });
 
         describe('delegation enabled', function () {

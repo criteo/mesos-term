@@ -1,4 +1,5 @@
 import AppsHelpers = require('../apps_helpers');
+import * as Sandbox from "../common/sandbox";
 
 describe('app4 (label GRANTED_TO harry and bob, no user most probably meaning root)', function () {
     describe('super admin user', function () {
@@ -11,5 +12,19 @@ describe('app4 (label GRANTED_TO harry and bob, no user most probably meaning ro
 
     describe('user bob', function () {
         AppsHelpers.testUnauthorizedUser('bob', 'app4');
+    });
+
+    describe("sandbox", () => {
+        describe('user john can open sandbox', () => {
+            Sandbox.testOpenSandbox('john', 'app4');
+        });
+
+        describe('user harry is not authorized to open sandbox', () => {
+            Sandbox.testSandboxUnauthorized('harry', 'app4');
+        });
+
+        describe('user bob is not authorized to open sandbox', () => {
+            Sandbox.testSandboxUnauthorized('bob', 'app4');
+        });
     });
 });

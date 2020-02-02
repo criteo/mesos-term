@@ -1,6 +1,6 @@
 export class UnauthorizedAccessError extends Error {
     constructor() {
-        super("Unauthorized access to container");
+        super("Unauthorized access");
 
         // Set the prototype explicitly.
         Object.setPrototypeOf(this, UnauthorizedAccessError.prototype);
