@@ -35,10 +35,15 @@ export default function () {
 
             const parentDir = path.slice(1).split('/').slice(0, -1).join('/');
             const fds = await browseSandbox(match.params.taskID, '/' + parentDir);
-            for (let i = 0; i < fds.length; i++) {
-                if (fds[i].path === path) {
-                    setCurrentFd(fds[i]);
-                    break;
+
+            if (path === '/') {
+                setCurrentFd(null);
+            } else {
+                for (let i = 0; i < fds.length; i++) {
+                    if (fds[i].path === path) {
+                        setCurrentFd(fds[i]);
+                        break;
+                    }
                 }
             }
             setFiles(files);
