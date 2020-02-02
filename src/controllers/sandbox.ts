@@ -1,7 +1,7 @@
 import Express = require('express');
 import {
     browseSandbox, getTaskInfo, getMesosSlaveState, readSandboxFile,
-    downloadSandboxFile, downloadSandboxDirectory, TaskInfo, MesosAgentNotFoundError
+    downloadSandboxFile, downloadSandboxDirectory, TaskInfo, MesosAgentNotFoundError, TaskNotFoundError
 } from '../mesos';
 import { env } from '../env_vars';
 import * as Moment from 'moment';
@@ -87,6 +87,10 @@ export default function (app: Express.Application) {
                 res.status(403);
                 res.send('Unauthorized');
                 return;
+            } else if (err instanceof TaskNotFoundError) {
+                res.status(404);
+                res.send('Task not found');
+                return;
             }
             res.status(500);
             res.send();
@@ -109,6 +113,10 @@ export default function (app: Express.Application) {
             } else if (err instanceof UnauthorizedAccessError) {
                 res.status(403);
                 res.send('Unauthorized');
+                return;
+            } else if (err instanceof TaskNotFoundError) {
+                res.status(404);
+                res.send('Task not found');
                 return;
             }
             res.status(503);
@@ -133,6 +141,10 @@ export default function (app: Express.Application) {
             } else if (err instanceof UnauthorizedAccessError) {
                 res.status(403);
                 res.send('Unauthorized');
+                return;
+            } else if (err instanceof TaskNotFoundError) {
+                res.status(404);
+                res.send('Task not found');
                 return;
             }
             res.status(503);
@@ -166,6 +178,10 @@ export default function (app: Express.Application) {
             } else if (err instanceof UnauthorizedAccessError) {
                 res.status(403);
                 res.send('Unauthorized');
+                return;
+            } else if (err instanceof TaskNotFoundError) {
+                res.status(404);
+                res.send('Task not found');
                 return;
             }
             res.status(503);

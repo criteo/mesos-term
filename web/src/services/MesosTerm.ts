@@ -103,7 +103,7 @@ export interface FileDescription {
 
 export async function browseSandbox(taskID: string, path: string) {
     const res = await Axios.get<FileDescription[]>(`/api/sandbox/browse?taskID=${taskID}&path=${encodeURIComponent(path)}`, {
-        validateStatus: c => c === 400 || c === 403 || c === 200
+        validateStatus: c => c === 400 || c === 403 || c === 404 || c === 200
     });
 
     if (res.status === 400) {
@@ -112,6 +112,10 @@ export async function browseSandbox(taskID: string, path: string) {
 
     if (res.status === 403) {
         throw new UnauthorizedAccessError();
+    }
+
+    if (res.status === 404) {
+        throw new TaskNotFoundError();
     }
 
     return res.data;
