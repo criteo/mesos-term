@@ -60,6 +60,7 @@ export default function () {
         if (path !== qs.path) {
             setPath(qs.path ? qs.path as string : '/');
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [qs.path, setPath]);
 
     useEffect(() => { fetchFiles() }, [fetchFiles]);

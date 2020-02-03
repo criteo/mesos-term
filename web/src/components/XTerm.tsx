@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { makeStyles } from "@material-ui/core";
 import classnames from "classnames";
-import Measure, { ContentRect } from "react-measure";
+import Measure from "react-measure";
 
 import { Terminal } from 'xterm';
 import "xterm/css/xterm.css";
@@ -66,6 +66,7 @@ export default function (props: Props) {
         }
 
         await postResizeTerminal(props.token, dimension.rows, dimension.cols);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dimension, props.token, websocketState]);
 
     const handleSocketOpen = useMemoizedCallback((socket: WebSocket, e: Event) => {
