@@ -66,8 +66,7 @@ export default function (props: Props) {
         }
 
         await postResizeTerminal(props.token, dimension.rows, dimension.cols);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dimension, props.token, websocketState]);
+    }, [dimension, props.token]);
 
     const handleSocketOpen = useMemoizedCallback((socket: WebSocket, e: Event) => {
         const self = socket;
@@ -80,6 +79,7 @@ export default function (props: Props) {
         }
         keepAlive();
         setWebsocketState(WebSocket.OPEN);
+        handleTerminalResize();
         props.onOpen();
         console.log("Connection is open!");
     }, []);
@@ -116,7 +116,6 @@ export default function (props: Props) {
         xtermRef.current.loadAddon(fitAddon.current);
         xtermRef.current.loadAddon(new AttachAddon(websocket.current));
         xtermRef.current.open(terminalDivRef.current);
-        handleTerminalResize();
     }, [props.token, handleSocketOpen, handleSocketClose, handleSocketError]);
 
     useEffect(() => { resizeRemoteTerminal(); }, [resizeRemoteTerminal]);
