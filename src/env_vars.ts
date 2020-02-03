@@ -19,6 +19,11 @@ function getOrElse(varName: string, defaultValue: string): string {
 
 export interface EnvVars {
   AUTHORIZATIONS_ENABLED: boolean;
+<<<<<<< HEAD
+=======
+
+  SESSION_MAX_AGE_SECONDS: number;
+>>>>>>> ebd02d2... Add OAuth2 support.
 
   JWT_SECRET: string;
   LDAP_URL?: string;
@@ -30,6 +35,15 @@ export interface EnvVars {
   SESSION_SECRET: string;
   SUPER_ADMINS: string[];
   ALLOWED_TASK_ADMINS: string[];
+
+  // OAuth2 parameters
+  OAUTH2_AUTHORIZATION_URL?: string;
+  OAUTH2_ACCESS_TOKEN_URL?: string;
+  OAUTH2_TOKEN_INFO_URL?: string;
+  OAUTH2_CLIENT_ID?: string;
+  OAUTH2_CLIENT_SECRET?: string;
+  OAUTH2_FAILURE_REDIRECT_URL?: string;
+
 
   // When enabled, all users can see the sandboxes, meaning that
   // the label MESOS_TERM_DEBUG_GRANTED_TO is not honored anymore.
@@ -71,6 +85,8 @@ export const env: EnvVars = {
   EXTRA_ENV: getOrElse('MESOS_TERM_ENVIRONMENT', ''),
   COMMAND: getOrElse('MESOS_TERM_COMMAND', '/bin/sh'),
   AUTHORIZE_ALL_SANDBOXES: false,
+  // Default of maxAge is 24 hours.
+  SESSION_MAX_AGE_SECONDS: parseFloat(getOrElse('MESOS_TERM_SESSION_MAX_AGE_SECONDS', '86400')),
 };
 
 
@@ -96,4 +112,15 @@ if (authorizations_enabled) {
   env['AUTHORIZE_ALL_SANDBOXES'] =
     'MESOS_TERM_AUTHORIZE_ALL_SANDBOXES' in process.env &&
     process.env['MESOS_TERM_AUTHORIZE_ALL_SANDBOXES'] === 'true';
+
+  const oauthEnabled = (process.env['MESOS_TERM_OAUTH2_AUTHORIZATION_URL']) ? true : false;
+  if (oauthEnabled) {
+    env['OAUTH2_AUTHORIZATION_URL'] = getOrExit('MESOS_TERM_OAUTH2_AUTHORIZATION_URL');
+    env['OAUTH2_ACCESS_TOKEN_URL'] = getOrExit('MESOS_TERM_OAUTH2_ACCESS_TOKEN_URL');
+    env['OAUTH2_TOKEN_INFO_URL'] = getOrExit('MESOS_TERM_OAUTH2_TOKEN_INFO_URL');
+    env['OAUTH2_CLIENT_ID'] = getOrExit('MESOS_TERM_OAUTH2_CLIENT_ID');
+    env['OAUTH2_CLIENT_SECRET'] = getOrExit('MESOS_TERM_OAUTH2_CLIENT_SECRET');
+    env['OAUTH2_FAILURE_REDIRECT_URL'] = getOrExit('MESOS_TERM_OAUTH2_FAILURE_REDIRECT_URL');
+  }
 }
+

@@ -87,7 +87,11 @@ export default function () {
     }, [layout]);
 
     let breadCrumbRoot = (
+<<<<<<< HEAD
         <Link href={buildURL(match.params.taskID, '/', layout)} key={`path-item-root`}>
+=======
+        <Link href={`${location.pathname}?path=${encodeURIComponent('/')}`} key={`path-item-root`}>
+>>>>>>> ebd02d2... Add OAuth2 support.
             Sandbox
         </Link>
     )
@@ -96,7 +100,11 @@ export default function () {
         const link = path.split('/').slice(0, i + 2).join('/');
         const url = buildURL(match.params.taskID, link, layout);
         return (
+<<<<<<< HEAD
             <Link href={url} key={`path-item-${i}`}>
+=======
+            <Link href={`${location.pathname}?path=${encodeURIComponent(link)}`} key={`path-item-${i}`}>
+>>>>>>> ebd02d2... Add OAuth2 support.
                 {x}
             </Link>
         )

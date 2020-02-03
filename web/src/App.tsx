@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
+=======
+import React, { useState } from 'react';
+>>>>>>> ebd02d2... Add OAuth2 support.
 import { BrowserRouter as Router, Route, Redirect, Switch } from "react-router-dom";
 import { ThemeProvider, createMuiTheme } from '@material-ui/core';
 import NotificationsContext, { Notification } from './hooks/NotificationContext';

@@ -147,7 +147,18 @@ Here are the details of available options.
 | MESOS\_TERM\_CA\_FILE                   | CA file to connect to Mesos agent  in pem format.                                        |
 | MESOS\_TERM\_MESOS\_AGENT\_PRINCIPAL    | The principal Mesos term uses to connect to the Mesos agent.                             |
 | MESOS\_TERM\_MESOS\_AGENT\_PASSWORD     | The password Mesos term uses to connect to the Mesos agent.                              |
+<<<<<<< HEAD
 | MESOS\_TERM\_AUTHORIZE\_ALL\_SANDBOXES  | If `true`, all authenticated users can read all sandboxes. Otherwise the permissions are granted according to the same strategy as for terminals   |
+=======
+| MESOS\_TERM\_AUTHORIZE\_ALL\_SANDBOXES    | If `true`, all authenticated users can read all sandboxes. Otherwise the permissions are granted according to the same strategy as for terminals.                |
+| MESOS\_TERM\_SESSION\_MAX\_AGE\_SECONDS | Max age of the session cookie in seconds                                                 |
+| MESOS\_TERM\_OAUTH2\_AUTHORIZATION\_URL           | Authorization URL. Note that OAuth2 works in combination with LDAP so you must provide the LDAP configuration too.                              |
+| MESOS\_TERM\_OAUTH2\_ACCESS\_TOKEN\_URL           | Access token URL.                               |
+| MESOS\_TERM\_OAUTH2\_TOKEN\_INFO\_URL             | Token info URL.                                 |
+| MESOS\_TERM\_OAUTH2\_CLIENT\_ID                   | Client ID of the provider.                  |
+| MESOS\_TERM\_OAUTH2\_CLIENT\_SECRET               | Client secret.                              |
+| MESOS\_TERM\_OAUTH2\_FAILURE\_REDIRECT\_URL       | Redirect to that URL on authentication request. This URL is likely a SSO portal |
+>>>>>>> ebd02d2... Add OAuth2 support.
 
 ## Authorizations model
 

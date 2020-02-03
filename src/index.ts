@@ -14,18 +14,26 @@ import config from './controllers/config';
 import sandbox from './controllers/sandbox';
 
 import { setup, SuperAdminsOnly } from './express_helpers';
+<<<<<<< HEAD
 import { BasicAuth } from './authentication';
+=======
+import { BasicAuth, OAuth2 } from './authentication';
+>>>>>>> ebd02d2... Add OAuth2 support.
 import { AuthenticatedLogger, AnonymousLogger } from './logger';
 
 const app = Express();
 const expressWs = ExpressWs(app);
 
+console.log(`Cookie max age is set to ${env.SESSION_MAX_AGE_SECONDS} seconds`);
 const sessionOptions: session.SessionOptions = {
   name: 'mesos-term',
   secret: env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: {
+    secure: false,
+    maxAge: env.SESSION_MAX_AGE_SECONDS * 1000,
+  },
 };
 
 if (app.get('env') === 'production') {
@@ -34,12 +42,25 @@ if (app.get('env') === 'production') {
 }
 
 app.use(session(sessionOptions));
+<<<<<<< HEAD
 
+=======
+>>>>>>> ebd02d2... Add OAuth2 support.
 
 if (env.AUTHORIZATIONS_ENABLED) {
-  console.log('Authorizations are enabled.');
   setup(app, new AuthenticatedLogger());
+<<<<<<< HEAD
   BasicAuth(app);
+=======
+  if (env.OAUTH2_AUTHORIZATION_URL) {
+    console.log('OAuth2 authentication is enabled.');
+    OAuth2(app);
+  }
+  else {
+    console.log('Basic authentication is enabled.');
+    BasicAuth(app);
+  }
+>>>>>>> ebd02d2... Add OAuth2 support.
 }
 else {
   console.log('Authorizations are disabled.');
