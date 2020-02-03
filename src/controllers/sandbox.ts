@@ -83,11 +83,13 @@ export default function (app: Express.Application) {
                 res.status(400);
                 res.send('Mesos agent not found');
                 return;
-            } else if (err instanceof UnauthorizedAccessError) {
+            }
+            else if (err instanceof UnauthorizedAccessError) {
                 res.status(403);
                 res.send('Unauthorized');
                 return;
-            } else if (err instanceof TaskNotFoundError) {
+            }
+            else if (err instanceof TaskNotFoundError) {
                 res.status(404);
                 res.send('Task not found');
                 return;
@@ -110,11 +112,13 @@ export default function (app: Express.Application) {
                 res.status(400);
                 res.send('Mesos agent not found');
                 return;
-            } else if (err instanceof UnauthorizedAccessError) {
+            }
+            else if (err instanceof UnauthorizedAccessError) {
                 res.status(403);
                 res.send('Unauthorized');
                 return;
-            } else if (err instanceof TaskNotFoundError) {
+            }
+            else if (err instanceof TaskNotFoundError) {
                 res.status(404);
                 res.send('Task not found');
                 return;
@@ -138,11 +142,13 @@ export default function (app: Express.Application) {
                 res.status(400);
                 res.send('Mesos agent not found');
                 return;
-            } else if (err instanceof UnauthorizedAccessError) {
+            }
+            else if (err instanceof UnauthorizedAccessError) {
                 res.status(403);
                 res.send('Unauthorized');
                 return;
-            } else if (err instanceof TaskNotFoundError) {
+            }
+            else if (err instanceof TaskNotFoundError) {
                 res.status(404);
                 res.send('Task not found');
                 return;
@@ -175,11 +181,13 @@ export default function (app: Express.Application) {
                 res.status(400);
                 res.send('Mesos agent not found');
                 return;
-            } else if (err instanceof UnauthorizedAccessError) {
+            }
+            else if (err instanceof UnauthorizedAccessError) {
                 res.status(403);
                 res.send('Unauthorized');
                 return;
-            } else if (err instanceof TaskNotFoundError) {
+            }
+            else if (err instanceof TaskNotFoundError) {
                 res.status(404);
                 res.send('Task not found');
                 return;
