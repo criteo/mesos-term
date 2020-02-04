@@ -148,11 +148,12 @@ const useStyles = makeStyles(theme => ({
         background: theme.palette.background.default,
     },
     terminal: {
-        flexGrow: 1
+        flexGrow: 1,
+        width: '100%',
     },
     statusBarContainer: {
         width: '100%',
-        height: theme.spacing(4),
+        minHeight: theme.spacing(4),
         display: "flex",
         flexDirection: "row",
         alignContent: "center",

@@ -50,7 +50,7 @@ const useStyles = makeStyles(theme => ({
         borderRight: "1px solid #565656",
     },
     rightContainer: {
-        flexGrow: 1,
+        width: '100%',
         display: "flex",
         flexDirection: 'column',
         alignContent: 'center',

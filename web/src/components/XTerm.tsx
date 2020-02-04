@@ -34,39 +34,33 @@ export default function (props: Props) {
     const fitAddon = useRef<FitAddon>(new FitAddon());
     const websocket = useRef<WebSocket | null>(null);
     const classes = useStyles();
-    const [dimension, setDimension] = useState(null as Dimension | null);
     const [websocketState, setWebsocketState] = useState(WebSocket.CLOSED);
     const { createErrorNotification, createInfoNotification } = useNotifications();
     const location = useLocation();
     const queryParams = queryString.parse(location.search);
-    const xtermRef = useRef<Terminal>(new Terminal({
-        screenReaderMode: queryParams.screenReaderMode === "true",
-        fontFamily: 'roboto',
-        fontWeight: "normal",
-    }));
+    const xtermRef = useRef<Terminal | null>(null);
     const resizeThrottlingTimer = useRef<NodeJS.Timeout | null>(null);
 
-    const handleTerminalResize = async () => {
+    const resizeRemoteTerminal = useCallback(async () => {
+        if (props.token === null) {
+            return;
+        }
+        const dimensions = fitAddon.current.proposeDimensions();
+        if (dimensions) {
+            await postResizeTerminal(props.token, dimensions.rows, dimensions.cols);
+        }
+    }, [props.token]);
+
+    const handleTerminalResize = useCallback(async () => {
         fitAddon.current.fit();
         if (resizeThrottlingTimer.current) {
             clearTimeout(resizeThrottlingTimer.current);
             resizeThrottlingTimer.current = null;
         }
         resizeThrottlingTimer.current = setTimeout(() => {
-            const dimensions = fitAddon.current.proposeDimensions();
-            if (dimensions) {
-                setDimension(dimensions);
-            }
+            resizeRemoteTerminal();
         }, 300);
-    }
-
-    const resizeRemoteTerminal = useCallback(async () => {
-        if (dimension === null || props.token === null) {
-            return;
-        }
-
-        await postResizeTerminal(props.token, dimension.rows, dimension.cols);
-    }, [dimension, props.token]);
+    }, [resizeRemoteTerminal]);
 
     const handleSocketOpen = useMemoizedCallback((socket: WebSocket, e: Event) => {
         const self = socket;
@@ -79,15 +73,16 @@ export default function (props: Props) {
         }
         keepAlive();
         setWebsocketState(WebSocket.OPEN);
-        handleTerminalResize();
+        fitAddon.current.fit();
+        resizeRemoteTerminal();
         props.onOpen();
         console.log("Connection is open!");
-    }, []);
+    }, [resizeRemoteTerminal]);
 
     const handleSocketClose = useMemoizedCallback((socket: WebSocket, e: Event) => {
         setWebsocketState(WebSocket.CLOSED);
         console.log("Connection has been closed.");
-        createInfoNotification("Connection has been closed.")
+        createInfoNotification("Connection has been closed.");
         props.onClose();
     }, []);
 
@@ -113,13 +108,21 @@ export default function (props: Props) {
         websocket.current.onclose = function (this, e) { handleSocketClose(this, e) };;
         websocket.current.onerror = function (this, e) { handleSocketError(this, e) };;
 
+        xtermRef.current = new Terminal({
+            screenReaderMode: queryParams.screenReaderMode === "true",
+            // fontFamily: 'roboto',
+            // fontWeight: 'normal',
+        })
         xtermRef.current.loadAddon(fitAddon.current);
         xtermRef.current.loadAddon(new AttachAddon(websocket.current));
         xtermRef.current.open(terminalDivRef.current);
-    }, [props.token, handleSocketOpen, handleSocketClose, handleSocketError]);
+        fitAddon.current.fit();
+        resizeRemoteTerminal();
+    }, [props.token, handleSocketOpen, handleSocketClose, handleSocketError, resizeRemoteTerminal]);
 
     useEffect(() => { resizeRemoteTerminal(); }, [resizeRemoteTerminal]);
     useEffect(() => { createTerminal(); }, [createTerminal]);
+    useEffect(() => window.onresize = function () { handleTerminalResize() }, [handleTerminalResize]);
 
     const termClassName = classnames(isFocused ? 'xterm-focused' : null, classes.termContainer);
     const isReady = websocketState === WebSocket.OPEN;
@@ -141,13 +144,13 @@ const useStyles = makeStyles(theme => ({
         display: "flex",
         flexDirection: "column",
         backgroundColor: 'black',
-        height: "100%",
+        height: '100%',
     },
     termContainer: {
         flexGrow: 1,
     },
     mesosLogo: {
-        position: 'absolute',
+        position: 'fixed',
         left: 0,
         right: 0,
         marginLeft: 'auto',
