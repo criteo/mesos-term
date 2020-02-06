@@ -147,8 +147,7 @@ Here are the details of available options.
 | MESOS\_TERM\_CA\_FILE                   | CA file to connect to Mesos agent  in pem format.                                        |
 | MESOS\_TERM\_MESOS\_AGENT\_PRINCIPAL    | The principal Mesos term uses to connect to the Mesos agent.                             |
 | MESOS\_TERM\_MESOS\_AGENT\_PASSWORD     | The password Mesos term uses to connect to the Mesos agent.                              |
-| MESOS\_TERM\_FORWARDED\_AUTH\_ENABLED   | If `true`, authentication is handled by a proxy in front of MesosTerm. MesosTerm consumes X-Forwarded-User header to get the DN of the user. This option should be used in combination with the LDAP options for resolving user groups.    |
-| MESOS\_TERM\_AUTHORIZE\_ALL\_SANDBOXES    | If `true`, all authenticated users can read all sandboxes. Otherwise the permissions are granted according to the same strategy as for terminals   |
+| MESOS\_TERM\_AUTHORIZE\_ALL\_SANDBOXES  | If `true`, all authenticated users can read all sandboxes. Otherwise the permissions are granted according to the same strategy as for terminals   |
 
 ## Authorizations model
 

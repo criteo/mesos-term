@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HashRouter as Router, Route, Redirect, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Redirect, Switch } from "react-router-dom";
 import { ThemeProvider, createMuiTheme } from '@material-ui/core';
 import NotificationsContext, { Notification } from './hooks/NotificationContext';
 import NotificationBar from './components/NotificationBar';

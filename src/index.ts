@@ -14,7 +14,7 @@ import config from './controllers/config';
 import sandbox from './controllers/sandbox';
 
 import { setup, SuperAdminsOnly } from './express_helpers';
-import { BasicAuth, ForwardedAuth } from './authentication';
+import { BasicAuth } from './authentication';
 import { AuthenticatedLogger, AnonymousLogger } from './logger';
 
 const app = Express();
@@ -33,26 +33,23 @@ if (app.get('env') === 'production') {
   sessionOptions.cookie.secure = true;
 }
 
-app.use('/', Express.static(__dirname + '/public_html'));
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '/views'));
 app.use(session(sessionOptions));
-app.use(BodyParser.json());
+
 
 if (env.AUTHORIZATIONS_ENABLED) {
   console.log('Authorizations are enabled.');
   setup(app, new AuthenticatedLogger());
-  if (env.FORWARDED_AUTH_ENABLED) {
-    ForwardedAuth(app);
-  }
-  else {
-    BasicAuth(app);
-  }
+  BasicAuth(app);
 }
 else {
   console.log('Authorizations are disabled.');
   setup(app, new AnonymousLogger());
 }
+
+app.use('/', Express.static(__dirname + '/public_html'));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '/views'));
+app.use(BodyParser.json());
 
 app.get('/ping', ping);
 TerminalController(app);

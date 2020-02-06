@@ -48,7 +48,7 @@ export function testSandboxUnauthorized(username: string, appName: string) {
         this.timeout(TIMEOUT_TEST);
         const instanceID = this.mesosTaskIds[appName];
         await Helpers.withChrome(async (driver) => {
-            await driver.get(`http://${username}:password@localhost:5000/#/task/${instanceID}/sandbox`);
+            await driver.get(`http://${username}:password@localhost:5000/task/${instanceID}/sandbox`);
             await receiveUnauthorizedErrorMessage(driver);
         });
     });
@@ -56,7 +56,7 @@ export function testSandboxUnauthorized(username: string, appName: string) {
 
 async function checkCanSeeFilesInSandbox(username: string, instanceID: string) {
     await Helpers.withChrome(async (driver) => {
-        await driver.get(`http://${username}:password@localhost:5000/#/task/${instanceID}/sandbox`);
+        await driver.get(`http://${username}:password@localhost:5000/task/${instanceID}/sandbox`);
         await driver.wait(untilSandboxDisplaysFiles(['stdout', 'stderr']));
     });
 }

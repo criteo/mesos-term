@@ -10,7 +10,7 @@ describe('Sandbox', function () {
             const instanceID = this.mesosTaskIds["app1"];
             const username = "john";
             await Helpers.withChrome(async (driver) => {
-                await driver.get(`http://${username}:password@localhost:5000/#/task/${instanceID}/sandbox`);
+                await driver.get(`http://${username}:password@localhost:5000/task/${instanceID}/sandbox`);
                 await Sandbox.clickFile(driver, "stdout");
                 await Sandbox.checkDescription(driver, "stdout", "-rw-r--r--", "myuser", "myuser");
                 await Sandbox.clickFile(driver, "stderr");
@@ -24,7 +24,7 @@ describe('Sandbox', function () {
             const instanceID = this.mesosTaskIds["app1"];
             const username = "john";
             await Helpers.withChrome(async (driver) => {
-                await driver.get(`http://${username}:password@localhost:5000/#/task/${instanceID}/sandbox`);
+                await driver.get(`http://${username}:password@localhost:5000/task/${instanceID}/sandbox`);
                 await Sandbox.doubleClickFile(driver, "stdout");
                 await Sandbox.checkDescription(driver, "stdout", "-rw-r--r--", "myuser", "myuser");
                 await Sandbox.waitFileReaderToBeVisible(driver);
@@ -38,7 +38,7 @@ describe('Sandbox', function () {
             const instanceID = this.mesosTaskIds["app1"];
             const username = "john";
             await Helpers.withChrome(async (driver) => {
-                await driver.get(`http://${username}:password@localhost:5000/#/task/${instanceID}/terminal?screenReaderMode=true`);
+                await driver.get(`http://${username}:password@localhost:5000/task/${instanceID}/terminal?screenReaderMode=true`);
                 await driver.wait(untilTermContains(/\$|#/), TIMEOUT_DRIVER);
                 await sendKeysToTerminal(driver, 'touch hello && sleep 5 && echo hello > hello\n');
 
@@ -46,7 +46,7 @@ describe('Sandbox', function () {
                 const tabs = await driver.getAllWindowHandles();
                 await driver.switchTo().window(tabs[1]);
 
-                await driver.get(`http://${username}:password@localhost:5000/#/task/${instanceID}/sandbox`);
+                await driver.get(`http://${username}:password@localhost:5000/task/${instanceID}/sandbox`);
                 await Sandbox.doubleClickFile(driver, "hello");
                 await Sandbox.waitFileReaderToBeVisible(driver);
                 await driver.wait(Sandbox.untilFileReaderContains("hello"), TIMEOUT_DRIVER);
