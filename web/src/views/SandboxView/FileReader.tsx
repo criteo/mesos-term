@@ -1,4 +1,4 @@
-import React, { useState, useRef, MutableRefObject, UIEvent } from "react";
+import React, { useRef, MutableRefObject, UIEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import { makeStyles, useTheme } from "@material-ui/core";
@@ -14,20 +14,32 @@ interface FileReaderProps {
 export default function (props: FileReaderProps) {
     const classes = useFileReaderStyles();
     const fileReaderRef = useRef<HTMLDivElement | null>(null);
-    const [loadPreviousPortion, setLoadPreviousPortion] = useState(false);
-    const { lines, contentRef, follow, setFollow, lineRange } = useFileReader(
-        props.taskID, props.path, 2000, loadPreviousPortion);
+    const { lines, contentRef, follow, setFollow, lineRange, readPreviousPortion, buffer } = useFileReader(
+        props.taskID, props.path, 10000);
+    const throttler = useRef<boolean>(false);
 
-    const handleScroll = (p: UIEvent<HTMLDivElement>) => {
-        if (p.currentTarget.scrollHeight > 0) {
-            if (p.currentTarget.scrollTop < 0.1 * p.currentTarget.scrollHeight) {
-                setLoadPreviousPortion(true);
-            } else {
-                setLoadPreviousPortion(false);
+    const handleScroll = async (p: UIEvent<HTMLDivElement>) => {
+        if (!buffer) {
+            return;
+        }
+
+        setFollow(contentRef.current !== null &&
+            contentRef.current.scrollHeight - p.currentTarget.scrollTop === contentRef.current.clientHeight);
+
+        if (buffer.range.start === 0) {
+            return;
+        }
+
+        if (p.currentTarget.scrollTop < 0.05 * p.currentTarget.scrollHeight) {
+            if (p.currentTarget.scrollTop === 0) {
+                p.currentTarget.scrollTo({ top: 0.05 * p.currentTarget.scrollHeight });
             }
-
-            setFollow(contentRef.current !== null &&
-                contentRef.current.scrollHeight - p.currentTarget.scrollTop === contentRef.current.clientHeight)
+            if (throttler.current) {
+                return;
+            }
+            throttler.current = true;
+            await readPreviousPortion();
+            setTimeout(() => throttler.current = false, 200);
         }
     }
 
@@ -95,12 +107,13 @@ interface FileContentProps {
 
 function FileContent(props: FileContentProps) {
     const classes = useFileContentStyles();
-    const textParts = props.lines;
     const theme = useTheme();
     const margin = theme.spacing(2);
 
-    const items = props.lines.map((l, i) =>
-        <Row content={textParts[i]} margin={margin} key={props.lineRange.start + i} />);
+    const items = props.lines.map((l, i) => {
+        const key = props.lineRange.start + i + l;
+        return <Row content={l} margin={margin} key={key} />
+    });
 
     return (
         <div className={classes.root}

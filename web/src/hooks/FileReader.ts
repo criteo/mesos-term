@@ -15,7 +15,7 @@ interface FileState {
 
 export function useFileReader(
     taskID: string, path: string,
-    chunkSize: number, loadMore: boolean) {
+    chunkSize: number) {
 
     const timer = useRef<NodeJS.Timeout | null>();
     const [follow, setFollow] = useState(true);
@@ -34,11 +34,11 @@ export function useFileReader(
         const size = Math.min(buffer.current.range.start, chunkSize);
         const res = await readSandboxFile(taskID, path, from, size);
         if (res.data !== '') {
-            const contentLines = buffer.current.data.split('\n');
+            const oldContentLines = buffer.current.data.split('\n');
             buffer.current.data = res.data + buffer.current.data;
             buffer.current.range.start -= res.data.length;
             const newContentLines = buffer.current.data.split('\n');
-            buffer.current.lineRange.start -= newContentLines.length - contentLines.length;
+            buffer.current.lineRange.start -= newContentLines.length - oldContentLines.length;
             setDisplayedLines(newContentLines);
         }
     }, [setDisplayedLines, taskID, chunkSize, path]);
@@ -49,8 +49,7 @@ export function useFileReader(
         }
 
         const from = buffer.current.range.end;
-        const size = Math.min(chunkSize);
-        const res = await readSandboxFile(taskID, path, from, size);
+        const res = await readSandboxFile(taskID, path, from, chunkSize);
         if (res.data !== '') {
             const contentLines = buffer.current.data.split('\n');
             buffer.current.data = buffer.current.data + res.data;
@@ -72,7 +71,13 @@ export function useFileReader(
             lineRange: { start: 0, end: 0 }
         };
         setInit(true);
-    }, [taskID, path]);
+
+        if (contentRef.current && buffer.current) {
+            while (contentRef.current.scrollHeight < window.innerHeight * 1.2 && buffer.current.range.start > 0) {
+                await readPreviousPortion();
+            }
+        }
+    }, [taskID, path, readPreviousPortion]);
 
     useEffect(() => {
         timer.current = setInterval(readNextPortion, 2000);
@@ -90,22 +95,14 @@ export function useFileReader(
     }, [follow, displayedLines]);
 
     useEffect(() => { initialize() }, [initialize]);
+
     useEffect(() => {
-        async function fn() {
-            if (init) {
-                await readPreviousPortion();
-                if (contentRef.current)
-                    contentRef.current.scrollTop = contentRef.current.scrollHeight;
+        (async function fn() {
+            if (init && contentRef.current) {
+                contentRef.current.scrollTop = contentRef.current.scrollHeight;
             }
-        }
-        fn();
-    }, [readPreviousPortion, init]);
+        })();
+    }, [init]);
 
-    useEffect(() => {
-        if (loadMore) {
-            readPreviousPortion();
-        }
-    }, [readPreviousPortion, loadMore]);
-
-    return { lines: displayedLines, contentRef, follow, setFollow, lineRange };
+    return { lines: displayedLines, contentRef, follow, setFollow, lineRange, readPreviousPortion, buffer: buffer.current };
 }
