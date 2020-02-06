@@ -94,6 +94,6 @@ if (authorizations_enabled) {
   env['ENABLE_RIGHTS_DELEGATION'] = process.env['MESOS_TERM_ENABLE_RIGHTS_DELEGATION'] === 'true';
 
   env['AUTHORIZE_ALL_SANDBOXES'] =
-    'AUTHORIZE_ALL_SANDBOXES' in process.env &&
-    process.env['AUTHORIZE_ALL_SANDBOXES'] === 'true';
+    'MESOS_TERM_AUTHORIZE_ALL_SANDBOXES' in process.env &&
+    process.env['MESOS_TERM_AUTHORIZE_ALL_SANDBOXES'] === 'true';
 }
