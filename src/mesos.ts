@@ -254,9 +254,10 @@ function cacheMesosState(mesosMasterURL: string, refreshSeconds: number) {
   refreshCache();
 
   return async (update: boolean) => {
-    if (!update) {
+    if (!update && cache !== undefined) {
       return cache;
     }
+    console.log('refresh');
     return refreshCache();
   };
 }

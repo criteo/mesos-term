@@ -1,30 +1,25 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { makeStyles } from "@material-ui/core";
 import classnames from "classnames";
-import Measure from "react-measure";
 
 import { Terminal } from 'xterm';
 import "xterm/css/xterm.css";
 
 import { AttachAddon } from 'xterm-addon-attach';
-import { FitAddon } from 'xterm-addon-fit';
+import { FitAddon } from './FitAddon';
 import { postResizeTerminal } from "../services/MesosTerm";
 import MesosImage from "../assets/images/mesos.png";
 import { useNotifications } from "../hooks/NotificationContext";
 import queryString from 'query-string';
 import { useLocation } from "react-router";
 import { useMemoizedCallback } from "../hooks/MemoizedCallback";
+import { useWindowLoaded } from "../hooks/WindowLoadedContext";
 
 export interface Props extends React.DOMAttributes<{}> {
     token: string | null;
 
     onOpen: () => void;
     onClose: () => void;
-}
-
-interface Dimension {
-    rows: number;
-    cols: number;
 }
 
 export default function (props: Props) {
@@ -40,16 +35,17 @@ export default function (props: Props) {
     const queryParams = queryString.parse(location.search);
     const xtermRef = useRef<Terminal | null>(null);
     const resizeThrottlingTimer = useRef<NodeJS.Timeout | null>(null);
+    const windowLoaded = useWindowLoaded();
 
     const resizeRemoteTerminal = useCallback(async () => {
-        if (props.token === null) {
+        if (props.token === null || websocketState !== WebSocket.OPEN) {
             return;
         }
         const dimensions = fitAddon.current.proposeDimensions();
-        if (dimensions) {
+        if (dimensions && dimensions.cols && dimensions.rows) {
             await postResizeTerminal(props.token, dimensions.rows, dimensions.cols);
         }
-    }, [props.token]);
+    }, [props.token, websocketState]);
 
     const handleTerminalResize = useCallback(async () => {
         fitAddon.current.fit();
@@ -73,11 +69,10 @@ export default function (props: Props) {
         }
         keepAlive();
         setWebsocketState(WebSocket.OPEN);
-        fitAddon.current.fit();
-        resizeRemoteTerminal();
         props.onOpen();
+        handleTerminalResize();
         console.log("Connection is open!");
-    }, [resizeRemoteTerminal]);
+    }, [handleTerminalResize]);
 
     const handleSocketClose = useMemoizedCallback((socket: WebSocket, e: Event) => {
         setWebsocketState(WebSocket.CLOSED);
@@ -94,13 +89,14 @@ export default function (props: Props) {
 
 
     const createTerminal = useCallback(async () => {
-        if (props.token === null || terminalDivRef.current === null) {
+        if (props.token === null || terminalDivRef.current === null || xtermRef.current !== null || !windowLoaded) {
             return;
         }
+
         const protocol = (window.location.protocol === 'https:') ? 'wss://' : 'ws://';
         const socketURL = protocol + window.location.hostname
             + ((window.location.port) ? (':' + window.location.port) : '')
-            + '/api/terminals/ws?token=' + props.token;
+            + `/api/terminals/ws?token=${props.token}`;
         websocket.current = new WebSocket(socketURL);
         setWebsocketState(WebSocket.CONNECTING);
 
@@ -110,32 +106,33 @@ export default function (props: Props) {
 
         xtermRef.current = new Terminal({
             screenReaderMode: queryParams.screenReaderMode === "true",
-            // fontFamily: 'roboto',
-            // fontWeight: 'normal',
+            fontFamily: 'roboto',
+            fontWeight: 'normal',
         })
         xtermRef.current.loadAddon(fitAddon.current);
         xtermRef.current.loadAddon(new AttachAddon(websocket.current));
         xtermRef.current.open(terminalDivRef.current);
-        fitAddon.current.fit();
-        resizeRemoteTerminal();
-    }, [props.token, handleSocketOpen, handleSocketClose, handleSocketError, resizeRemoteTerminal]);
+    }, [props.token, handleSocketOpen, handleSocketClose, handleSocketError, windowLoaded, queryParams.screenReaderMode]);
 
     useEffect(() => { resizeRemoteTerminal(); }, [resizeRemoteTerminal]);
-    useEffect(() => { createTerminal(); }, [createTerminal]);
-    useEffect(() => window.onresize = function () { handleTerminalResize() }, [handleTerminalResize]);
+    useEffect(() => {
+        window.addEventListener('resize', handleTerminalResize);
+        return () => { window.removeEventListener('resize', handleTerminalResize); };
+    }, [handleTerminalResize]);
 
-    const termClassName = classnames(isFocused ? 'xterm-focused' : null, classes.termContainer);
+    useEffect(() => {
+        createTerminal();
+        return () => { xtermRef.current = null; };
+    }, [createTerminal]);
+
+    const termClassName = classnames(isFocused ? 'xterm-focused' : null, classes.term);
     const isReady = websocketState === WebSocket.OPEN;
 
     return (
-        <Measure bounds onResize={handleTerminalResize}>
-            {({ measureRef }) => (
-                <div className={classes.root} ref={measureRef}>
-                    <img src={MesosImage} alt="mesos logo" className={classnames(classes.mesosLogo, isReady ? classes.mesosLogoBackground : "")} />
-                    <div ref={terminalDivRef} className={termClassName} id="terminal" />
-                </div>
-            )}
-        </Measure>
+        <div className={classes.root}>
+            <img src={MesosImage} alt="mesos logo" className={classnames(classes.mesosLogo, isReady ? classes.mesosLogoBackground : "")} />
+            <div ref={terminalDivRef} className={termClassName} id="terminal" />
+        </div>
     );
 }
 
@@ -143,11 +140,11 @@ const useStyles = makeStyles(theme => ({
     root: {
         display: "flex",
         flexDirection: "column",
-        backgroundColor: 'black',
-        height: '100%',
-    },
-    termContainer: {
         flexGrow: 1,
+    },
+    term: {
+        flexGrow: 1,
+        backgroundColor: 'black',
     },
     mesosLogo: {
         position: 'fixed',

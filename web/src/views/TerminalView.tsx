@@ -108,7 +108,10 @@ export default function () {
                 <span className={classnames(classes.loader, status === Status.Loaded || status === Status.Failed || status === Status.Closed ? "hidden" : "")}>
                     <CircularProgress size={128} />
                 </span>
-                <XTerm token={termToken} onOpen={() => { setStatus(Status.Loaded) }} onClose={() => { setStatus(Status.Closed) }} />
+                <XTerm
+                    token={termToken}
+                    onOpen={() => { setStatus(Status.Loaded) }}
+                    onClose={() => { setStatus(Status.Closed) }} />
             </div>
             <div className={classes.statusBarContainer}>
                 <div className={classes.statusBar}>
@@ -141,15 +144,16 @@ export default function () {
 
 const useStyles = makeStyles(theme => ({
     root: {
-        width: '100%',
-        height: '100%',
-        display: "flex",
+        display: 'flex',
         flexDirection: "column",
         background: theme.palette.background.default,
+        height: '100%',
     },
     terminal: {
         flexGrow: 1,
         width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
     },
     statusBarContainer: {
         width: '100%',
