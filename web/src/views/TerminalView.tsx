@@ -101,7 +101,7 @@ export default function () {
                 onClose={() => setDelegationDialogOpen(false)} /> : null}
             {taskID ? <AccessRequestDialog
                 open={accessRequestDialogOpen}
-                closable={status !== Status.Unauthorized}
+                closable={true}
                 onClose={() => setAccessRequestDialogOpen(false)}
                 onAccessRequest={setAccessToken} /> : null}
             <div className={classes.terminal}>
