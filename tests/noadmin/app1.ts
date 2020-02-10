@@ -2,6 +2,8 @@ import AppsHelpers = require('../apps_helpers');
 import * as Sandbox from "../common/sandbox";
 
 describe('app1 (no label, no root)', function () {
+    this.retries(3);
+
     describe('grant access button is not displayed', function () {
         AppsHelpers.testShouldSeeGrantAccessButton('john', 'app1');
     })

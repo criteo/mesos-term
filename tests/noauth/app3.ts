@@ -2,6 +2,8 @@ import AppsHelpers = require('../apps_helpers');
 import * as Sandbox from "../common/sandbox";
 
 describe('app3 (label GRANTED_TO dev, no root)', function () {
+    this.retries(3);
+
     describe('user john can interact with terminal', function () {
         AppsHelpers.testInteractionsWithTerminal('john', 'app3');
     });
