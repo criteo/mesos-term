@@ -1,0 +1,170 @@
+version: "3"
+services:
+  zookeeper:
+    image: zookeeper:3.4.11
+    hostname: zookeeper
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.130.2
+
+  mesos-master:
+    image: mesosphere/mesos-master:1.6.0-rc1
+    privileged: true
+    hostname: localhost
+    ports:
+      - "5050:5050"
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.130.3
+    links:
+      - zookeeper
+    depends_on:
+      - zookeeper
+    environment:
+      MESOS_ZK: zk://zookeeper:2181/mesos
+      MESOS_QUORUM: 1
+      MESOS_CLUSTER: docker-compose
+      MESOS_HOSTNAME: localhost
+      MESOS_WORK_DIR: /var/tmp/mesos
+      MESOS_LOG_DIR: /var/log/mesos
+      LIBPROCESS_IP: 172.16.130.3
+
+  mesos-slave:
+    build:
+      context: tests/resources
+      dockerfile: Dockerfile.slave
+    privileged: true
+    hostname: localhost
+    entrypoint: "mesos-agent"
+    ports:
+      - "5051:5051"
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.130.4
+    links:
+      - zookeeper:zookeeper
+      - mesos-master:master.mesos
+    depends_on:
+      - zookeeper
+      - mesos-master
+    environment:
+      MESOS_MASTER: zk://zookeeper:2181/mesos
+      MESOS_CONTAINERIZERS: mesos,docker
+      MESOS_PORT: 5051
+      MESOS_RESOURCES: ports(*):[11000-11999]
+      MESOS_HOSTNAME: localhost
+      MESOS_WORK_DIR: /var/tmp/mesos
+      MESOS_LOG_DIR: /var/log/mesos
+      MESOS_SYSTEMD_ENABLE_SUPPORT: "false"
+      MESOS_FRAMEWORKS_HOME: /var/tmp/mesos/frameworks
+      MESOS_IMAGE_PROVIDERS: docker
+      MESOS_ISOLATION: filesystem/linux,docker/runtime
+      MESOS_AUTHENTICATE_HTTP_READWRITE: "true"
+      MESOS_AUTHENTICATE_HTTP_EXECUTORS: "true"
+      MESOS_HTTP_CREDENTIALS: /etc/mesos/agent_credential
+      MESOS_JWT_SECRET_KEY: /etc/mesos/secret_key
+      LIBPROCESS_IP: 172.16.130.4
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./tests/resources/agent_credential:/etc/mesos/agent_credential
+      - ./tests/resources/secret_key:/etc/mesos/secret_key
+
+  marathon:
+    image: mesosphere/marathon:v1.5.6
+    entrypoint:
+      - ./bin/start
+      - --disable_ha
+      - --logging_level
+      - info
+    hostname: localhost
+    ports:
+      - "8080:8080"
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.130.5
+    links:
+      - zookeeper
+      - mesos-master
+    depends_on:
+      - zookeeper
+      - mesos-master
+      - mesos-slave
+    environment:
+      - MARATHON_ZK=zk://zookeeper:2181/marathon
+      - MARATHON_MASTER=zk://zookeeper:2181/mesos
+      - LIBPROCESS_IP=172.16.130.5
+
+  openldap:
+    image: clems4ever/openldap
+    ports:
+      - "389:389"
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.130.6
+    environment:
+      - SLAPD_ORGANISATION=MyCompany
+      - SLAPD_DOMAIN=example.com
+      - SLAPD_PASSWORD=password
+      - SLAPD_CONFIG_PASSWORD=password
+      - SLAPD_ADDITIONAL_MODULES=memberof
+      - SLAPD_ADDITIONAL_SCHEMAS=openldap
+      - SLAPD_FORCE_RECONFIGURE=true
+
+  mesos-term:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    ports:
+      - "3000:3000"
+    environment:
+      - HOST=0.0.0.0
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.130.7
+    links:
+      - mesos-master
+      - openldap
+    depends_on:
+      - mesos-master
+      - openldap
+    volumes:
+      - ./src:/usr/app/src
+
+  openldap-admin:
+    image: osixia/phpldapadmin:0.6.11
+    ports:
+      - 9090:80
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - PHPLDAPADMIN_HTTPS=false
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.130.12
+
+  mesos-term-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    volumes:
+      - ./web:/usr/app
+    working_dir: /usr/app
+    ports:
+      - 5000:3000
+    command: /bin/bash -c 'npm ci && npm run start'
+    networks:
+      mesos_command_modules_net:
+        ipv4_address: 172.16.130.13
+
+networks:
+  mesos_command_modules_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.130.0/24

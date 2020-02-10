@@ -1,0 +1,29 @@
+FROM node:11.15.0
+
+ARG USER_ID
+ARG GROUP_ID
+
+RUN userdel node && \
+    groupadd --gid ${GROUP_ID} dev && \
+    useradd --uid ${USER_ID} -g dev -m dev && \
+    mkdir -p /usr/app && chown dev:dev /usr/app && \
+    npm install -g ts-node nodemon && \
+    apt-get update && apt-get install -y python3-pip
+
+USER dev
+
+WORKDIR /usr/app
+
+ADD package.json package.json
+ADD package-lock.json package-lock.json
+RUN npm ci
+
+ADD tests/resources/entrypoint.sh /entrypoint.sh
+ADD src/python/requirements.txt requirements.txt
+
+RUN pip3 install -r requirements.txt
+
+ADD nodemon.json nodemon.json
+ADD tsconfig.json tsconfig.json
+
+CMD ["/entrypoint.sh"]

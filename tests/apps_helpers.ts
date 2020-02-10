@@ -1,403 +1,269 @@
-import Bluebird = require('bluebird');
-import webdriver = require('selenium-webdriver');
+import { WebDriver, until, By, Condition } from 'selenium-webdriver';
 import helpers = require('./helpers');
-import Assert = require('assert');
 
-const TIMEOUT = 10000;
+const TIMEOUT_TEST = 20000;
+const TIMEOUT_DRIVER = 18000;
 
-export function interactWithTerminal(driver: any) {
-  return driver.wait(webdriver.until.elementLocated(webdriver.By.css(".xterm-rows")), TIMEOUT)
-    .then(function(el: webdriver.WebElement) {
-      return Bluebird.resolve(driver.wait(webdriver.until.elementTextMatches(el, /\$|#/), TIMEOUT));
-    })
-    .then(function() {
-      return Bluebird.resolve(
-        driver.wait(webdriver.until.elementLocated(webdriver.By.css(".terminal")), TIMEOUT));
-    })
-    .then(function(el: webdriver.WebElement) {
-      return Bluebird.resolve(el.sendKeys('ls\n'));
-    })
-    .then(function() {
-      return Bluebird.resolve(
-        driver.wait(webdriver.until.elementLocated(webdriver.By.css(".xterm-rows")), TIMEOUT));
-    })
-    .then(function(el: webdriver.WebElement) {
-      return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'stdout'), TIMEOUT));
+export const untilTermContains = function (pattern: RegExp) {
+  return new Condition(
+    `for terminal to contain ${pattern.toString()}`,
+    async function (driver) {
+      const el = await driver.wait(until.elementLocated(By.className("xterm-accessibility-tree")), TIMEOUT_DRIVER);
+      const text = await el.getText();
+      const matches = text.match(pattern);
+      return matches !== null && matches.length > 0;
     });
 }
 
-export function testAnswerToCommand(driver: any, command: string, expected: string) {
-  return driver.wait(webdriver.until.elementLocated(webdriver.By.css('.xterm-rows>div')), TIMEOUT)
-    .then(function(el: webdriver.WebElement) {
-      return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, 'runs'), TIMEOUT));
-    })
-    .then(function() {
-      return Bluebird.resolve(
-        driver.wait(webdriver.until.elementLocated(webdriver.By.css('.terminal')), TIMEOUT));
-    })
-    .then(function(el: webdriver.WebElement) {
-      return Bluebird.resolve(el.sendKeys(command + '\n'));
-    })
-    .then(function() {
-      return Bluebird.resolve(
-        driver.wait(webdriver.until.elementLocated(webdriver.By.css('.xterm-rows')), TIMEOUT));
-    })
-    .then(function(el: webdriver.WebElement) {
-      return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, expected), TIMEOUT));
-    });
+export async function sendKeysToTerminal(driver: WebDriver, keys: string) {
+  let el = await driver.wait(until.elementLocated(By.css(".xterm")), TIMEOUT_DRIVER);
+  await el.click();
+  el = await driver.wait(until.elementLocated(By.css(".xterm-helper-textarea")), TIMEOUT_DRIVER);
+  await el.sendKeys(keys);
 }
 
-export function checkInteractionsWithTerminal(
-  port: number,
+export async function interactWithTerminal(driver: WebDriver) {
+  await driver.wait(untilTermContains(/\$|#/), TIMEOUT_DRIVER);
+  await sendKeysToTerminal(driver, "ls\n");
+  await driver.wait(untilTermContains(/stdout/), TIMEOUT_DRIVER);
+}
+
+export async function testAnswerToCommand(driver: WebDriver, command: string, expected: string) {
+  await driver.wait(untilTermContains(/\$|#/), TIMEOUT_DRIVER);
+  await sendKeysToTerminal(driver, command + '\n');
+  await driver.wait(untilTermContains(new RegExp(expected)), TIMEOUT_DRIVER);
+}
+
+export async function checkInteractionsWithTerminal(
   user: string,
   instanceId: string) {
-  return helpers.withChrome(function(driver) {
-    return Bluebird.resolve(driver.get(`http://${user}:password@localhost:${port}/login/${instanceId}`))
-      .then(function() {
-        return interactWithTerminal(driver);
-      })
-      .then(function() {
-        return driver.sleep(2);
-      });
+  await helpers.withChrome(async function (driver) {
+    await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+    await interactWithTerminal(driver);
   });
 }
 
-export function checkInteractionsWithTerminalUsingAccessToken(
-  port: number,
+async function enterAccessToken(driver: WebDriver, accessToken: string) {
+  let el = await driver.wait(until.elementLocated(By.css("#access-request-dialog .token-field .MuiInput-input")), TIMEOUT_DRIVER);
+  el = await driver.wait(until.elementIsVisible(el), TIMEOUT_DRIVER);
+  await el.sendKeys(accessToken);
+  let buttonEl = await driver.wait(until.elementLocated(By.css("#access-request-dialog .ok-button")), TIMEOUT_DRIVER);
+  await buttonEl.click();
+}
+
+export async function checkInteractionsWithTerminalUsingAccessToken(
+  user: string,
+  accessToken: string,
+  instanceId: string) {
+  await helpers.withChrome(async function (driver) {
+    await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+    await enterAccessToken(driver, accessToken);
+    await interactWithTerminal(driver);
+    await driver.sleep(2);
+  });
+}
+
+export async function checkBadAccessToken(
   user: string,
   accessToken: string,
   instanceId: string) {
 
-  return helpers.withChrome(function(driver) {
-    return Bluebird.resolve(driver.get(`http://${user}:password@localhost:${port}/login/${instanceId}`))
-      .then(function() {
-        return Bluebird.resolve(
-          driver.wait(webdriver.until.elementLocated(webdriver.By.css(".access-token-field")), TIMEOUT))
-      })
-      .then(function(el: webdriver.WebElement) {
-        return Bluebird.resolve(
-          driver.wait(webdriver.until.elementIsVisible(el), TIMEOUT));
-      })
-      .then(function(el: webdriver.WebElement) {
-        return Bluebird.resolve(el.sendKeys(accessToken + '\n'));
-      })
-      .then(function() {
-        return interactWithTerminal(driver);
-      })
-      .then(function() {
-        return driver.sleep(2);
-      });
-  });
-}
-
-export function checkBadAccessToken(
-  port: number,
-  user: string,
-  accessToken: string,
-  instanceId: string) {
-
-  return helpers.withChrome(function(driver) {
-    return Bluebird.resolve(driver.get(`http://${user}:password@localhost:${port}/login/${instanceId}`))
-      .then(function() {
-        return Bluebird.resolve(
-          driver.wait(webdriver.until.elementLocated(webdriver.By.css(".access-token-field")), TIMEOUT))
-      })
-      .then(function(el: webdriver.WebElement) {
-        return Bluebird.resolve(
-          driver.wait(webdriver.until.elementIsVisible(el), TIMEOUT));
-      })
-      .then(function(el: webdriver.WebElement) {
-        return Bluebird.resolve(el.sendKeys(accessToken + '\n'));
-      })
-      .then(function() {
-        return receiveUnauthorizedErrorMessage(driver, port, user, instanceId, 'Unauthorized access to container.');
-      })
-      .then(function() {
-        return driver.sleep(2);
-      });
+  await helpers.withChrome(async function (driver) {
+    await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+    await enterAccessToken(driver, accessToken);
+    await receiveUnauthorizedErrorMessage(driver, 'Unauthorized access');
+    await driver.sleep(2);
   });
 }
 
 export function testInteractionsWithTerminal(
-  port: number,
   user: string,
   appName: string) {
 
-  it('should be able to interact with terminal', function() {
+  it('should be able to interact with terminal', async function () {
     this.retries(3);
-    this.timeout(TIMEOUT);
+    this.timeout(TIMEOUT_TEST);
     const instanceId = this.mesosTaskIds[appName];
-    return checkInteractionsWithTerminal(port, user, instanceId);
+    await checkInteractionsWithTerminal(user, instanceId);
   });
 }
 
-function testReceiveErrorMessage(
-  port: number,
+async function testReceiveErrorMessage(
   user: string,
   instanceId: string,
   expectedError: string) {
 
-  return helpers.withChrome(function(driver) {
-    return Bluebird.resolve(driver.get(`http://${user}:password@localhost:${port}/login/${instanceId}`))
-      .then(function() {
-        return Bluebird.resolve(
-          driver.wait(webdriver.until.elementLocated(webdriver.By.css(".error-splash .error")), TIMEOUT))
-      })
-      .then(function(el) {
-        return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, expectedError), TIMEOUT));
-      });
+  await helpers.withChrome(async function (driver) {
+    await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+    const el = await driver.wait(until.elementLocated(By.css(".notification-error .message-content")), TIMEOUT_DRIVER);
+    await driver.wait(until.elementTextContains(el, expectedError), TIMEOUT_DRIVER);
   });
 }
 
-function receiveUnauthorizedErrorMessage(
-  driver: any,
-  port: number,
-  user: string,
-  instanceId: string,
+async function receiveUnauthorizedErrorMessage(
+  driver: WebDriver,
   expectedError: string) {
-
-  return Bluebird.resolve(driver.get(`http://${user}:password@localhost:${port}/login/${instanceId}`))
-    .then(function() {
-      return Bluebird.resolve(
-        driver.wait(webdriver.until.elementLocated(webdriver.By.css(".unauthorized-splash .error")), TIMEOUT))
-    })
-    .then(function(el) {
-      return Bluebird.resolve(driver.wait(webdriver.until.elementTextContains(el, expectedError), TIMEOUT));
-    });
-}
-
-function testReceiveUnauthorizedErrorMessage(
-  port: number,
-  user: string,
-  instanceId: string,
-  expectedError: string) {
-  return helpers.withChrome(function(driver) {
-    return receiveUnauthorizedErrorMessage(driver, port, user, instanceId, expectedError);
-  });
-}
-
-function testReceiveErrorMessageFromAppName(
-  port: number,
-  user: string,
-  appName: string,
-  expectedError: string) {
-
-  describe(`from app name ${appName}`, function() {
-    it(`should receive error "${expectedError}"`, function() {
-      this.timeout(TIMEOUT);
-
-      const instanceId = this.mesosTaskIds[appName];
-      return testReceiveErrorMessage(port, user, instanceId, expectedError);
-    });
-  });
+  const el = await driver.wait(until.elementLocated(By.css(".notification-error .message-content")), TIMEOUT_DRIVER);
+  await driver.wait(until.elementTextContains(el, expectedError), TIMEOUT_DRIVER);
 }
 
 function testReceiveErrorMessageFromInstanceId(
-  port: number,
   user: string,
   instanceId: string,
   expectedError: string) {
 
-  describe(`from instance ID ${instanceId}`, function() {
-    it(`should receive error "${expectedError}"`, function() {
-      this.timeout(TIMEOUT);
-
-      return testReceiveErrorMessage(port, user, instanceId, expectedError);
+  describe(`from instance ID ${instanceId}`, function () {
+    it(`should receive error "${expectedError}"`, function () {
+      this.timeout(TIMEOUT_TEST);
+      return testReceiveErrorMessage(user, instanceId, expectedError);
     });
   });
 }
 
-function testReceiveUnauthorizedErrorMessageFromAppName(
-  port: number,
-  user: string,
-  appName: string,
-  expectedError: string) {
-
-  describe(`from app name ${appName}`, function() {
-    it(`should receive unauthorized error "${expectedError}"`, function() {
-      this.timeout(TIMEOUT);
-
+export function testCaseUnauthorizedAccessDialogDisplayed(user: string, appName: string) {
+  describe("unauthorized access dialog be displayed", () => {
+    it("displayed", async function () {
+      this.timeout(TIMEOUT_TEST);
       const instanceId = this.mesosTaskIds[appName];
-      return testReceiveUnauthorizedErrorMessage(port, user, instanceId, expectedError);
-    });
-  });
+      await helpers.withChrome(async function (driver) {
+        await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+        const el = await driver.wait(until.elementLocated(By.id("access-request-dialog")), TIMEOUT_DRIVER);
+        await driver.wait(until.elementIsVisible(el), TIMEOUT_DRIVER);
+      })
+    })
+  })
 }
 
-export function testUnauthorizedUser(port: number, user: string, appName: string) {
-  testReceiveUnauthorizedErrorMessageFromAppName(port, user, appName, 'Unauthorized access to container.');
+export function testUnauthorizedUser(user: string, appName: string) {
+  testCaseUnauthorizedAccessDialogDisplayed(user, appName);
 }
 
-export function testNoTaskId(port: number, user: string, instanceId: string) {
-  testReceiveErrorMessageFromInstanceId(port, user, instanceId, 'Task not found.');
+export function testNoTaskId(user: string, instanceId: string) {
+  testReceiveErrorMessageFromInstanceId(user, instanceId, 'Task not found');
 }
 
-export function testShouldNotSeeGrantAccessButton(port: number, user: string, appName: string) {
-  it('should not see the `Grant access` button', function() {
-    this.timeout(TIMEOUT);
+export function testShouldNotSeeGrantAccessButton(user: string, appName: string) {
+  it('should not see the `Grant access` button', async function () {
+    this.timeout(TIMEOUT_TEST);
     const instanceId = this.mesosTaskIds[appName];
 
-    return helpers.withChrome(function(driver) {
-      return Bluebird.resolve(driver.get(`http://${user}:password@localhost:${port}/login/${instanceId}`))
-        .then(function() {
-          return Bluebird.resolve(
-            driver.wait(webdriver.until.elementLocated(webdriver.By.css(".task_id")), TIMEOUT))
-        })
-        .then(function(el) {
-          return Bluebird.resolve(
-            driver.wait(webdriver.until.elementIsVisible(el), TIMEOUT))
-        })
-        .then(function() {
-          return Bluebird.resolve(
-            driver.findElement(webdriver.By.css(".delegate-button")))
-            .then(() => Bluebird.reject(new Error('should not be here')))
-            .catch((err) => Bluebird.resolve());
-        });
+    await helpers.withChrome(async function (driver) {
+      await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+      let el = await driver.wait(until.elementLocated(By.css(".user-item")), TIMEOUT_DRIVER);
+      await driver.wait(until.elementIsVisible(el), TIMEOUT_DRIVER);
+      await driver.sleep(1000);
+      try {
+        await driver.findElement(By.css(".grant-permission-button"));
+      } catch (err) {
+        return
+      }
+      throw new Error("should not be here");
     });
   });
 }
 
-export function testShouldSeeGrantAccessButton(port: number, user: string, appName: string) {
-  it('should see the `Grant access` button', function() {
-    this.timeout(TIMEOUT);
+export function testShouldSeeGrantAccessButton(user: string, appName: string) {
+  it('should see the `Grant access` button', async function () {
+    this.timeout(TIMEOUT_TEST);
     const instanceId = this.mesosTaskIds[appName];
-    
-    return helpers.withChrome(function(driver) {
-      return Bluebird.resolve(driver.get(`http://${user}:password@localhost:${port}/login/${instanceId}`))
-        .then(function() {
-          return Bluebird.resolve(
-            driver.wait(webdriver.until.elementLocated(webdriver.By.css(".delegate-button")), TIMEOUT))
-        })
-        .then(function(el) {
-          return Bluebird.resolve(
-            driver.wait(webdriver.until.elementIsVisible(el), TIMEOUT))
-        })
+
+    await helpers.withChrome(async function (driver) {
+      await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal`)
+      const el = await driver.wait(until.elementLocated(By.css(".grant-permission-button")), TIMEOUT_DRIVER);
+      await driver.wait(until.elementIsVisible(el), TIMEOUT_DRIVER);
     });
   });
 }
 
-function waitUntilElementIsVisible(driver: any, cssClass: string, timeout: number) {
-  return Bluebird.resolve(
-    driver.wait(webdriver.until.elementLocated(webdriver.By.css(cssClass)), timeout))
-      .then((el) => Bluebird.resolve(driver.wait(webdriver.until.elementIsVisible(el), timeout)));
+async function waitUntilElementIsVisible(driver: any, cssClass: string, timeout: number) {
+  const el = await driver.wait(until.elementLocated(By.css(cssClass)), timeout);
+  await driver.wait(until.elementIsVisible(el), timeout);
+  return el;
 }
 
-function waitUntilElementIsNotVisible(driver: any, cssClass: string, timeout: number) {
-  return Bluebird.resolve(
-    driver.wait(webdriver.until.elementLocated(webdriver.By.css(cssClass)), timeout))
-      .then((el) => Bluebird.resolve(driver.wait(webdriver.until.elementIsNotVisible(el), timeout)));
+async function delegateAccessToken(driver: WebDriver, delegatedUser: string, instanceId: string) {
+  const grantEl = await driver.wait(until.elementLocated(By.css(".grant-permission-button")), TIMEOUT_DRIVER);
+  await driver.wait(until.elementIsVisible(grantEl), TIMEOUT_DRIVER);
+  await grantEl.click();
+
+  const dialogEl = await driver.wait(until.elementLocated(By.id("delegation-dialog")), TIMEOUT_DRIVER);
+  await driver.wait(until.elementIsVisible(dialogEl), TIMEOUT_DRIVER);
+  const userEl = await waitUntilElementIsVisible(driver, '#delegation-dialog .username-field .MuiInput-input', TIMEOUT_DRIVER);
+  await userEl.sendKeys(delegatedUser);
+  const generateButtonEl = await waitUntilElementIsVisible(driver, '#delegation-dialog .generate-button', TIMEOUT_DRIVER);
+  await generateButtonEl.click();
+  const tokenEl = await waitUntilElementIsVisible(driver, '#delegation-dialog .token-field .MuiInput-input', TIMEOUT_DRIVER);
+  const accessURL = await tokenEl.getAttribute("value");
+  return accessURL;
 }
 
-function delegateAccessToken(driver: any, port: number, delegatedUser: string, instanceId: string) {
-  let token: string;
-  return waitUntilElementIsVisible(driver, '.delegation-form', TIMEOUT)
-    .then(() => waitUntilElementIsVisible(driver, '.delegate-form-user', TIMEOUT))
-    .then((el) => Bluebird.resolve(el.sendKeys(delegatedUser)))
-    .then(() => waitUntilElementIsVisible(driver, '.delegate-form-delegate', TIMEOUT))
-    .then((el) => Bluebird.resolve(el.click()))
-    .then(() => Bluebird.resolve(driver.sleep(1000)))
-    .then(() => waitUntilElementIsVisible(driver, '.access-token textarea', TIMEOUT))
-    .then((el) => Bluebird.resolve(el.getAttribute("value")))
-    .then((accessUrl: string) => { token = accessUrl.match(/access_token=(.*)$/)[1]; return Bluebird.resolve(); })
-    .then(() => waitUntilElementIsVisible(driver, '.delegate-form-ok', TIMEOUT))
-    .then((el) => Bluebird.resolve(el.click()))
-    .then(() => waitUntilElementIsNotVisible(driver, '.delegation-form', TIMEOUT))
-    .then(() => Bluebird.resolve(driver.get(`http://${delegatedUser}:password@localhost:${port}/login/${instanceId}`)))
-    .then(() => waitUntilElementIsVisible(driver, '.access-token-field', TIMEOUT))
-    .then((el) => Bluebird.resolve(el.sendKeys(token)))
-    .then(() => waitUntilElementIsVisible(driver, '.access-token-button', TIMEOUT))
-    .then((el) => Bluebird.resolve(el.click()))
-    .then(() => interactWithTerminal(driver));
-}
-
-function delegateAccessUrl(driver: any, port: number, delegatedUser: string, instanceId: string) {
-  let url: string;
-  return waitUntilElementIsVisible(driver, '.delegation-form', TIMEOUT)
-    .then(() => waitUntilElementIsVisible(driver, '.delegate-form-user', TIMEOUT))
-    .then((el) => Bluebird.resolve(el.sendKeys(delegatedUser)))
-    .then(() => waitUntilElementIsVisible(driver, '.delegate-form-delegate', TIMEOUT))
-    .then((el) => Bluebird.resolve(el.click()))
-    .then(() => Bluebird.resolve(driver.sleep(1000)))
-    .then(() => waitUntilElementIsVisible(driver, '.access-token textarea', TIMEOUT))
-    .then((el) => Bluebird.resolve(el.getAttribute("value")))
-    .then((accessUrl) => { url = accessUrl; return Bluebird.resolve(); })
-    .then(() => waitUntilElementIsVisible(driver, '.delegate-form-ok', TIMEOUT))
-    .then((el) => Bluebird.resolve(el.click()))
-    .then(() => waitUntilElementIsNotVisible(driver, '.delegation-form', TIMEOUT))
-    .then(() => Bluebird.resolve(driver.get(url)))
-    .then(() => interactWithTerminal(driver));
-}
-
-export function testShouldGrantAccessViaButtonAndToken(port: number, admin: string, delegatedUser: string, appName: string) {
-  it(`should allow ${admin} to delegate access to ${delegatedUser} via button`, function() {
+export function testShouldGrantAccessViaButtonAndToken(admin: string, delegatedUser: string, appName: string) {
+  it(`should allow ${admin} to delegate access to ${delegatedUser} via button and token in dialog`, async function () {
     this.timeout(20000);
+    this.retries(3);
     const instanceId = this.mesosTaskIds[appName];
+    let token: string;
+    await helpers.withChrome(async function (driver) {
+      await driver.get(`http://${admin}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+      token = await delegateAccessToken(driver, delegatedUser, instanceId);
+      token = token.match(/access_token=(.*)$/)[1];
+    });
 
-    return helpers.withChrome(function(driver) {
-      
-      return Bluebird.resolve(driver.get(`http://${admin}:password@localhost:${port}/login/${instanceId}`))
-        .then(() => waitUntilElementIsVisible(driver, '.delegate-button', TIMEOUT))
-        .then((el) => Bluebird.resolve(el.click()))
-        .then(() => delegateAccessToken(driver, port, delegatedUser, instanceId));
+    await helpers.withChrome(async function (driver) {
+      await driver.get(`http://${delegatedUser}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+      await driver.wait(until.elementLocated(By.id("access-request-dialog")), TIMEOUT_DRIVER);
+      const aTokenEl = await waitUntilElementIsVisible(driver, '#access-request-dialog .token-field .MuiInput-input', TIMEOUT_DRIVER);
+      await aTokenEl.sendKeys(token);
+      const okButtonEl = await waitUntilElementIsVisible(driver, '#access-request-dialog .ok-button', TIMEOUT_DRIVER);
+      await okButtonEl.click();
+      await interactWithTerminal(driver);
     });
   });
 }
 
-export function testShouldGrantAccessViaButtonAndUrl(port: number, admin: string, delegatedUser: string, appName: string) {
-  it(`should allow ${admin} to delegate access to ${delegatedUser} via button`, function() {
-    this.timeout(20000);
+export function testShouldGrantAccessViaButtonAndUrl(admin: string, delegatedUser: string, appName: string) {
+  it(`should allow ${admin} to delegate access to ${delegatedUser} via button and url`, async function () {
+    this.timeout(30000);
+    this.retries(3);
     const instanceId = this.mesosTaskIds[appName];
 
-    return helpers.withChrome(function(driver) {
-      
-      return Bluebird.resolve(driver.get(`http://${admin}:password@localhost:${port}/login/${instanceId}`))
-        .then(() => waitUntilElementIsVisible(driver, '.delegate-button', TIMEOUT))
-        .then((el) => Bluebird.resolve(el.click()))
-        .then(() => delegateAccessUrl(driver, port, delegatedUser, instanceId));
+    let url: string;
+    await helpers.withChrome(async function (driver) {
+      await driver.get(`http://${admin}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+      url = await delegateAccessToken(driver, delegatedUser, instanceId);
+    });
+
+    await helpers.withChrome(async function (driver) {
+      url = "http://" + delegatedUser + ":password@" + url.slice(7);
+      await driver.get(`${url}&screenReaderMode=true`);
+      await interactWithTerminal(driver);
     });
   });
 }
 
 
-export function testShouldNotGrantAccessWhenUserIsEmpty(port: number, admin: string, appName: string) {
-  it(`should face an error when user is not provided`, function() {
-    this.timeout(20000);
+export function testShouldAbortAccessDelegation(admin: string, appName: string) {
+  it(`should face an error when user is not provided`, async function () {
+    this.timeout(30000);
+    this.retries(3);
     const instanceId = this.mesosTaskIds[appName];
 
-    return helpers.withChrome(function(driver) {
-      let token: string;
-      return Bluebird.resolve(driver.get(`http://${admin}:password@localhost:${port}/login/${instanceId}`))
-        .then(() => waitUntilElementIsVisible(driver, '.delegate-button', TIMEOUT))
-        .then((el) => Bluebird.resolve(el.click()))
-        .then(() => waitUntilElementIsVisible(driver, '.delegation-form', TIMEOUT))
-        .then(() => waitUntilElementIsVisible(driver, '.delegate-form-user', TIMEOUT))
-        .then(() => waitUntilElementIsVisible(driver, '.delegate-form-delegate', TIMEOUT))
-        .then((el) => Bluebird.resolve(el.click()))
-        .then(() => waitUntilElementIsVisible(driver, '.error p', TIMEOUT))
-        .then((el) => Bluebird.resolve(el.getText()))
-        .then((errorMessage) => { Assert.equal('Request must contain key `delegate_to`.', errorMessage); return Bluebird.resolve(); })
-        .then(() => waitUntilElementIsVisible(driver, '.delegate-form-retry', TIMEOUT))
-        .then((el) => Bluebird.resolve(el.click()))
-        .then(() => waitUntilElementIsVisible(driver, '.delegation-form', TIMEOUT))
-        .then(() => waitUntilElementIsVisible(driver, '.delegate-form-user', TIMEOUT));
-      });
-  });
-}
+    await helpers.withChrome(async function (driver) {
+      await driver.get(`http://${admin}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+      const grantEl = await driver.wait(until.elementLocated(By.css(".grant-permission-button")), TIMEOUT_DRIVER);
+      await driver.wait(until.elementIsVisible(grantEl), TIMEOUT_DRIVER);
+      await grantEl.click();
 
-export function testShouldAbortAccessDelegation(port: number, admin: string, appName: string) {
-  it(`should face an error when user is not provided`, function() {
-    this.timeout(20000);
-    const instanceId = this.mesosTaskIds[appName];
+      const dialogEl = await driver.wait(until.elementLocated(By.id("delegation-dialog")), TIMEOUT_DRIVER);
+      await driver.wait(until.elementIsVisible(dialogEl), TIMEOUT_DRIVER);
 
-    return helpers.withChrome(function(driver) {
-      let token: string;
-      return Bluebird.resolve(driver.get(`http://${admin}:password@localhost:${port}/login/${instanceId}`))
-        .then(() => waitUntilElementIsVisible(driver, '.delegate-button', TIMEOUT))
-        .then((el) => Bluebird.resolve(el.click()))
-        .then(() => waitUntilElementIsVisible(driver, '.delegation-form', TIMEOUT))
-        .then(() => waitUntilElementIsVisible(driver, '.delegate-form-user', TIMEOUT))
-        .then(() => waitUntilElementIsVisible(driver, '.delegate-form-abort', TIMEOUT))
-        .then((el) => Bluebird.resolve(el.click()))
-        .then(() => waitUntilElementIsNotVisible(driver, '.delegation-form', TIMEOUT));
-      });
+      const buttonClose = await driver.wait(until.elementLocated(By.css("#delegation-dialog .close-button")));
+      await buttonClose.click();
+
+      await driver.wait(async (d) => {
+        const el = await d.findElements(By.id("delegation-dialog"));
+        return el.length === 0;
+      }, TIMEOUT_DRIVER);
+    });
   });
 }

@@ -1,0 +1,18 @@
+{
+  "id": "/app4",
+  "cmd": "env && sleep 360000",
+  "cpus": 0.1,
+  "mem": 16,
+  "disk": 0,
+  "instances": 1,
+  "labels": {
+    "MESOS_TERM_DEBUG_GRANTED_TO": "harry,bob"
+  },
+  "portDefinitions": [
+    {
+      "port": 10000,
+      "name": "default",
+      "protocol": "tcp"
+    }
+  ]
+}
