@@ -29,20 +29,20 @@ describe('app6 (label GRANTED_TO dev and harry, no root)', function () {
             Sandbox.testOpenSandbox('john', 'app6');
         });
 
-        describe('user harry is not authorized to open sandbox', () => {
-            Sandbox.testSandboxUnauthorized('harry', 'app6');
+        describe('user harry can open sandbox', () => {
+            Sandbox.testOpenSandbox('harry', 'app6');
         });
 
-        describe('user bob is not authorized to open sandbox', () => {
-            Sandbox.testSandboxUnauthorized('bob', 'app6');
+        describe('user bob can open sandbox', () => {
+            Sandbox.testOpenSandbox('bob', 'app6');
         });
 
-        describe('user alice is not authorized to open sandbox', () => {
+        describe('user alice can open sandbox', () => {
             Sandbox.testOpenSandbox('alice', 'app6');
         });
 
-        describe('user blackhat is not authorized to open sandbox', () => {
-            Sandbox.testSandboxUnauthorized('blackhat', 'app6');
+        describe('user blackhat can open sandbox', () => {
+            Sandbox.testOpenSandbox('blackhat', 'app6');
         });
     });
 });

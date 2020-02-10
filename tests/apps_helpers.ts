@@ -134,12 +134,12 @@ export function testCaseUnauthorizedAccessDialogDisplayed(user: string, appName:
   })
 }
 
-export async function testUnauthorizedUser(user: string, appName: string) {
-  await testCaseUnauthorizedAccessDialogDisplayed(user, appName);
+export function testUnauthorizedUser(user: string, appName: string) {
+  testCaseUnauthorizedAccessDialogDisplayed(user, appName);
 }
 
-export async function testNoTaskId(user: string, instanceId: string) {
-  await testReceiveErrorMessageFromInstanceId(user, instanceId, 'Task not found');
+export function testNoTaskId(user: string, instanceId: string) {
+  testReceiveErrorMessageFromInstanceId(user, instanceId, 'Task not found');
 }
 
 export function testShouldNotSeeGrantAccessButton(user: string, appName: string) {
