@@ -9,19 +9,27 @@ import classnames from "classnames";
 import { useNotifications } from "../../hooks/NotificationContext";
 import { saveAs } from 'file-saver';
 import FileReader from "./FileReader";
-import FileDescriptionBar from "../../components/FileDescriptionBar";
+import FileDescriptionBar, { Layout } from "../../components/FileDescriptionBar";
 import FileBrowser from "../../components/FileBrowser";
 
 function isDirectory(fd: FileDescription) {
     return fd.mode.slice(0, 1) === 'd';
 }
 
+function buildURL(taskID: string, path: string, layout: Layout) {
+    const lay = layout === Layout.List ? "list" : "grid";
+    return `/task/${taskID}/sandbox?path=${encodeURIComponent(path)}&layout=${lay}`;
+}
+
 export default function () {
     const match = useRouteMatch<{ taskID: string }>();
     const classes = useStyles();
     const location = useLocation();
-    const qs = queryString.parse(location.search);
+    const qs = queryString.parse(location.search, { sort: false });
     const [path, setPath] = useState(qs.path ? qs.path as string : '/');
+    const [layout, setLayout] = useState(qs.layout && qs.layout === 'grid' ?
+        Layout.Grid : Layout.List);
+
     const [files, setFiles] = useState(null as FileDescription[] | null);
     const history = useHistory();
     const [selectedFile, setSelectedFile] = useState(null as FileDescription | null);
@@ -67,25 +75,49 @@ export default function () {
 
     useEffect(() => { fetchFiles() }, [fetchFiles]);
 
-    useEffect(() => { history.push(`/task/${match.params.taskID}/sandbox?path=${encodeURIComponent(path)}`) },
-        [history, path, match.params.taskID]);
+    useEffect(() => {
+        history.push(buildURL(match.params.taskID, path, layout));
+    }, [history, path, match.params.taskID]);
+
+    useEffect(() => {
+        history.replace(buildURL(match.params.taskID, path, layout));
+    }, [layout]);
 
     let breadCrumbRoot = (
-        <Link href={`${location.pathname}?path=${encodeURIComponent('/')}`} key={`path-item-root`}>
+        <Link href={buildURL(match.params.taskID, '/', layout)} key={`path-item-root`}>
             Sandbox
         </Link>
     )
 
     const restBreadCrumbItems = path.slice(1).split('/').filter(x => x !== '').map((x, i) => {
         const link = path.split('/').slice(0, i + 2).join('/');
+        const url = buildURL(match.params.taskID, link, layout);
         return (
-            <Link href={`${location.pathname}?path=${encodeURIComponent(link)}`} key={`path-item-${i}`}>
+            <Link href={url} key={`path-item-${i}`}>
                 {x}
             </Link>
         )
     });
 
-    const downloadFile = useCallback(async () => {
+    const downloadFile = async (fd: FileDescription) => {
+        console.log(fd);
+        try {
+            const p = fd.path;
+            const isDir = isDirectory(fd);
+            let filename = p.split('/').pop();
+            if (!filename) {
+                filename = match.params.taskID;
+            }
+            const blob = await downloadSandboxFile(match.params.taskID, p, isDir);
+            // const blob = new Blob([arr], { type: isDir ? 'application/zip' : 'octet/stream' });
+            saveAs(blob, filename + ((isDir) ? '.zip' : ''));
+        } catch (err) {
+            createErrorNotification(err.message);
+        }
+    }
+
+
+    const downloadFileCallback = useCallback(async () => {
         try {
             let p: string;
             let isDir: boolean;
@@ -119,7 +151,9 @@ export default function () {
         setSelectedFile(fd);
     }
 
-    const handleDownloadClick = downloadFile;
+    const handleLayoutChange = (layout: Layout) => {
+        setLayout(layout);
+    }
 
     return (
         <div className={classes.root}>
@@ -138,15 +172,21 @@ export default function () {
                     path={path} />
                 : <div className={classes.explorerContainer}
                     onClick={e => { setSelectedFile(null); e.preventDefault() }}>
-                    <FileBrowser files={files ? files : []}
+                    <FileBrowser
+                        files={files ? files : []}
+                        layout={layout}
                         selectedFilePath={selectedFile ? selectedFile.path : null}
                         onFileClick={handleFileClick}
-                        onFileDoubleClick={handleFileDoubleClick} />
+                        onFileDoubleClick={handleFileDoubleClick}
+                        onFileDownloadClick={downloadFile} />
                 </div>}
             <div className={classes.description}>
                 <FileDescriptionBar
                     fd={selectedFile ? selectedFile : currentFd}
-                    onDownloadClick={handleDownloadClick} />
+                    hideLayoutButtons={isFile === true}
+                    layout={layout}
+                    onLayoutChanged={handleLayoutChange}
+                    onDownloadClick={downloadFileCallback} />
             </div>
         </div>
     )

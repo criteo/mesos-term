@@ -106,7 +106,7 @@ export default function (props: Props) {
 
         xtermRef.current = new Terminal({
             screenReaderMode: queryParams.screenReaderMode === "true",
-            fontFamily: 'roboto',
+            fontFamily: 'terminal-roboto',
             fontWeight: 'normal',
         })
         xtermRef.current.loadAddon(fitAddon.current);

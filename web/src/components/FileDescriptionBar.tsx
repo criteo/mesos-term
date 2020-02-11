@@ -1,15 +1,24 @@
 import React, { Fragment } from "react";
 import { FileDescription } from "../services/MesosTerm";
-import { Tooltip, makeStyles, Button } from "@material-ui/core";
+import { Tooltip, makeStyles, Button, ButtonGroup } from "@material-ui/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFolder, faFile } from "@fortawesome/free-solid-svg-icons";
+import { faFolder, faFile, faList, faThLarge } from "@fortawesome/free-solid-svg-icons";
 import classnames from "classnames";
 import Moment from "moment";
+import { DATETIME_FORMAT } from "../constants";
 
 interface FileDescriptionBarProps {
     fd: FileDescription | null;
+    layout: Layout;
+    hideLayoutButtons: boolean;
 
     onDownloadClick: () => void;
+    onLayoutChanged: (layout: Layout) => void;
+}
+
+export enum Layout {
+    Grid,
+    List,
 }
 
 export default function (props: FileDescriptionBarProps) {
@@ -20,9 +29,28 @@ export default function (props: FileDescriptionBarProps) {
     const isDir = props.fd === null || mode.slice(0, 1) === 'd';
     const uid = props.fd ? props.fd.uid : '-';
     const gid = props.fd ? props.fd.gid : '-';
-    const mtime = props.fd ? Moment(new Date(props.fd.mtime * 1000)).format("DD/MM/YYYY HH:mm:ss") : '-';
+    const mtime = props.fd ? Moment(new Date(props.fd.mtime * 1000)).format(DATETIME_FORMAT) : '-';
+
+    const handleLayoutGridClick = () => {
+        props.onLayoutChanged(Layout.Grid);
+    }
+
+    const handleLayoutListClick = () => {
+        props.onLayoutChanged(Layout.List);
+    }
+
     return (
         <Fragment>
+            {!props.hideLayoutButtons ? <ButtonGroup className={classes.layoutButtons}>
+                <Button disabled={props.layout === Layout.Grid}
+                    onClick={handleLayoutGridClick}>
+                    <FontAwesomeIcon icon={faThLarge} />
+                </Button>
+                <Button disabled={props.layout === Layout.List}
+                    onClick={handleLayoutListClick}>
+                    <FontAwesomeIcon icon={faList} />
+                </Button>
+            </ButtonGroup> : null}
             <Tooltip title="download">
                 <span onClick={props.onDownloadClick}>
                     <FontAwesomeIcon icon={isDir ? faFolder : faFile} className={classes.icon} />
@@ -49,6 +77,9 @@ const useFileDescriptionBarStyles = makeStyles(theme => ({
         '&.even': {
             color: '#b3b3b3',
         }
+    },
+    layoutButtons: {
+        marginRight: theme.spacing(2),
     },
     icon: {
         display: 'inline-block',
