@@ -10,6 +10,7 @@ import { useNotifications } from "../../hooks/NotificationContext";
 import { saveAs } from 'file-saver';
 import FileReader from "./FileReader";
 import FileDescriptionBar from "../../components/FileDescriptionBar";
+import FileBrowser from "../../components/FileBrowser";
 
 function isDirectory(fd: FileDescription) {
     return fd.mode.slice(0, 1) === 'd';
@@ -69,25 +70,6 @@ export default function () {
     useEffect(() => { history.push(`/task/${match.params.taskID}/sandbox?path=${encodeURIComponent(path)}`) },
         [history, path, match.params.taskID]);
 
-    const fileItems = files ? files.map((f, i) => {
-        const handleDoubleClick = (ev: MouseEvent<HTMLDivElement>, fd: FileDescription) => {
-            setPath(f.path);
-        }
-        const handleClick = (ev: MouseEvent<HTMLDivElement>, fd: FileDescription) => {
-            ev.stopPropagation();
-            setSelectedFile(fd);
-        }
-        return (
-            <Grid item lg={2} sm={3} xs={6}
-                key={`file-${i}`}>
-                <FileItem fd={f}
-                    onClick={e => handleClick(e, f)}
-                    onDoubleClick={e => handleDoubleClick(e, f)}
-                    selected={selectedFile !== null && f.path === selectedFile.path} />
-            </Grid>
-        );
-    }) : [];
-
     let breadCrumbRoot = (
         <Link href={`${location.pathname}?path=${encodeURIComponent('/')}`} key={`path-item-root`}>
             Sandbox
@@ -130,6 +112,13 @@ export default function () {
         }
     }, [selectedFile, match.params.taskID, currentFd, createErrorNotification]);
 
+    const handleFileDoubleClick = (fd: FileDescription) => {
+        setPath(fd.path);
+    }
+    const handleFileClick = (fd: FileDescription) => {
+        setSelectedFile(fd);
+    }
+
     const handleDownloadClick = downloadFile;
 
     return (
@@ -147,12 +136,12 @@ export default function () {
                 ? <FileReader
                     taskID={match.params.taskID}
                     path={path} />
-                : <div className={classes.explorerContainer} onClick={e => { setSelectedFile(null); e.preventDefault() }}>
-                    <Grid container
-                        className={classes.grid}
-                        spacing={2}>
-                        {fileItems}
-                    </Grid>
+                : <div className={classes.explorerContainer}
+                    onClick={e => { setSelectedFile(null); e.preventDefault() }}>
+                    <FileBrowser files={files ? files : []}
+                        selectedFilePath={selectedFile ? selectedFile.path : null}
+                        onFileClick={handleFileClick}
+                        onFileDoubleClick={handleFileDoubleClick} />
                 </div>}
             <div className={classes.description}>
                 <FileDescriptionBar
@@ -199,11 +188,6 @@ const useStyles = makeStyles(theme => ({
         marginLeft: theme.spacing(),
         color: 'white',
     },
-    grid: {
-        width: 'calc(100%)',
-        margin: 0,
-        padding: theme.spacing(),
-    },
     description: {
         display: 'flex',
         flexDirection: 'row',
@@ -219,52 +203,3 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-interface FileItemProps {
-    fd: FileDescription;
-    selected: boolean;
-
-    onClick: (e: MouseEvent<HTMLDivElement>, fd: FileDescription) => void;
-    onDoubleClick: (e: MouseEvent<HTMLDivElement>, fd: FileDescription) => void;
-}
-
-function FileItem(props: FileItemProps) {
-    const classes = useFileItemStyles();
-    const isDirectory = props.fd.mode.slice(0, 1) === 'd';
-    const filename = props.fd.path.split('/').pop();
-
-    return (
-        <Paper elevation={1}
-            onClick={e => props.onClick(e, props.fd)}
-            onDoubleClick={e => props.onDoubleClick(e, props.fd)}
-            className={classnames(classes.paper, props.selected ? classes.selected : '')}>
-            <div className={classnames(classes.content, "file-item")}>
-                <FontAwesomeIcon icon={isDirectory ? faFolder : faFile} size="3x" />
-                <Typography noWrap className={classnames(classes.filename, "filename")}>{filename}</Typography>
-            </div>
-        </Paper>
-    )
-}
-
-const useFileItemStyles = makeStyles(theme => ({
-    paper: {
-        padding: theme.spacing(2),
-        cursor: 'pointer',
-        border: '1px solid ' + theme.palette.background.default,
-        userSelect: 'none',
-    },
-    content: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignContent: 'center',
-        alignItems: 'center',
-        color: '#b7b7b7',
-        overflow: 'hidden',
-    },
-    filename: {
-        width: '100%',
-        textAlign: "center",
-    },
-    selected: {
-        border: '1px solid #949494',
-    }
-}));
