@@ -8,3 +8,5 @@ mesos-term-*.tgz
 dist/
 
 .vscode/
+
+private/

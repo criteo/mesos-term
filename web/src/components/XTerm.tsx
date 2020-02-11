@@ -14,6 +14,7 @@ import queryString from 'query-string';
 import { useLocation } from "react-router";
 import { useMemoizedCallback } from "../hooks/MemoizedCallback";
 import { useWindowLoaded } from "../hooks/WindowLoadedContext";
+import * as XtermWebfontAddon from 'xterm-webfont'
 
 export interface Props extends React.DOMAttributes<{}> {
     token: string | null;
@@ -27,6 +28,7 @@ export default function (props: Props) {
     const terminalDivRef = useRef<HTMLDivElement>(null);
     const timer = useRef<NodeJS.Timeout | null>(null);
     const fitAddon = useRef<FitAddon>(new FitAddon());
+    const webFontAddon = useRef(new XtermWebfontAddon());
     const websocket = useRef<WebSocket | null>(null);
     const classes = useStyles();
     const [websocketState, setWebsocketState] = useState(WebSocket.CLOSED);
@@ -111,7 +113,8 @@ export default function (props: Props) {
         })
         xtermRef.current.loadAddon(fitAddon.current);
         xtermRef.current.loadAddon(new AttachAddon(websocket.current));
-        xtermRef.current.open(terminalDivRef.current);
+        xtermRef.current.loadAddon(webFontAddon.current);
+        (xtermRef.current as any).loadWebfontAndOpen(terminalDivRef.current);
     }, [props.token, handleSocketOpen, handleSocketClose, handleSocketError, windowLoaded, queryParams.screenReaderMode]);
 
     useEffect(() => { resizeRemoteTerminal(); }, [resizeRemoteTerminal]);
