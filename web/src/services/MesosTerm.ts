@@ -95,7 +95,7 @@ export async function getConfig() {
 export interface FileDescription {
     gid: string;
     mode: string;
-    mtime: string,
+    mtime: number,
     path: string;
     size: number;
     uid: string;

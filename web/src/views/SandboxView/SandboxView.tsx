@@ -9,6 +9,7 @@ import classnames from "classnames";
 import { useNotifications } from "../../hooks/NotificationContext";
 import { saveAs } from 'file-saver';
 import FileReader from "./FileReader";
+import FileDescriptionBar from "../../components/FileDescriptionBar";
 
 function isDirectory(fd: FileDescription) {
     return fd.mode.slice(0, 1) === 'd';
@@ -154,7 +155,9 @@ export default function () {
                     </Grid>
                 </div>}
             <div className={classes.description}>
-                <FileDescriptionBar fd={selectedFile ? selectedFile : currentFd} onDownloadClick={handleDownloadClick} />
+                <FileDescriptionBar
+                    fd={selectedFile ? selectedFile : currentFd}
+                    onDownloadClick={handleDownloadClick} />
             </div>
         </div>
     )
@@ -263,52 +266,5 @@ const useFileItemStyles = makeStyles(theme => ({
     },
     selected: {
         border: '1px solid #949494',
-    }
-}));
-
-interface FileDescriptionBarProps {
-    fd: FileDescription | null;
-
-    onDownloadClick: () => void;
-}
-
-function FileDescriptionBar(props: FileDescriptionBarProps) {
-    const classes = useFileDescriptionBarStyles();
-    const filename = props.fd ? props.fd.path.split('/').pop() : '-';
-    const size = props.fd ? (props.fd.size / 1000).toFixed(2) : '-';
-    const mode = props.fd ? props.fd.mode : '-';
-    const isDir = props.fd === null || mode.slice(0, 1) === 'd';
-    const uid = props.fd ? props.fd.uid : '-';
-    const gid = props.fd ? props.fd.gid : '-';
-    return (
-        <Fragment>
-            <Tooltip title="download">
-                <span onClick={props.onDownloadClick}>
-                    <FontAwesomeIcon icon={isDir ? faFolder : faFile} className={classes.icon} />
-                </span>
-            </Tooltip>
-            <span className={classnames(classes.item, "desc-name", "odd")}>name: {filename}</span>{" "}
-            <span className={classnames(classes.item, "desc-size", "even")}>size: {size}kb</span>{" "}
-            <span className={classnames(classes.item, "desc-mode", "odd")}>mode: {mode}</span>{" "}
-            <span className={classnames(classes.item, "desc-uid", "even")}>uid: {uid}</span>{" "}
-            <span className={classnames(classes.item, "desc-gid", "odd")}>gid: {gid}</span>{" "}
-            <Button size="small" variant="outlined" onClick={props.onDownloadClick}>
-                Download
-            </Button>
-        </Fragment>
-    )
-}
-
-const useFileDescriptionBarStyles = makeStyles(theme => ({
-    item: {
-        marginRight: theme.spacing(2),
-        '&.even': {
-            color: '#b3b3b3',
-        }
-    },
-    icon: {
-        display: 'inline-block',
-        cursor: 'pointer',
-        marginRight: theme.spacing(2),
     }
 }));
