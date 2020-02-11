@@ -100,7 +100,8 @@ function FileItem(props: FileItemProps) {
         e.preventDefault();
     }
 
-    const icon = <FontAwesomeIcon icon={isDirectory ? faFolder : faFile} className={classes.icon} />;
+    const icon = <FontAwesomeIcon icon={isDirectory ? faFolder : faFile} size="lg"
+        className={classes.icon} />;
 
     return (
         <TableRow className={classnames(classes.root, "file-item")}
