@@ -1,25 +1,35 @@
-import React, { useEffect, useState, useCallback, MouseEvent, Fragment } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { browseSandbox, FileDescription, downloadSandboxFile } from "../../services/MesosTerm";
 import { useRouteMatch, useHistory, useLocation } from "react-router";
-import { makeStyles, Grid, Paper, Typography, Breadcrumbs, Link, Tooltip, CircularProgress, Button } from "@material-ui/core";
+import { makeStyles, Breadcrumbs, Link, CircularProgress } from "@material-ui/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFolder, faFile, faSitemap } from "@fortawesome/free-solid-svg-icons";
+import { faSitemap } from "@fortawesome/free-solid-svg-icons";
 import queryString from "query-string";
 import classnames from "classnames";
 import { useNotifications } from "../../hooks/NotificationContext";
 import { saveAs } from 'file-saver';
 import FileReader from "./FileReader";
+import FileDescriptionBar, { Layout } from "../../components/FileDescriptionBar";
+import FileBrowser from "../../components/FileBrowser";
 
 function isDirectory(fd: FileDescription) {
     return fd.mode.slice(0, 1) === 'd';
+}
+
+function buildURL(taskID: string, path: string, layout: Layout) {
+    const lay = layout === Layout.List ? "list" : "grid";
+    return `/task/${taskID}/sandbox?path=${encodeURIComponent(path)}&layout=${lay}`;
 }
 
 export default function () {
     const match = useRouteMatch<{ taskID: string }>();
     const classes = useStyles();
     const location = useLocation();
-    const qs = queryString.parse(location.search);
+    const qs = queryString.parse(location.search, { sort: false });
     const [path, setPath] = useState(qs.path ? qs.path as string : '/');
+    const [layout, setLayout] = useState(qs.layout && qs.layout === 'grid' ?
+        Layout.Grid : Layout.List);
+
     const [files, setFiles] = useState(null as FileDescription[] | null);
     const history = useHistory();
     const [selectedFile, setSelectedFile] = useState(null as FileDescription | null);
@@ -65,44 +75,51 @@ export default function () {
 
     useEffect(() => { fetchFiles() }, [fetchFiles]);
 
-    useEffect(() => { history.push(`/task/${match.params.taskID}/sandbox?path=${encodeURIComponent(path)}`) },
-        [history, path, match.params.taskID]);
+    useEffect(() => {
+        history.push(buildURL(match.params.taskID, path, layout));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [history, path, match.params.taskID]);
 
-    const fileItems = files ? files.map((f, i) => {
-        const handleDoubleClick = (ev: MouseEvent<HTMLDivElement>, fd: FileDescription) => {
-            setPath(f.path);
-        }
-        const handleClick = (ev: MouseEvent<HTMLDivElement>, fd: FileDescription) => {
-            ev.stopPropagation();
-            setSelectedFile(fd);
-        }
-        return (
-            <Grid item lg={2} sm={3} xs={6}
-                key={`file-${i}`}>
-                <FileItem fd={f}
-                    onClick={e => handleClick(e, f)}
-                    onDoubleClick={e => handleDoubleClick(e, f)}
-                    selected={selectedFile !== null && f.path === selectedFile.path} />
-            </Grid>
-        );
-    }) : [];
+    useEffect(() => {
+        history.replace(buildURL(match.params.taskID, path, layout));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [layout]);
 
     let breadCrumbRoot = (
-        <Link href={`${location.pathname}?path=${encodeURIComponent('/')}`} key={`path-item-root`}>
+        <Link href={buildURL(match.params.taskID, '/', layout)} key={`path-item-root`}>
             Sandbox
         </Link>
     )
 
     const restBreadCrumbItems = path.slice(1).split('/').filter(x => x !== '').map((x, i) => {
         const link = path.split('/').slice(0, i + 2).join('/');
+        const url = buildURL(match.params.taskID, link, layout);
         return (
-            <Link href={`${location.pathname}?path=${encodeURIComponent(link)}`} key={`path-item-${i}`}>
+            <Link href={url} key={`path-item-${i}`}>
                 {x}
             </Link>
         )
     });
 
-    const downloadFile = useCallback(async () => {
+    const downloadFile = async (fd: FileDescription) => {
+        console.log(fd);
+        try {
+            const p = fd.path;
+            const isDir = isDirectory(fd);
+            let filename = p.split('/').pop();
+            if (!filename) {
+                filename = match.params.taskID;
+            }
+            const blob = await downloadSandboxFile(match.params.taskID, p, isDir);
+            // const blob = new Blob([arr], { type: isDir ? 'application/zip' : 'octet/stream' });
+            saveAs(blob, filename + ((isDir) ? '.zip' : ''));
+        } catch (err) {
+            createErrorNotification(err.message);
+        }
+    }
+
+
+    const downloadFileCallback = useCallback(async () => {
         try {
             let p: string;
             let isDir: boolean;
@@ -129,7 +146,16 @@ export default function () {
         }
     }, [selectedFile, match.params.taskID, currentFd, createErrorNotification]);
 
-    const handleDownloadClick = downloadFile;
+    const handleFileDoubleClick = (fd: FileDescription) => {
+        setPath(fd.path);
+    }
+    const handleFileClick = (fd: FileDescription) => {
+        setSelectedFile(fd);
+    }
+
+    const handleLayoutChange = (layout: Layout) => {
+        setLayout(layout);
+    }
 
     return (
         <div className={classes.root}>
@@ -146,15 +172,23 @@ export default function () {
                 ? <FileReader
                     taskID={match.params.taskID}
                     path={path} />
-                : <div className={classes.explorerContainer} onClick={e => { setSelectedFile(null); e.preventDefault() }}>
-                    <Grid container
-                        className={classes.grid}
-                        spacing={2}>
-                        {fileItems}
-                    </Grid>
+                : <div className={classes.explorerContainer}
+                    onClick={e => { setSelectedFile(null); e.preventDefault() }}>
+                    <FileBrowser
+                        files={files ? files : []}
+                        layout={layout}
+                        selectedFilePath={selectedFile ? selectedFile.path : null}
+                        onFileClick={handleFileClick}
+                        onFileDoubleClick={handleFileDoubleClick}
+                        onFileDownloadClick={downloadFile} />
                 </div>}
             <div className={classes.description}>
-                <FileDescriptionBar fd={selectedFile ? selectedFile : currentFd} onDownloadClick={handleDownloadClick} />
+                <FileDescriptionBar
+                    fd={selectedFile ? selectedFile : currentFd}
+                    hideLayoutButtons={isFile === true}
+                    layout={layout}
+                    onLayoutChanged={handleLayoutChange}
+                    onDownloadClick={downloadFileCallback} />
             </div>
         </div>
     )
@@ -196,11 +230,6 @@ const useStyles = makeStyles(theme => ({
         marginLeft: theme.spacing(),
         color: 'white',
     },
-    grid: {
-        width: 'calc(100%)',
-        margin: 0,
-        padding: theme.spacing(),
-    },
     description: {
         display: 'flex',
         flexDirection: 'row',
@@ -216,99 +245,3 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-interface FileItemProps {
-    fd: FileDescription;
-    selected: boolean;
-
-    onClick: (e: MouseEvent<HTMLDivElement>, fd: FileDescription) => void;
-    onDoubleClick: (e: MouseEvent<HTMLDivElement>, fd: FileDescription) => void;
-}
-
-function FileItem(props: FileItemProps) {
-    const classes = useFileItemStyles();
-    const isDirectory = props.fd.mode.slice(0, 1) === 'd';
-    const filename = props.fd.path.split('/').pop();
-
-    return (
-        <Paper elevation={1}
-            onClick={e => props.onClick(e, props.fd)}
-            onDoubleClick={e => props.onDoubleClick(e, props.fd)}
-            className={classnames(classes.paper, props.selected ? classes.selected : '')}>
-            <div className={classnames(classes.content, "file-item")}>
-                <FontAwesomeIcon icon={isDirectory ? faFolder : faFile} size="3x" />
-                <Typography noWrap className={classnames(classes.filename, "filename")}>{filename}</Typography>
-            </div>
-        </Paper>
-    )
-}
-
-const useFileItemStyles = makeStyles(theme => ({
-    paper: {
-        padding: theme.spacing(2),
-        cursor: 'pointer',
-        border: '1px solid ' + theme.palette.background.default,
-        userSelect: 'none',
-    },
-    content: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignContent: 'center',
-        alignItems: 'center',
-        color: '#b7b7b7',
-        overflow: 'hidden',
-    },
-    filename: {
-        width: '100%',
-        textAlign: "center",
-    },
-    selected: {
-        border: '1px solid #949494',
-    }
-}));
-
-interface FileDescriptionBarProps {
-    fd: FileDescription | null;
-
-    onDownloadClick: () => void;
-}
-
-function FileDescriptionBar(props: FileDescriptionBarProps) {
-    const classes = useFileDescriptionBarStyles();
-    const filename = props.fd ? props.fd.path.split('/').pop() : '-';
-    const size = props.fd ? (props.fd.size / 1000).toFixed(2) : '-';
-    const mode = props.fd ? props.fd.mode : '-';
-    const isDir = props.fd === null || mode.slice(0, 1) === 'd';
-    const uid = props.fd ? props.fd.uid : '-';
-    const gid = props.fd ? props.fd.gid : '-';
-    return (
-        <Fragment>
-            <Tooltip title="download">
-                <span onClick={props.onDownloadClick}>
-                    <FontAwesomeIcon icon={isDir ? faFolder : faFile} className={classes.icon} />
-                </span>
-            </Tooltip>
-            <span className={classnames(classes.item, "desc-name", "odd")}>name: {filename}</span>{" "}
-            <span className={classnames(classes.item, "desc-size", "even")}>size: {size}kb</span>{" "}
-            <span className={classnames(classes.item, "desc-mode", "odd")}>mode: {mode}</span>{" "}
-            <span className={classnames(classes.item, "desc-uid", "even")}>uid: {uid}</span>{" "}
-            <span className={classnames(classes.item, "desc-gid", "odd")}>gid: {gid}</span>{" "}
-            <Button size="small" variant="outlined" onClick={props.onDownloadClick}>
-                Download
-            </Button>
-        </Fragment>
-    )
-}
-
-const useFileDescriptionBarStyles = makeStyles(theme => ({
-    item: {
-        marginRight: theme.spacing(2),
-        '&.even': {
-            color: '#b3b3b3',
-        }
-    },
-    icon: {
-        display: 'inline-block',
-        cursor: 'pointer',
-        marginRight: theme.spacing(2),
-    }
-}));
