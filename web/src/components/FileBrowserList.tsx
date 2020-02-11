@@ -6,6 +6,7 @@ import { faFolder, faFile } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { formatFileSize } from "../utils/FileSize";
 import { DATETIME_FORMAT } from "../constants";
+import classnames from "classnames";
 
 
 interface Props {
@@ -102,12 +103,12 @@ function FileItem(props: FileItemProps) {
     const icon = <FontAwesomeIcon icon={isDirectory ? faFolder : faFile} className={classes.icon} />;
 
     return (
-        <TableRow className={classes.root}
+        <TableRow className={classnames(classes.root, "file-item")}
             hover
             selected={props.selected}
             onClick={handleClick}
             onDoubleClick={handleDoubleClick}>
-            <TableCell>{icon}{filename}</TableCell>
+            <TableCell>{icon}<span className="filename">{filename}</span></TableCell>
             <TableCell>{props.fd.uid}</TableCell>
             <TableCell>{props.fd.gid}</TableCell>
             <TableCell align="right">{formatFileSize(props.fd.size)}</TableCell>
