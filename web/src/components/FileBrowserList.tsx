@@ -84,7 +84,6 @@ function FileItem(props: FileItemProps) {
     const classes = useFileItemStyles();
     const isDirectory = props.fd.mode.slice(0, 1) === 'd';
     const filename = props.fd.path.split('/').pop();
-    const size = props.fd.size;
     const date = Moment(new Date(props.fd.mtime * 1000)).format(DATETIME_FORMAT);
 
     const handleClick = (e: MouseEvent<HTMLTableRowElement>) => {

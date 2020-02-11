@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useCallback, MouseEvent, Fragment } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { browseSandbox, FileDescription, downloadSandboxFile } from "../../services/MesosTerm";
 import { useRouteMatch, useHistory, useLocation } from "react-router";
-import { makeStyles, Grid, Paper, Typography, Breadcrumbs, Link, Tooltip, CircularProgress, Button } from "@material-ui/core";
+import { makeStyles, Breadcrumbs, Link, CircularProgress } from "@material-ui/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFolder, faFile, faSitemap } from "@fortawesome/free-solid-svg-icons";
+import { faSitemap } from "@fortawesome/free-solid-svg-icons";
 import queryString from "query-string";
 import classnames from "classnames";
 import { useNotifications } from "../../hooks/NotificationContext";
@@ -77,10 +77,12 @@ export default function () {
 
     useEffect(() => {
         history.push(buildURL(match.params.taskID, path, layout));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [history, path, match.params.taskID]);
 
     useEffect(() => {
         history.replace(buildURL(match.params.taskID, path, layout));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layout]);
 
     let breadCrumbRoot = (
