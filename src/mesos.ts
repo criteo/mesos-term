@@ -326,7 +326,10 @@ export async function downloadSandboxFile(
   relativePath: string) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
-  const res = await Axios.get<string>(`${mesosSlaveURL}/files/download?path=${fullPath}`, { validateStatus: code => code === 400 || code === 200 });
+  const res = await Axios.get<string>(`${mesosSlaveURL}/files/download?path=${fullPath}`, {
+    validateStatus: code => code === 400 || code === 200,
+    responseType: 'arraybuffer',
+  });
   if (res.status === 400 && (res as any).data === 'Cannot download a directory.\n') {
     throw new DownloadDirectoryError();
 

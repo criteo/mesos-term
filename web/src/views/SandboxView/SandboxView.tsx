@@ -37,6 +37,7 @@ export default function () {
     const isFile = files && files.length === 0;
     const [loadingState, setLoadingState] = useState(false);
     const { createErrorNotification } = useNotifications();
+    const [downloadInProgress, setDownloadInProgress] = useState(false);
 
     const fetchFiles = useCallback(async () => {
         try {
@@ -101,56 +102,40 @@ export default function () {
         )
     });
 
-    const downloadFile = async (fd: FileDescription) => {
-        console.log(fd);
+    const downloadFile = useCallback(async (fd: FileDescription | null) => {
         try {
-            const p = fd.path;
-            const isDir = isDirectory(fd);
+            const p = fd ? fd.path : '/';
+            const isDir = fd ? isDirectory(fd) : true;
             let filename = p.split('/').pop();
             if (!filename) {
                 filename = match.params.taskID;
             }
+            setDownloadInProgress(true);
             const blob = await downloadSandboxFile(match.params.taskID, p, isDir);
-            // const blob = new Blob([arr], { type: isDir ? 'application/zip' : 'octet/stream' });
             saveAs(blob, filename + ((isDir) ? '.zip' : ''));
         } catch (err) {
             createErrorNotification(err.message);
+        } finally {
+            setDownloadInProgress(false);
         }
-    }
+    }, [match.params.taskID, createErrorNotification]);
 
 
     const downloadFileCallback = useCallback(async () => {
-        try {
-            let p: string;
-            let isDir: boolean;
-            if (selectedFile) {
-                p = selectedFile.path;
-                isDir = isDirectory(selectedFile);
-            } else if (currentFd) {
-                p = currentFd.path;
-                isDir = isDirectory(currentFd);
-            } else {
-                // This is the full sandbox.
-                isDir = true;
-                p = '/';
-            }
-            let filename = p.split('/').pop();
-            if (!filename) {
-                filename = match.params.taskID;
-            }
-            const blob = await downloadSandboxFile(match.params.taskID, p, isDir);
-            // const blob = new Blob([arr], { type: isDir ? 'application/zip' : 'octet/stream' });
-            saveAs(blob, filename + ((isDir) ? '.zip' : ''));
-        } catch (err) {
-            createErrorNotification(err.message);
+        if (selectedFile) {
+            await downloadFile(selectedFile);
+        } else if (currentFd) {
+            await downloadFile(currentFd);
+        } else {
+            await downloadFile(null);
         }
-    }, [selectedFile, match.params.taskID, currentFd, createErrorNotification]);
+    }, [selectedFile, currentFd, downloadFile]);
 
     const handleFileDoubleClick = (fd: FileDescription) => {
         setPath(fd.path);
     }
     const handleFileClick = (fd: FileDescription) => {
-        setSelectedFile(fd);
+        setSelectedFile(selectedFile && selectedFile === fd ? null : fd);
     }
 
     const handleLayoutChange = (layout: Layout) => {
@@ -186,6 +171,7 @@ export default function () {
                 <FileDescriptionBar
                     fd={selectedFile ? selectedFile : currentFd}
                     hideLayoutButtons={isFile === true}
+                    downloadInProgress={downloadInProgress}
                     layout={layout}
                     onLayoutChanged={handleLayoutChange}
                     onDownloadClick={downloadFileCallback} />

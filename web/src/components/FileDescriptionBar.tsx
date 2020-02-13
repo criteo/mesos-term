@@ -11,6 +11,7 @@ interface FileDescriptionBarProps {
     fd: FileDescription | null;
     layout: Layout;
     hideLayoutButtons: boolean;
+    downloadInProgress: boolean;
 
     onDownloadClick: () => void;
     onLayoutChanged: (layout: Layout) => void;
@@ -67,6 +68,9 @@ export default function (props: FileDescriptionBarProps) {
                 onClick={props.onDownloadClick}>
                 Download
             </Button>
+            {props.downloadInProgress
+                ? <span className={classes.preparingDownload}>Preparing download...</span>
+                : null}
         </Fragment>
     )
 }
@@ -85,5 +89,8 @@ const useFileDescriptionBarStyles = makeStyles(theme => ({
         display: 'inline-block',
         cursor: 'pointer',
         marginRight: theme.spacing(2),
+    },
+    preparingDownload: {
+        marginLeft: theme.spacing(2),
     }
 }));
