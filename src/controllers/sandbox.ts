@@ -166,13 +166,13 @@ export default function (app: Express.Application) {
                 const content = await downloadSandboxDirectory(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
                     sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path);
                 res.set('Content-Type', 'application/octet-stream');
-                res.end(content);
+                res.end(content, 'binary');
             }
             else {
-                const content = await downloadSandboxFile(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
+                const mesosRes = await downloadSandboxFile(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
                     sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path);
                 res.set('Content-Type', 'application/octet-stream');
-                res.end(content);
+                res.end(mesosRes, 'binary');
             }
         }
         catch (err) {
