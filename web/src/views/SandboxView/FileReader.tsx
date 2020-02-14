@@ -149,12 +149,14 @@ interface RowProps {
 }
 
 function Row(props: RowProps) {
+    const theme = useTheme();
     return (
-        <p style={{
+        <pre style={{
             margin: 0,
             width: '100%',
+            fontSize: theme.typography.fontSize,
         }}>
             {props.content}
-        </p>
+        </pre>
     )
 }
