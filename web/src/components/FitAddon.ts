@@ -50,18 +50,17 @@ export class FitAddon implements ITerminalAddon {
             return undefined;
         }
 
-        if (!this._terminal.element || !this._terminal.element.parentElement) {
+        if (!this._terminal.element) {
             return undefined;
         }
 
         // TODO: Remove reliance on private API
         const core = (this._terminal as any)._core;
 
-        const parentElementStyle = this._terminal.element.parentElement;
         // specific to mesos term because the terminal takes the height of the window minus the toolbar.
         // If we use the parent element height, the terminal does not shrink when the height decreases.
         const parentElementHeight = window.innerHeight - 32;
-        const parentElementWidth = parentElementStyle.clientWidth;
+        const parentElementWidth = this._terminal.element.clientWidth;
         const elementStyle = window.getComputedStyle(this._terminal.element);
         const elementPadding = {
             top: parseInt(elementStyle.getPropertyValue('padding-top')),
