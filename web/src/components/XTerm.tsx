@@ -115,7 +115,29 @@ export default function (props: Props) {
         xtermRef.current.loadAddon(new AttachAddon(websocket.current));
         xtermRef.current.loadAddon(webFontAddon.current);
         (xtermRef.current as any).loadWebfontAndOpen(terminalDivRef.current);
-    }, [props.token, handleSocketOpen, handleSocketClose, handleSocketError, windowLoaded, queryParams.screenReaderMode]);
+
+        // Create an observer to check when the terminal is ready in order to resize it.
+        const observer = new MutationObserver(function (mutations) {
+            if (xtermRef.current && xtermRef.current.element) {
+                observer.disconnect();
+                handleTerminalResize();
+            }
+        });
+        observer.observe(terminalDivRef.current, {
+            attributes: false,
+            childList: true,
+            characterData: false,
+            subtree: true
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+            props.token,
+            handleSocketOpen,
+            handleSocketClose,
+            handleSocketError,
+            windowLoaded,
+            queryParams.screenReaderMode
+        ]);
 
     useEffect(() => { resizeRemoteTerminal(); }, [resizeRemoteTerminal]);
     useEffect(() => {
