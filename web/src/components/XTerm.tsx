@@ -38,16 +38,17 @@ export default function (props: Props) {
     const xtermRef = useRef<Terminal | null>(null);
     const resizeThrottlingTimer = useRef<NodeJS.Timeout | null>(null);
     const windowLoaded = useWindowLoaded();
+    const [terminalReady, setTerminalReady] = useState(false);
 
     const resizeRemoteTerminal = useCallback(async () => {
-        if (props.token === null || websocketState !== WebSocket.OPEN) {
+        if (props.token === null || websocketState !== WebSocket.OPEN || !terminalReady) {
             return;
         }
         const dimensions = fitAddon.current.proposeDimensions();
         if (dimensions && dimensions.cols && dimensions.rows) {
             await postResizeTerminal(props.token, dimensions.rows, dimensions.cols);
         }
-    }, [props.token, websocketState]);
+    }, [props.token, websocketState, terminalReady]);
 
     const handleTerminalResize = useCallback(async () => {
         fitAddon.current.fit();
@@ -121,6 +122,7 @@ export default function (props: Props) {
             if (xtermRef.current && xtermRef.current.element) {
                 observer.disconnect();
                 handleTerminalResize();
+                setTerminalReady(true);
             }
         });
         observer.observe(terminalDivRef.current, {
