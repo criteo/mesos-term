@@ -1,6 +1,6 @@
 {
   "name": "mesos-term",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "",
   "main": "main.js",
   "scripts": {
