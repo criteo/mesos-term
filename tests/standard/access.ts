@@ -4,7 +4,8 @@ import Axios from "axios";
 import { equal } from "assert";
 
 describe('basic routes', function () {
-    this.timeout(5000);
+    this.timeout(30000);
+    this.retries(3);
 
     it('should access to /ping', function () {
         return helpers.withChrome(async function (driver) {

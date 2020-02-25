@@ -1,10 +1,12 @@
 import * as Sandbox from "../common/sandbox";
 import Helpers = require('../helpers');
-import { TIMEOUT_DRIVER, TIMEOUT_TEST } from "../common/constants";
+import { TIMEOUT_DRIVER } from "../common/constants";
 import { sendKeysToTerminal, untilTermContains } from "../apps_helpers";
 
 describe('Sandbox', function () {
-    this.timeout(TIMEOUT_TEST);
+    this.timeout(30000);
+    this.retries(3);
+
     describe('file description is updated when file selected', () => {
         it("should update description", async function () {
             const instanceID = this.mesosTaskIds["app1"];

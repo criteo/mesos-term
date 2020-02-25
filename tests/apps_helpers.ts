@@ -1,7 +1,6 @@
 import { WebDriver, until, By, Condition } from 'selenium-webdriver';
 import helpers = require('./helpers');
 
-const TIMEOUT_TEST = 20000;
 const TIMEOUT_DRIVER = 18000;
 
 export const untilTermContains = function (pattern: RegExp) {
@@ -94,8 +93,6 @@ export function testInteractionsWithTerminal(
   appName: string) {
 
   it('should be able to interact with terminal', async function () {
-    this.retries(3);
-    this.timeout(TIMEOUT_TEST);
     const instanceId = this.mesosTaskIds[appName];
     await checkInteractionsWithTerminal(user, instanceId);
   });
@@ -127,7 +124,6 @@ function testReceiveErrorMessageFromInstanceId(
 
   describe(`from instance ID ${instanceId}`, function () {
     it(`should receive error "${expectedError}"`, function () {
-      this.timeout(TIMEOUT_TEST);
       return testReceiveErrorMessage(user, instanceId, expectedError);
     });
   });
@@ -136,7 +132,6 @@ function testReceiveErrorMessageFromInstanceId(
 export function testCaseUnauthorizedAccessDialogDisplayed(user: string, appName: string) {
   describe("unauthorized access dialog be displayed", () => {
     it("displayed", async function () {
-      this.timeout(TIMEOUT_TEST);
       const instanceId = this.mesosTaskIds[appName];
       await helpers.withChrome(async function (driver) {
         await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
@@ -157,7 +152,6 @@ export function testNoTaskId(user: string, instanceId: string) {
 
 export function testShouldNotSeeGrantAccessButton(user: string, appName: string) {
   it('should not see the `Grant access` button', async function () {
-    this.timeout(TIMEOUT_TEST);
     const instanceId = this.mesosTaskIds[appName];
 
     await helpers.withChrome(async function (driver) {
@@ -177,7 +171,6 @@ export function testShouldNotSeeGrantAccessButton(user: string, appName: string)
 
 export function testShouldSeeGrantAccessButton(user: string, appName: string) {
   it('should see the `Grant access` button', async function () {
-    this.timeout(TIMEOUT_TEST);
     const instanceId = this.mesosTaskIds[appName];
 
     await helpers.withChrome(async function (driver) {
@@ -205,9 +198,9 @@ async function delegateAccessToken(driver: WebDriver, delegatedUser: string, dur
   const userEl = await waitUntilElementIsVisible(driver, '#delegation-dialog .username-field .MuiInput-input', TIMEOUT_DRIVER);
   await userEl.sendKeys(delegatedUser);
 
-  const select = await driver.wait(until.elementLocated(By.css("#duration-select")));
+  const select = await driver.wait(until.elementLocated(By.css("#duration-select")), TIMEOUT_DRIVER);
   await select.click();
-  const option = await driver.wait(until.elementLocated(By.xpath('//*[@id="menu-"]/div[3]/ul/li[@data-value="' + duration + '"]')));
+  const option = await driver.wait(until.elementLocated(By.xpath('//*[@id="menu-"]/div[3]/ul/li[@data-value="' + duration + '"]')), TIMEOUT_DRIVER);
   await option.click();
 
   const generateButtonEl = await waitUntilElementIsVisible(driver, '#delegation-dialog .generate-button', TIMEOUT_DRIVER);
@@ -220,8 +213,6 @@ async function delegateAccessToken(driver: WebDriver, delegatedUser: string, dur
 
 export function testShouldGrantAccessViaButtonAndToken(admin: string, delegatedUser: string, appName: string) {
   it(`should allow ${admin} to delegate access to ${delegatedUser} via button and token in dialog`, async function () {
-    this.timeout(20000);
-    this.retries(3);
     const instanceId = this.mesosTaskIds[appName];
     let token: string;
     await helpers.withChrome(async function (driver) {
@@ -244,8 +235,6 @@ export function testShouldGrantAccessViaButtonAndToken(admin: string, delegatedU
 
 export function testShouldGrantAccessViaButtonAndUrl(admin: string, delegatedUser: string, appName: string) {
   it(`should allow ${admin} to delegate access to ${delegatedUser} via button and url`, async function () {
-    this.timeout(30000);
-    this.retries(3);
     const instanceId = this.mesosTaskIds[appName];
 
     let url: string;
@@ -265,8 +254,6 @@ export function testShouldGrantAccessViaButtonAndUrl(admin: string, delegatedUse
 
 export function testShouldAbortAccessDelegation(admin: string, appName: string) {
   it(`should face an error when user is not provided`, async function () {
-    this.timeout(30000);
-    this.retries(3);
     const instanceId = this.mesosTaskIds[appName];
 
     await helpers.withChrome(async function (driver) {

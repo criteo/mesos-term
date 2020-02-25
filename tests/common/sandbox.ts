@@ -2,7 +2,6 @@ import { WebDriver, until, By, Condition, WebElement } from 'selenium-webdriver'
 import * as Helpers from "../helpers";
 import { receiveUnauthorizedErrorMessage } from './errors';
 
-const TIMEOUT_TEST = 20000;
 const TIMEOUT_DRIVER = 18000;
 
 const untilSandboxDisplaysFiles = function (names: string[]) {
@@ -35,8 +34,6 @@ const untilSandboxDisplaysFiles = function (names: string[]) {
 
 export function testOpenSandbox(username: string, appName: string) {
     it('should be able to see files of the sandbox', async function () {
-        // this.retries(3);
-        this.timeout(TIMEOUT_TEST);
         const instanceID = this.mesosTaskIds[appName];
         await checkCanSeeFilesInSandbox(username, instanceID);
     });
@@ -44,8 +41,6 @@ export function testOpenSandbox(username: string, appName: string) {
 
 export function testSandboxUnauthorized(username: string, appName: string) {
     it('should be unauthorized', async function () {
-        // this.retries(3);
-        this.timeout(TIMEOUT_TEST);
         const instanceID = this.mesosTaskIds[appName];
         await Helpers.withChrome(async (driver) => {
             await driver.get(`http://${username}:password@localhost:5000/task/${instanceID}/sandbox`);
