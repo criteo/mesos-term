@@ -22,9 +22,10 @@ export async function withChrome<T>(
   });
 
   let fnError: Error;
+  let result: any;
 
   try {
-    await fn(driver);
+    result = await fn(driver);
   } catch (err) {
     fnError = err;
   } finally {
@@ -34,12 +35,14 @@ export async function withChrome<T>(
   if (fnError) {
     throw fnError;
   }
+  return result;
 }
 
 export function getDelegation(from: string, to: string, instanceId: string) {
   const body = {
     'task_id': instanceId,
-    'delegate_to': to
+    'delegate_to': to,
+    'duration': '1h',
   };
   return Request({
     uri: `http://${from}:password@localhost:5000/api/delegate`,

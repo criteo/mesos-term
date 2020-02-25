@@ -76,6 +76,19 @@ export async function checkBadAccessToken(
   });
 }
 
+export function generateAccessToken(
+  user: string,
+  delegatedUser: string,
+  instanceId: string,
+  duration: string) {
+
+  return helpers.withChrome(async function (driver) {
+    await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+    const url = await delegateAccessToken(driver, delegatedUser, duration);
+    return url.match(/access_token=(.*)$/)[1];
+  });
+}
+
 export function testInteractionsWithTerminal(
   user: string,
   appName: string) {
@@ -181,7 +194,8 @@ async function waitUntilElementIsVisible(driver: any, cssClass: string, timeout:
   return el;
 }
 
-async function delegateAccessToken(driver: WebDriver, delegatedUser: string, instanceId: string) {
+// @duration is either 1h, 1d, 7d, 15d
+async function delegateAccessToken(driver: WebDriver, delegatedUser: string, duration: string) {
   const grantEl = await driver.wait(until.elementLocated(By.css(".grant-permission-button")), TIMEOUT_DRIVER);
   await driver.wait(until.elementIsVisible(grantEl), TIMEOUT_DRIVER);
   await grantEl.click();
@@ -190,8 +204,15 @@ async function delegateAccessToken(driver: WebDriver, delegatedUser: string, ins
   await driver.wait(until.elementIsVisible(dialogEl), TIMEOUT_DRIVER);
   const userEl = await waitUntilElementIsVisible(driver, '#delegation-dialog .username-field .MuiInput-input', TIMEOUT_DRIVER);
   await userEl.sendKeys(delegatedUser);
+
+  const select = await driver.wait(until.elementLocated(By.css("#duration-select")));
+  await select.click();
+  const option = await driver.wait(until.elementLocated(By.xpath('//*[@id="menu-"]/div[3]/ul/li[@data-value="' + duration + '"]')));
+  await option.click();
+
   const generateButtonEl = await waitUntilElementIsVisible(driver, '#delegation-dialog .generate-button', TIMEOUT_DRIVER);
   await generateButtonEl.click();
+
   const tokenEl = await waitUntilElementIsVisible(driver, '#delegation-dialog .token-field .MuiInput-input', TIMEOUT_DRIVER);
   const accessURL = await tokenEl.getAttribute("value");
   return accessURL;
@@ -205,7 +226,7 @@ export function testShouldGrantAccessViaButtonAndToken(admin: string, delegatedU
     let token: string;
     await helpers.withChrome(async function (driver) {
       await driver.get(`http://${admin}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
-      token = await delegateAccessToken(driver, delegatedUser, instanceId);
+      token = await delegateAccessToken(driver, delegatedUser, '1h');
       token = token.match(/access_token=(.*)$/)[1];
     });
 
@@ -230,7 +251,7 @@ export function testShouldGrantAccessViaButtonAndUrl(admin: string, delegatedUse
     let url: string;
     await helpers.withChrome(async function (driver) {
       await driver.get(`http://${admin}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
-      url = await delegateAccessToken(driver, delegatedUser, instanceId);
+      url = await delegateAccessToken(driver, delegatedUser, '1h');
     });
 
     await helpers.withChrome(async function (driver) {

@@ -31,8 +31,19 @@ export function DelegatePost(
     return;
   }
 
-  const duration = (req.body.expires_in) ? req.body.expires_in : '15m';
-  const expires_in = ParseDuration(duration) / 1000;
+  if (!req.body.duration) {
+    res.status(406).send('Request must contain key `duration`.');
+    return;
+  }
+
+  const duration = req.body.duration;
+  const expiresIn = ParseDuration(duration) / 1000;
+
+  if (!expiresIn) {
+    console.error(`Unable to parse duration ${req.body.duration}`);
+    res.status(400).send(`Unable to parse duration ${req.body.duration}`);
+    return;
+  }
 
   const delegate_to = req.body.delegate_to.split(',');
 
@@ -41,7 +52,7 @@ export function DelegatePost(
     delegate_to: delegate_to
   };
   const options = {
-    expiresIn: expires_in,
+    expiresIn: expiresIn,
     issuer: req.user.cn
   };
 
