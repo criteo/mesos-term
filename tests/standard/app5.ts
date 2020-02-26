@@ -2,6 +2,7 @@ import AppsHelpers = require('../apps_helpers');
 import * as Sandbox from "../common/sandbox";
 
 describe('app5 (no label, root user)', function () {
+    this.timeout(30000);
     this.retries(3);
 
     describe('super admin user is authorized to interact with terminal', function () {

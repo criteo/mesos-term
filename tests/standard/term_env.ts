@@ -3,6 +3,9 @@ import helpers = require('../helpers');
 
 
 describe('custom environment variables', function () {
+    this.timeout(30000);
+    this.retries(3);
+
     const user = 'john';
     const appName = 'app1';
 
