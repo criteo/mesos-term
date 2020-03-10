@@ -24,6 +24,7 @@ export function useFileReader(
     const [init, setInit] = useState(false);
     const [displayedLines, setDisplayedLines] = useState([] as string[]);
     const lineRange = buffer.current ? buffer.current.lineRange : { start: 0, end: 0 };
+    const [eof, setEof] = useState(false);
 
     const readPreviousPortion = useCallback(async () => {
         if (!buffer.current) {
@@ -58,6 +59,9 @@ export function useFileReader(
             buffer.current.lineRange.end += newContentLines.length - contentLines.length;
             setDisplayedLines(newContentLines);
         }
+        if (res.eof) {
+            setEof(true);
+        }
     }, [setDisplayedLines, taskID, chunkSize, path]);
 
     const initialize = useCallback(async () => {
@@ -80,13 +84,15 @@ export function useFileReader(
     }, [taskID, path, readPreviousPortion]);
 
     useEffect(() => {
-        timer.current = setInterval(readNextPortion, 2000);
+        if (!eof) {
+            timer.current = setInterval(readNextPortion, 2000);
+        }
         return () => {
             if (timer.current) {
                 clearInterval(timer.current);
             }
         }
-    }, [readNextPortion]);
+    }, [readNextPortion, eof]);
 
     useEffect(() => {
         if (contentRef.current && follow) {

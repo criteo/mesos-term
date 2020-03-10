@@ -15,6 +15,7 @@ interface SandboxDescriptor {
     frameworkID: string;
     containerID: string;
     task: TaskInfo;
+    last_status: 'TASK_STARTING' | 'TASK_RUNNING' | 'TASK_KILLED' | 'UNKNOWN';
 }
 
 function cacheSandboxDescriptor(fetcher: (taskID: string) => Promise<SandboxDescriptor>) {
@@ -58,6 +59,7 @@ function cacheSandboxDescriptor(fetcher: (taskID: string) => Promise<SandboxDesc
 const sandboxCache = cacheSandboxDescriptor(async (taskID) => {
     const taskInfo = await getTaskInfo(taskID);
     const slaveState = await getMesosSlaveState(taskInfo.agent_url);
+    const status = (taskInfo.statuses.length > 0) ? taskInfo.statuses[taskInfo.statuses.length - 1] : 'UNKNOWN';
     return {
         agentURL: taskInfo.agent_url,
         workDir: slaveState.flags.work_dir,
@@ -65,6 +67,7 @@ const sandboxCache = cacheSandboxDescriptor(async (taskID) => {
         frameworkID: taskInfo.framework_id,
         containerID: taskInfo.container_id,
         task: taskInfo,
+        last_status: status,
     };
 });
 
@@ -134,6 +137,9 @@ export default function (app: Express.Application) {
             const sandbox = await sandboxCache(req.query.taskID);
             const files = await readSandboxFile(sandbox.agentURL, sandbox.workDir, sandbox.slaveID, sandbox.frameworkID,
                 req.query.taskID, sandbox.containerID, req.query.path, req.query.offset, req.query.size);
+            if (!(sandbox.last_status === 'TASK_RUNNING' || sandbox.last_status === 'TASK_STARTING')) {
+                files.eof = true;
+            }
             res.send(files);
         }
         catch (err) {
