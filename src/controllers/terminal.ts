@@ -70,9 +70,9 @@ async function TerminalBearer(
     await next();
   }
   catch (err) {
-    console.error(`Error with URL ${req.originalUrl}: ${err}`);
+    console.error('Cannot verify bearer for http connections', err);
     res.status(403);
-    res.send(err);
+    res.send('Cannot verify bearer for http connections');
   }
 }
 
@@ -86,13 +86,12 @@ export async function WsTerminalBearer(
     await next();
   }
   catch (err) {
-    console.error(err);
+    console.error('Cannot verify bearer for ws connections', err);
   }
 }
 
 function spawnTerminal(
   req: Request,
-  res: Express.Response,
   task: TaskInfo) {
 
   const params = [
@@ -156,7 +155,7 @@ async function tryRequestTerminal(
   if (env.AUTHORIZATIONS_ENABLED) {
     await Authorizations.CheckTaskAuthorization(req, task, req.query.access_token);
   }
-  const pid = await spawnTerminal(req, res, task);
+  const pid = await spawnTerminal(req, task);
   return Jwt.sign({ pid }, env.JWT_SECRET, { expiresIn: 60 * 60 });
 }
 
@@ -182,7 +181,7 @@ async function createTerminal(
     });
   }
   catch (err) {
-    console.error(err);
+    console.error(`Cannot create terminal for task ${taskId}`, err);
     if (err instanceof Authorizations.UnauthorizedAccessError) {
       res.status(403);
       res.send();
