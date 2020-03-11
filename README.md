@@ -210,6 +210,34 @@ the cache when a terminal is requested for a task that does not exist in
 the cache. It allows users to log into newly created instances that
 might not be yet in the cache.
 
+## Contributing
+
+MesosTerm uses hot-reloading to let you develop and test easily. In order
+to spawn a complete environment please follow the steps:
+
+    $ # Prepare the environment
+    $ source bootstrap.sh
+
+    $ # Run the suite called "standard"
+    $ ./tests/resources/setup.sh standard
+
+A suite represents a complete environment for a given configuration of
+MesosTerm. For instance, in a given configuration, authorization module
+could be enabled while disabled in another configuration.
+
+The list of available suite is:
+
+- noadmin / task admins are disabled, only super admins can have access to containers.
+- noauth / authentication and authorization is completely disabled.
+- standard / authentication and authorization is enabled with standard features.
+- taskadmins / task admins are enabled to restrict the set of administrators of tasks (see MESOS\_TERM\_ALLOWED\_TASK\_ADMINS above).
+
+You can then run the corresponding set of tests once you're happy with you changes with
+
+    $ ./tests/resources/run_tests standard
+
+Enjoy!
+
 ## License
 **MesosTerm** is **licensed** under the **[MIT License]**. The terms of the license are as follows:
 
