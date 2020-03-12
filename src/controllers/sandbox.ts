@@ -1,7 +1,7 @@
 import Express = require('express');
 import {
     browseSandbox, getTaskInfo, getMesosSlaveState, readSandboxFile,
-    downloadSandboxFile, downloadSandboxDirectory, TaskInfo, MesosAgentNotFoundError, TaskNotFoundError
+    downloadSandboxFileAsStream, downloadSandboxDirectory, TaskInfo, MesosAgentNotFoundError, TaskNotFoundError
 } from '../mesos';
 import { env } from '../env_vars';
 import * as Moment from 'moment';
@@ -162,18 +162,18 @@ export default function (app: Express.Application) {
     app.get('/api/sandbox/download', async function (req: Express.Request, res: Express.Response) {
         try {
             const sandbox = await sandboxCache(req.query.taskID);
+            res.set('Content-Type', 'application/octet-stream');
+            res.set('Content-Disposition', 'attachment; filename=' + req.query.filename);
+
             if (req.query.directory === 'true') {
-                const content = await downloadSandboxDirectory(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
-                    sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path);
-                res.set('Content-Type', 'application/octet-stream');
-                res.end(content, 'binary');
+                await downloadSandboxDirectory(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
+                    sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path, res);
             }
             else {
-                const mesosRes = await downloadSandboxFile(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
-                    sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path);
-                res.set('Content-Type', 'application/octet-stream');
-                res.end(mesosRes, 'binary');
+                await downloadSandboxFileAsStream(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
+                    sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path, res);
             }
+            res.end();
         }
         catch (err) {
             console.error(err);
