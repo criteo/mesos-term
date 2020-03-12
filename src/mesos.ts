@@ -344,7 +344,7 @@ export async function downloadSandboxFileAsStream(
     });
     fileContentRes.data.on('error', (err: Error) => {
       reject(err);
-    })
+    });
   });
 }
 
@@ -407,5 +407,5 @@ export async function downloadSandboxDirectory(
       .pipe(res)
       .on('finish', resolve)
       .on('error', reject);
-  })
+  });
 }
