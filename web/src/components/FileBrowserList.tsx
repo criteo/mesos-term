@@ -20,7 +20,11 @@ interface Props {
 
 export default function (props: Props) {
     const classes = useStyles();
-    const fileItems = props.files ? props.files.map((f, i) => {
+    const directories = props.files ? props.files.filter(f => f.mode.slice(0, 1) === 'd') : [];
+    const files = props.files ? props.files.filter(f => f.mode.slice(0, 1) !== 'd') : [];
+    const dirsAndFiles = directories.concat(files);
+
+    const fileItems = dirsAndFiles.map((f, i) => {
         const handleDoubleClick = (ev: MouseEvent<HTMLDivElement>, fd: FileDescription) => {
             props.onFileDoubleClick(fd);
         }
@@ -40,7 +44,7 @@ export default function (props: Props) {
                 onDownloadClick={handleDownload}
                 selected={props.selectedFilePath !== null && f.path === props.selectedFilePath} />
         );
-    }) : [];
+    });
 
     return (
         <Table>
@@ -100,7 +104,7 @@ function FileItem(props: FileItemProps) {
     }
 
     const icon = <FontAwesomeIcon icon={isDirectory ? faFolder : faFile} size="lg"
-        className={classes.icon} />;
+        className={classnames(classes.icon, isDirectory ? classes.directory : '')} />;
 
     return (
         <TableRow className={classnames(classes.root, "file-item")}
@@ -130,5 +134,8 @@ const useFileItemStyles = makeStyles(theme => ({
     },
     icon: {
         marginRight: theme.spacing(2),
+    },
+    directory: {
+        color: '#c38c00',
     }
 }))
