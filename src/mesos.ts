@@ -14,7 +14,7 @@ interface MesosLabel {
 }
 
 interface MesosStatus {
-  state: string;
+  state: 'TASK_RUNNING' | 'TASK_STARTING' | 'TASK_KILLED';
   container_status: {
     container_id: {
       value: string;
@@ -28,7 +28,7 @@ interface MesosStatus {
 interface MesosTask {
   labels: MesosLabel[];
   id: string;
-  state: 'TASK_RUNNING' | 'TASK_STARTING';
+  state: 'TASK_RUNNING' | 'TASK_STARTING' | 'TASK_KILLED';
   user: string;
   slave_id: string;
   framework_id: string;
@@ -68,6 +68,7 @@ export interface TaskInfo extends TaskContainer {
   slave_hostname: string;
   admins: string[];
   task_id: string;
+  statuses: ('TASK_STARTING' | 'TASK_RUNNING' | 'TASK_KILLED')[];
 }
 
 const mesosStateCache = cacheMesosState(env.MESOS_MASTER_URL, env.MESOS_STATE_CACHE_TIME);
@@ -170,6 +171,7 @@ function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
     admins = allowed.split(',') as string[];
   }
 
+  // Ensure the task has run.
   const runningStatuses = task.statuses.filter(s => s.state === 'TASK_RUNNING');
 
   if (runningStatuses.length === 0) {
@@ -191,6 +193,7 @@ function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
     slave_hostname: slave_hostname,
     admins: admins,
     task_id: task.id,
+    statuses: task.statuses.map(s => s.state),
     ...taskContainer,
   };
 }
@@ -257,7 +260,6 @@ function cacheMesosState(mesosMasterURL: string, refreshSeconds: number) {
     if (!update && cache !== undefined) {
       return cache;
     }
-    console.log('refresh');
     return refreshCache();
   };
 }
@@ -298,6 +300,7 @@ export async function browseSandbox(
 export interface FileData {
   data: string;
   offset: number;
+  eof: boolean;
 }
 
 export async function readSandboxFile(
@@ -306,7 +309,7 @@ export async function readSandboxFile(
   relativaPath: string, offset: number, size: number) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativaPath}`);
-  const res = await Axios.get<FileDescription[]>(`${mesosSlaveURL}/files/read?path=${fullPath}&offset=${offset}&length=${size}`);
+  const res = await Axios.get<FileData>(`${mesosSlaveURL}/files/read?path=${fullPath}&offset=${offset}&length=${size}`);
   return res.data;
 }
 

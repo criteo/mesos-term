@@ -124,6 +124,7 @@ export async function browseSandbox(taskID: string, path: string) {
 export interface FileData {
     data: string;
     offset: number;
+    eof: boolean;
 }
 
 export async function readSandboxFile(taskID: string, path: string, offset: number, size: number) {
