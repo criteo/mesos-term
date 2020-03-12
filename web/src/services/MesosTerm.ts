@@ -132,9 +132,6 @@ export async function readSandboxFile(taskID: string, path: string, offset: numb
     return res.data;
 }
 
-export async function downloadSandboxFile(taskID: string, path: string, directory: boolean) {
-    const res = await Axios.get<Blob>(`/api/sandbox/download?taskID=${taskID}&path=${encodeURIComponent(path)}&directory=${directory}`, {
-        responseType: 'blob',
-    });
-    return res.data;
+export async function downloadSandboxFile(taskID: string, path: string, directory: boolean, filename: string) {
+    (window as any).location = `/api/sandbox/download?taskID=${taskID}&path=${encodeURIComponent(path)}&directory=${directory}&filename=${filename}`;
 }

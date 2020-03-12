@@ -5,6 +5,7 @@ import Axios, { AxiosRequestConfig } from 'axios';
 import { promises as Fs } from 'fs';
 import JSZip = require('jszip');
 import * as https from 'https';
+import * as streamBuffers from 'stream-buffers';
 
 type Labels = { [key: string]: string };
 
@@ -323,27 +324,53 @@ export class DownloadDirectoryError extends Error {
 }
 
 
-export async function downloadSandboxFile(
+export async function downloadSandboxFileAsStream(
+  mesosSlaveURL: string, workDir: string, slaveID: string,
+  frameworkID: string, executorID: string, containerID: string,
+  relativePath: string, res: any) {
+  const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
+  const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
+  const fileContentRes = await Axios.get(`${mesosSlaveURL}/files/download?path=${fullPath}`, {
+    validateStatus: (code: number) => code === 400 || code === 200,
+    responseType: 'stream',
+  });
+  if (fileContentRes.status === 400 && (fileContentRes as any).data === 'Cannot download a directory.\n') {
+    throw new DownloadDirectoryError();
+  }
+
+  return new Promise((resolve, reject) => {
+    fileContentRes.data.on('data', (chunk: ArrayBuffer) => {
+      res.write(chunk);
+    });
+    fileContentRes.data.on('end', () => {
+      resolve();
+    });
+    fileContentRes.data.on('error', (err: Error) => {
+      reject(err);
+    });
+  });
+}
+
+export async function downloadSandboxFileAsNodeArray(
   mesosSlaveURL: string, workDir: string, slaveID: string,
   frameworkID: string, executorID: string, containerID: string,
   relativePath: string) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
-  const res = await Axios.get<string>(`${mesosSlaveURL}/files/download?path=${fullPath}`, {
-    validateStatus: code => code === 400 || code === 200,
+  const fileContentRes = await Axios.get(`${mesosSlaveURL}/files/download?path=${fullPath}`, {
+    validateStatus: (code: number) => code === 400 || code === 200,
     responseType: 'arraybuffer',
   });
-  if (res.status === 400 && (res as any).data === 'Cannot download a directory.\n') {
+  if (fileContentRes.status === 400 && (fileContentRes as any).data === 'Cannot download a directory.\n') {
     throw new DownloadDirectoryError();
-
   }
-  return res.data;
+  return fileContentRes.data;
 }
 
 async function downloadFileToDisk(mesosSlaveURL: string, workDir: string, slaveID: string,
   frameworkID: string, executorID: string, containerID: string,
   relativePath: string, basePath: string, zip: any) {
-  const content = await downloadSandboxFile(mesosSlaveURL, workDir, slaveID,
+  const content = await downloadSandboxFileAsNodeArray(mesosSlaveURL, workDir, slaveID,
     frameworkID, executorID, containerID, relativePath);
   // slice(1) strips the first slash.
   const path = relativePath.slice(basePath.length + ((basePath === '/') ? 0 : 1));
@@ -353,7 +380,7 @@ async function downloadFileToDisk(mesosSlaveURL: string, workDir: string, slaveI
 export async function downloadSandboxDirectory(
   mesosSlaveURL: string, workDir: string, slaveID: string,
   frameworkID: string, executorID: string, containerID: string,
-  relativePath: string) {
+  relativePath: string, res: any) {
   const directories = [relativePath] as string[];
   const files = [] as string[];
 
@@ -378,5 +405,10 @@ export async function downloadSandboxDirectory(
       frameworkID, executorID, containerID, files[i], relativePath, zip));
   }
   await Promise.all(promises);
-  return zip.generateAsync({ type: 'nodebuffer' });
+  return new Promise((resolve, reject) => {
+    zip.generateNodeStream({ streamFiles: true })
+      .pipe(res)
+      .on('finish', resolve)
+      .on('error', reject);
+  });
 }

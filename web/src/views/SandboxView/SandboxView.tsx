@@ -7,7 +7,6 @@ import { faSitemap } from "@fortawesome/free-solid-svg-icons";
 import queryString from "query-string";
 import classnames from "classnames";
 import { useNotifications } from "../../hooks/NotificationContext";
-import { saveAs } from 'file-saver';
 import FileReader from "./FileReader";
 import FileDescriptionBar, { Layout } from "../../components/FileDescriptionBar";
 import FileBrowser from "../../components/FileBrowser";
@@ -110,9 +109,12 @@ export default function () {
             if (!filename) {
                 filename = match.params.taskID;
             }
+
+            if (isDir) {
+                filename += '.zip';
+            }
             setDownloadInProgress(true);
-            const blob = await downloadSandboxFile(match.params.taskID, p, isDir);
-            saveAs(blob, filename + ((isDir) ? '.zip' : ''));
+            downloadSandboxFile(match.params.taskID, p, isDir, filename);
         } catch (err) {
             createErrorNotification(err.message);
         } finally {

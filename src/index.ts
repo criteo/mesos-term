@@ -4,6 +4,7 @@ import os = require('os');
 import path = require('path');
 import session = require('express-session');
 import BodyParser = require('body-parser');
+import Compression = require('compression');
 
 import { env } from './env_vars';
 
@@ -34,6 +35,7 @@ if (app.get('env') === 'production') {
 }
 
 app.use(session(sessionOptions));
+app.use(Compression());
 
 
 if (env.AUTHORIZATIONS_ENABLED) {
