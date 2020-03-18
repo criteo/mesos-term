@@ -1,7 +1,8 @@
 import Express = require('express');
 import {
     browseSandbox, getTaskInfo, getMesosSlaveState, readSandboxFile,
-    downloadSandboxFileAsStream, downloadSandboxDirectory, TaskInfo, MesosAgentNotFoundError, TaskNotFoundError
+    downloadSandboxFileAsStream, downloadSandboxDirectory, TaskInfo, MesosAgentNotFoundError,
+    TaskNotFoundError, FileNotFoundError
 } from '../mesos';
 import { env } from '../env_vars';
 import * as Moment from 'moment';
@@ -116,6 +117,11 @@ export default function (app: Express.Application) {
                 res.send('Mesos agent not found');
                 return;
             }
+            else if (err instanceof FileNotFoundError) {
+                res.status(404);
+                res.send('File not found');
+                return;
+            }
             else if (err instanceof UnauthorizedAccessError) {
                 res.status(403);
                 res.send('Unauthorized');
@@ -147,6 +153,11 @@ export default function (app: Express.Application) {
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
                 res.send('Mesos agent not found');
+                return;
+            }
+            else if (err instanceof FileNotFoundError) {
+                res.status(404);
+                res.send('File not found');
                 return;
             }
             else if (err instanceof UnauthorizedAccessError) {
@@ -186,6 +197,11 @@ export default function (app: Express.Application) {
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
                 res.send('Mesos agent not found');
+                return;
+            }
+            else if (err instanceof FileNotFoundError) {
+                res.status(404);
+                res.send('File not found');
                 return;
             }
             else if (err instanceof UnauthorizedAccessError) {

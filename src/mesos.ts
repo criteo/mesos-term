@@ -95,6 +95,15 @@ export class TaskNotFoundError extends Error {
   }
 }
 
+export class FileNotFoundError extends Error {
+  constructor(m: string) {
+    super('File not found: ' + m);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, FileNotFoundError.prototype);
+  }
+}
+
 export class TaskNotRunningError extends Error {
   constructor(m: string) {
     super('Task not running: ' + m);
@@ -290,10 +299,17 @@ interface FileDescription {
 export async function browseSandbox(
   mesosSlaveURL: string, workDir: string, slaveID: string,
   frameworkID: string, executorID: string, containerID: string,
-  relativaPath: string) {
+  relativePath: string) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
-  const fullPath = encodeURIComponent(`${basePath}${relativaPath}`);
-  const res = await Axios.get<FileDescription[]>(`${mesosSlaveURL}/files/browse?path=${fullPath}`);
+  const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
+  const res = await Axios.get<FileDescription[]>(`${mesosSlaveURL}/files/browse?path=${fullPath}`, {
+    validateStatus: (code: number) => code === 404 || code === 200,
+  });
+
+  if (res.status === 404) {
+    throw new FileNotFoundError(relativePath);
+  }
+
   const files = res.data.map(f => ({ ...f, path: f.path.replace(basePath, '') }));
   return files;
 }
@@ -307,10 +323,16 @@ export interface FileData {
 export async function readSandboxFile(
   mesosSlaveURL: string, workDir: string, slaveID: string,
   frameworkID: string, executorID: string, containerID: string,
-  relativaPath: string, offset: number, size: number) {
+  relativePath: string, offset: number, size: number) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
-  const fullPath = encodeURIComponent(`${basePath}${relativaPath}`);
-  const res = await Axios.get<FileData>(`${mesosSlaveURL}/files/read?path=${fullPath}&offset=${offset}&length=${size}`);
+  const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
+  const res = await Axios.get<FileData>(`${mesosSlaveURL}/files/read?path=${fullPath}&offset=${offset}&length=${size}`, {
+    validateStatus: (code: number) => code === 404 || code === 200,
+  });
+
+  if (res.status === 404) {
+    throw new FileNotFoundError(relativePath);
+  }
   return res.data;
 }
 

@@ -103,7 +103,7 @@ export interface FileDescription {
 
 export async function browseSandbox(taskID: string, path: string) {
     const res = await Axios.get<FileDescription[]>(`/api/sandbox/browse?taskID=${taskID}&path=${encodeURIComponent(path)}`, {
-        validateStatus: c => c === 400 || c === 403 || c === 404 || c === 200
+        validateStatus: c => c === 400 || c === 403 || c === 404 || c === 200,
     });
 
     if (res.status === 400) {
@@ -115,7 +115,7 @@ export async function browseSandbox(taskID: string, path: string) {
     }
 
     if (res.status === 404) {
-        throw new TaskNotFoundError();
+        throw new Error((res as any).data);
     }
 
     return res.data;
@@ -128,7 +128,12 @@ export interface FileData {
 }
 
 export async function readSandboxFile(taskID: string, path: string, offset: number, size: number) {
-    const res = await Axios.get<FileData>(`/api/sandbox/read?taskID=${taskID}&path=${encodeURIComponent(path)}&offset=${offset}&size=${size}`);
+    const res = await Axios.get<FileData>(`/api/sandbox/read?taskID=${taskID}&path=${encodeURIComponent(path)}&offset=${offset}&size=${size}`, {
+        validateStatus: c => c === 404 || c === 200,
+    });
+    if (res.status === 404) {
+        throw new Error((res as any).data);
+    }
     return res.data;
 }
 
