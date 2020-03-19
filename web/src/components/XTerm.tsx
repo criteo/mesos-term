@@ -123,6 +123,7 @@ export default function (props: Props) {
                 observer.disconnect();
                 handleTerminalResize();
                 setTerminalReady(true);
+                xtermRef.current.focus();
             }
         });
         observer.observe(terminalDivRef.current, {
@@ -133,13 +134,13 @@ export default function (props: Props) {
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
-            props.token,
-            handleSocketOpen,
-            handleSocketClose,
-            handleSocketError,
-            windowLoaded,
-            queryParams.screenReaderMode
-        ]);
+        props.token,
+        handleSocketOpen,
+        handleSocketClose,
+        handleSocketError,
+        windowLoaded,
+        queryParams.screenReaderMode
+    ]);
 
     useEffect(() => { resizeRemoteTerminal(); }, [resizeRemoteTerminal]);
     useEffect(() => {
