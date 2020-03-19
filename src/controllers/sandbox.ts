@@ -79,10 +79,9 @@ export default function (app: Express.Application) {
                 const sandbox = await sandboxCache(req.query.taskID);
                 await CheckTaskAuthorization(req, sandbox.task, req.query.access_token);
             }
-            await next();
         }
         catch (err) {
-            console.error(err);
+            console.error(`Cannot authorize user ${req.user.cn} to access to sandbox of task ${req.query.taskID}`, err);
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
                 res.send('Mesos agent not found');
@@ -101,6 +100,8 @@ export default function (app: Express.Application) {
             res.status(500);
             res.send();
         }
+
+        await next();
     });
 
     app.get('/api/sandbox/browse', async function (req: Express.Request, res: Express.Response) {
@@ -111,7 +112,7 @@ export default function (app: Express.Application) {
             res.send(files);
         }
         catch (err) {
-            console.error(err);
+            console.error(`Cannot browse files in ${req.query.path} from sandbox of task ${req.query.taskID}`, err);
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
                 res.send('Mesos agent not found');
@@ -149,7 +150,7 @@ export default function (app: Express.Application) {
             res.send(files);
         }
         catch (err) {
-            console.error(err);
+            console.error(`Cannot read file ${req.query.path} from sandbox of task ${req.query.taskID}`, err);
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
                 res.send('Mesos agent not found');
@@ -193,7 +194,7 @@ export default function (app: Express.Application) {
             res.end();
         }
         catch (err) {
-            console.error(err);
+            console.error(`Cannot download file(s) ${req.query.path} from sandbox of task ${req.query.taskID}`, err);
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
                 res.send('Mesos agent not found');

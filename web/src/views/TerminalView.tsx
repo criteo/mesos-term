@@ -57,7 +57,7 @@ export default function () {
             setTermToken(res.token);
             setContext({ user: res.task.user, taskID: taskID, agent: res.task.agent_url });
         } catch (err) {
-            console.error(err);
+            console.error('Unable to create terminal', err);
             if (err instanceof UnauthorizedAccessError) {
                 setStatus(Status.Unauthorized);
                 if (accessToken) {
