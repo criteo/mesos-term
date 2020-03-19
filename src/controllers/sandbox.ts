@@ -2,12 +2,14 @@ import Express = require('express');
 import {
     browseSandbox, getTaskInfo, getMesosSlaveState, readSandboxFile,
     downloadSandboxFileAsStream, downloadSandboxDirectory, TaskInfo, MesosAgentNotFoundError,
-    TaskNotFoundError, FileNotFoundError
+    TaskNotFoundError, FileNotFoundError, findTaskInSlaveState, MesosTaskState
 } from '../mesos';
 import { env } from '../env_vars';
 import * as Moment from 'moment';
 import { CheckTaskAuthorization, UnauthorizedAccessError } from '../authorizations';
 import { Request } from '../express_helpers';
+
+type TaskState = MesosTaskState | 'UNKNOWN';
 
 interface SandboxDescriptor {
     agentURL: string;
@@ -16,7 +18,7 @@ interface SandboxDescriptor {
     frameworkID: string;
     containerID: string;
     task: TaskInfo;
-    last_status: 'TASK_STARTING' | 'TASK_RUNNING' | 'TASK_KILLED' | 'UNKNOWN';
+    last_status: TaskState;
 }
 
 function cacheSandboxDescriptor(fetcher: (taskID: string) => Promise<SandboxDescriptor>) {
@@ -58,9 +60,24 @@ function cacheSandboxDescriptor(fetcher: (taskID: string) => Promise<SandboxDesc
 
 
 const sandboxCache = cacheSandboxDescriptor(async (taskID) => {
+    // TaskInfo retrieval relies on mesos master cache.
     const taskInfo = await getTaskInfo(taskID);
     const slaveState = await getMesosSlaveState(taskInfo.agent_url);
-    const status = (taskInfo.statuses.length > 0) ? taskInfo.statuses[taskInfo.statuses.length - 1] : 'UNKNOWN';
+
+    const slaveTaskInfos = await findTaskInSlaveState(slaveState, taskID);
+
+    if (slaveTaskInfos.length === 0) {
+        throw new TaskNotFoundError(taskID);
+    }
+
+    if (slaveTaskInfos.length > 1) {
+        throw new Error(`Multiple task descriptors have been found for task ${taskID}`);
+    }
+
+    const status: TaskState = (slaveTaskInfos[0].statuses.length > 0)
+        ? slaveTaskInfos[0].statuses[taskInfo.statuses.length - 1].state
+        : 'UNKNOWN';
+
     return {
         agentURL: taskInfo.agent_url,
         workDir: slaveState.flags.work_dir,
