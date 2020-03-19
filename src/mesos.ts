@@ -5,7 +5,6 @@ import Axios, { AxiosRequestConfig } from 'axios';
 import { promises as Fs } from 'fs';
 import JSZip = require('jszip');
 import * as https from 'https';
-import * as streamBuffers from 'stream-buffers';
 
 type Labels = { [key: string]: string };
 
@@ -14,8 +13,10 @@ interface MesosLabel {
   value: string;
 }
 
+export type MesosTaskState = 'TASK_RUNNING' | 'TASK_STARTING' | 'TASK_KILLED';
+
 interface MesosStatus {
-  state: 'TASK_RUNNING' | 'TASK_STARTING' | 'TASK_KILLED';
+  state: MesosTaskState;
   container_status: {
     container_id: {
       value: string;
@@ -122,20 +123,20 @@ export class MesosAgentNotFoundError extends Error {
   }
 }
 
-function findTask(state: MesosState, taskID: string) {
+function findTaskInMasterState(state: MesosState, taskID: string) {
   const mesosTasks = state.frameworks
     .reduce((acc: MesosTask[], framework: MesosFramework) =>
       acc.concat(framework.tasks).concat(framework.completed_tasks), []);
   return mesosTasks.filter(task => task.id === taskID);
 }
 
-async function getMesosTasks(taskID: string) {
+async function getMesosTasksFromMaster(taskID: string) {
   let state = await mesosStateCache(false);
-  let tasks = findTask(state, taskID);
+  let tasks = findTaskInMasterState(state, taskID);
 
   if (tasks.length === 0) {
     state = await mesosStateCache(true);
-    tasks = findTask(state, taskID);
+    tasks = findTaskInMasterState(state, taskID);
   }
   return tasks;
 }
@@ -209,7 +210,7 @@ function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
 }
 
 export async function getTaskInfo(taskID: string): Promise<TaskInfo> {
-  const tasks = await getMesosTasks(taskID);
+  const tasks = await getMesosTasksFromMaster(taskID);
 
   if (tasks.length === 0) {
     throw new TaskNotFoundError(taskID);
@@ -224,7 +225,7 @@ export async function getTaskInfo(taskID: string): Promise<TaskInfo> {
 }
 
 export async function getRunningTaskInfo(taskID: string): Promise<TaskInfo> {
-  const tasks = await getMesosTasks(taskID);
+  const tasks = await getMesosTasksFromMaster(taskID);
   const runningTasks = tasks.filter(t => t.state === 'TASK_RUNNING');
 
   if (tasks.length > 0 && runningTasks.length === 0) {
@@ -279,10 +280,39 @@ interface MesosSlaveState {
   flags: {
     work_dir: string;
   };
+  frameworks: MesosSlaveFramework[];
 }
 
-export async function getMesosSlaveState(
-  mesosSlaveURL: string) {
+interface MesosSlaveExecutor {
+  id: string;
+  tasks: MesosTask[];
+  completed_tasks: MesosTask[];
+}
+
+interface MesosSlaveFramework {
+  id: string;
+  name: string;
+  user: string;
+  failover_timeout: number;
+  checkpoint: boolean;
+  hostname: string;
+  role: string;
+  executors: MesosSlaveExecutor[];
+  completed_executors: MesosSlaveExecutor[];
+}
+
+export function findTaskInSlaveState(state: MesosSlaveState, taskID: string) {
+  const aggExecutorTasks = (acc2: MesosTask[], executor: MesosSlaveExecutor) =>
+    acc2.concat(executor.tasks).concat(executor.completed_tasks);
+
+  const mesosTasks = state.frameworks
+    .reduce((acc: MesosTask[], framework: MesosSlaveFramework) => acc
+      .concat(framework.executors.reduce(aggExecutorTasks, []))
+      .concat(framework.completed_executors.reduce(aggExecutorTasks, [])), []);
+  return mesosTasks.filter(task => task.id === taskID);
+}
+
+export async function getMesosSlaveState(mesosSlaveURL: string) {
   const res = await Axios.get<MesosSlaveState>(`${mesosSlaveURL}/state`);
   return res.data;
 }
