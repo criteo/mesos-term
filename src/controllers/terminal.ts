@@ -202,8 +202,10 @@ async function createTerminal(
       res.send('Mesos agent not found');
       return;
     }
-    res.status(503);
-    res.send();
+    // returning 400 allow to display response body to the user
+    // if using 503 we simply return "503 != 200" message
+    res.status(400);
+    res.send(err.message);
   }
 }
 
