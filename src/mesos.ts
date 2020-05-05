@@ -190,6 +190,7 @@ function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
   }
 
   if (runningStatuses.length > 1) {
+    console.log(task); // log full task detail to allow further investigation
     throw new Error(`Multiple running statuses has been found for the task ${task.id}`);
   }
 
