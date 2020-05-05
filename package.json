@@ -61,7 +61,7 @@
     "@types/node": "^10.1.1",
     "@types/request-promise": "^4.1.41",
     "@types/selenium-webdriver": "^4.0.6",
-    "@types/sinon": "^4.3.3",
+    "@types/sinon": "^9.0.0",
     "@types/stream-buffers": "^3.0.3",
     "chai": "^4.2.0",
     "chromedriver": "^81.0.0",
