@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@types/archiver": "^3.0.0",
-    "@types/assert": "^1.4.4",
+    "@types/assert": "^1.4.6",
     "@types/axios": "^0.14.0",
     "@types/basic-auth": "^1.1.2",
     "@types/body-parser": "^1.17.0",
