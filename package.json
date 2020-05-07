@@ -21,7 +21,7 @@
   "homepage": "https://github.com/clems4ever/mesos-term#readme",
   "dependencies": {
     "@types/compression": "^1.7.0",
-    "archiver": "^3.1.1",
+    "archiver": "^4.0.1",
     "axios": "^0.19.2",
     "basic-auth": "^2.0.0",
     "bluebird": "^3.5.1",
