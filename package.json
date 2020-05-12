@@ -60,7 +60,7 @@
     "@types/moment": "^2.13.0",
     "@types/node": "^10.1.1",
     "@types/request-promise": "^4.1.41",
-    "@types/selenium-webdriver": "^4.0.6",
+    "@types/selenium-webdriver": "^4.0.9",
     "@types/sinon": "^9.0.0",
     "@types/stream-buffers": "^3.0.3",
     "chai": "^4.2.0",
