@@ -41,7 +41,7 @@
     "query-string": "^6.10.1",
     "readable-stream": "^3.6.0",
     "request": "^2.86.0",
-    "request-promise": "^4.2.2",
+    "request-promise": "^4.2.5",
     "stream-buffers": "^3.0.2"
   },
   "devDependencies": {
