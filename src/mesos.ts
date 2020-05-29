@@ -35,6 +35,7 @@ interface MesosTask {
   slave_id: string;
   framework_id: string;
   statuses: MesosStatus[];
+  container: string;
 }
 
 interface MesosFramework {
@@ -186,7 +187,7 @@ function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
   const runningStatuses = task.statuses.filter(s => s.state === 'TASK_RUNNING');
 
   if (runningStatuses.length === 0) {
-    throw new Error(`Cannot find running status for task ${task.id}`);
+    console.log(`Cannot find running task status for task ${task.id}`);
   }
 
   if (runningStatuses.length > 1) {
@@ -194,7 +195,14 @@ function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
     throw new Error(`Multiple running statuses has been found for the task ${task.id}`);
   }
 
-  const taskContainer = taskStatusToTaskContainer(runningStatuses[0]);
+  let taskContainer = {
+    container_id: 'unknown',
+    parent_container_id: 'unknown',
+  };
+  if (runningStatuses.length > 0) {
+    // extract container id (and its parent container id) to allow later to spawn a terminal
+    taskContainer = taskStatusToTaskContainer(runningStatuses[0]);
+  }
 
   return {
     labels: labels,
@@ -288,6 +296,7 @@ interface MesosSlaveExecutor {
   id: string;
   tasks: MesosTask[];
   completed_tasks: MesosTask[];
+  container: string;
 }
 
 interface MesosSlaveFramework {
@@ -303,13 +312,17 @@ interface MesosSlaveFramework {
 }
 
 export function findTaskInSlaveState(state: MesosSlaveState, taskID: string) {
-  const aggExecutorTasks = (acc2: MesosTask[], executor: MesosSlaveExecutor) =>
-    acc2.concat(executor.tasks).concat(executor.completed_tasks);
+  const aggExecutorTasks = (acc2: MesosTask[], executor: MesosSlaveExecutor) => {
+    const allExecutorTasks = executor.tasks.concat(executor.completed_tasks);
+    allExecutorTasks.forEach(task => task.container = executor.container);
+    return acc2.concat(allExecutorTasks);
+  };
 
   const mesosTasks = state.frameworks
     .reduce((acc: MesosTask[], framework: MesosSlaveFramework) => acc
       .concat(framework.executors.reduce(aggExecutorTasks, []))
       .concat(framework.completed_executors.reduce(aggExecutorTasks, [])), []);
+
   return mesosTasks.filter(task => task.id === taskID);
 }
 

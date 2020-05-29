@@ -83,7 +83,7 @@ const sandboxCache = cacheSandboxDescriptor(async (taskID) => {
         workDir: slaveState.flags.work_dir,
         slaveID: slaveState.id,
         frameworkID: taskInfo.framework_id,
-        containerID: taskInfo.container_id,
+        containerID: slaveTaskInfos[0].container,
         task: taskInfo,
         last_status: status,
     };
