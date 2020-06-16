@@ -7,10 +7,10 @@ function getOrExit(varName: string): string {
   process.exit(1);
 }
 
-function getOrElse(varName: string, defaultValue: string): string {
+function getOrElse<T extends string | number>(varName: string, defaultValue: T): T {
   const v = process.env[varName];
   if (v) {
-    return v;
+    return v as T;
   }
   else {
     return defaultValue;
@@ -28,6 +28,7 @@ export interface EnvVars {
   MESOS_MASTER_URL: string;
   MESOS_STATE_CACHE_TIME: number;
   SESSION_SECRET: string;
+  SESSION_MAX_AGE_SEC: number;
   SUPER_ADMINS: string[];
   ALLOWED_TASK_ADMINS: string[];
 
@@ -62,6 +63,7 @@ function parseAllowedTaskAdmins() {
 
 export const env: EnvVars = {
   SESSION_SECRET: getOrExit('MESOS_TERM_SESSION_SECRET'),
+  SESSION_MAX_AGE_SEC: getOrElse('MESOS_TERM_SESSION_MAX_AGE_SEC', 3 * 3600), // 3h by default.
   JWT_SECRET: getOrExit('MESOS_TERM_JWT_SECRET'),
   SUPER_ADMINS: getSuperAdmins(),
   ALLOWED_TASK_ADMINS: parseAllowedTaskAdmins(),
