@@ -21,12 +21,20 @@ export function BasicAuth(app: Express.Application) {
 
   app.use(passport.initialize());
   app.use((req: Request, res, next) => {
+    // If user already has user account details, it means it has already been authenticated
+    // and we don't need to do it again. We rather skip to the next middleware.
+    if (req.session.user) {
+      req.user = req.session.user;
+      next();
+      return;
+    }
+
     passport.authenticate('ldapauth', { session: true }, (err: Error, user: any, info: any) => {
       if (err) {
         return next(err);
       }
 
-      if (!user && !req.session.user) {
+      if (!user) {
         console.log(`ldap auth for ${req.method} ${req.path}`);
         res.status(401);
         res.header('WWW-Authenticate', 'Basic realm="mesos-term"');
@@ -34,9 +42,9 @@ export function BasicAuth(app: Express.Application) {
         return;
       }
 
-      if (!req.session.user) {
-        req.session.user = user;
-      }
+      // save the user into the session.
+      req.session.user = user;
+      // And make it available in the request for the following middlewares.
       req.user = req.session.user;
       next();
     })(req, res, next);
