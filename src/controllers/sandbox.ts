@@ -62,6 +62,7 @@ function cacheSandboxDescriptor(fetcher: (taskID: string) => Promise<SandboxDesc
 const sandboxCache = cacheSandboxDescriptor(async (taskID) => {
     // TaskInfo retrieval relies on mesos master cache.
     const taskInfo = await getTaskInfo(taskID);
+    console.log(`Get sandbox cache for ${taskInfo.task_id}`)
     const slaveState = await getMesosSlaveState(taskInfo.agent_url);
 
     const slaveTaskInfos = await findTaskInSlaveState(slaveState, taskID);
@@ -93,6 +94,7 @@ export default function (app: Express.Application) {
     app.get('/api/sandbox/*', async function (req: Request, res: Express.Response, next: Express.NextFunction) {
         try {
             if (env.AUTHORIZATIONS_ENABLED && !env.AUTHORIZE_ALL_SANDBOXES) {
+                console.log(`Connection attempt from ${req.user.cn} for ${req.query.taskID}`)
                 const sandbox = await sandboxCache(req.query.taskID);
                 await CheckTaskAuthorization(req, sandbox.task, req.query.access_token);
             }
