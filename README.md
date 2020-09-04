@@ -143,6 +143,7 @@ Here are the details of available options.
 | MESOS\_TERM\_MESOS\_STATE\_CACHE\_TIME  | Time in seconds before invalidating the cache containing Mesos state.                    |
 | MESOS\_TERM\_NODE\_ENV                  | Must be "production" for express to run in production mode.                              |
 | MESOS\_TERM\_SESSION\_SECRET            | Secret used to encrypt session cookie.                                                   |
+| MESOS\_TERM\_SESSION\_MAX_AGE_SEC       | The session cookie will expire after this amount of time. (default: 3h)                  |
 | MESOS\_TERM\_SUPER\_ADMINS              | Comma-separated list of LDAP users and groups having all rights on all containers.       |
 | MESOS\_TERM\_CA\_FILE                   | CA file to connect to Mesos agent  in pem format.                                        |
 | MESOS\_TERM\_MESOS\_AGENT\_PRINCIPAL    | The principal Mesos term uses to connect to the Mesos agent.                             |

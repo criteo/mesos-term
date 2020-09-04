@@ -26,7 +26,7 @@ const sessionOptions: session.SessionOptions = {
   secret: env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: { secure: false, maxAge: env.SESSION_MAX_AGE_SEC * 1000.0 }
 };
 
 if (app.get('env') === 'production') {
