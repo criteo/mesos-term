@@ -33,7 +33,7 @@
     "express-ws": "^4.0.0",
     "jsonwebtoken": "^8.2.1",
     "jszip": "^3.4.0",
-    "moment": "^2.27.0",
+    "moment": "^2.29.1",
     "node-pty": "^0.9.0",
     "parse-duration": "^0.4.4",
     "passport": "^0.4.1",
