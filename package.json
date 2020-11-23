@@ -20,22 +20,8 @@
   },
   "homepage": "https://github.com/clems4ever/mesos-term#readme",
   "dependencies": {
-    "@types/axios": "latest",
-    "@types/basic-auth": "latest",
-    "@types/bluebird": "latest",
-    "@types/chai": "latest",
-    "@types/compression": "latest",
-    "@types/express-session": "latest",
-    "@types/express-ws": "latest",
-    "@types/jest": "latest",
-    "@types/jsonwebtoken": "latest",
-    "@types/passport": "latest",
-    "@types/request": "latest",
-    "@types/request-promise": "latest",
-    "eslint": "latest",
     "axios": "latest",
     "basic-auth": "latest",
-    "chai": "latest",
     "compression": "latest",
     "express": "latest",
     "express-session": "latest",
@@ -50,5 +36,19 @@
     "request": "latest",
     "request-promise": "latest"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/basic-auth": "latest",
+    "@types/bluebird": "latest",
+    "@types/chai": "latest",
+    "@types/compression": "latest",
+    "@types/express-session": "latest",
+    "@types/express-ws": "latest",
+    "@types/jest": "latest",
+    "@types/jsonwebtoken": "latest",
+    "@types/passport": "latest",
+    "@types/request": "latest",
+    "@types/request-promise": "latest",
+    "eslint": "latest",
+    "chai": "latest"
+  }
 }

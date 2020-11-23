@@ -12,6 +12,7 @@ npm run-script lint
 npm run-script compile
 
 pushd web
+npm install
 npm ci
 npm run build
 popd
