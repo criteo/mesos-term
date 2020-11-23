@@ -11,7 +11,7 @@ export interface User {
   memberOf: string[];
 }
 
-export interface Request extends Express.Request {
+export interface CustomRequest extends Express.Request {
   user: User;
 }
 
@@ -29,7 +29,7 @@ export function getLogger(req: Express.Request): Logger {
 }
 
 export function SuperAdminsOnly(
-  req: Request,
+  req: CustomRequest,
   res: Express.Response,
   next: Express.NextFunction) {
 

@@ -2,14 +2,14 @@ import Express = require('express');
 import Bluebird = require('bluebird');
 import Jwt = require('jsonwebtoken');
 import { env } from '../env_vars';
-import { Request } from '../express_helpers';
+import { CustomRequest } from '../express_helpers';
 
 const ParseDuration = require('parse-duration');
 
 const JwtAsync: any = Bluebird.promisifyAll(Jwt);
 
 export function DelegateGet(
-  req: Request,
+  req: CustomRequest,
   res: Express.Response) {
   res.render('delegate', {
     user: req.user.cn,
@@ -18,7 +18,7 @@ export function DelegateGet(
 }
 
 export function DelegatePost(
-  req: Request,
+  req: CustomRequest,
   res: Express.Response) {
 
   if (!req.body.task_id) {

@@ -7,7 +7,7 @@ import {
 import { env } from '../env_vars';
 import * as Moment from 'moment';
 import { CheckTaskAuthorization, UnauthorizedAccessError } from '../authorizations';
-import { Request } from '../express_helpers';
+import { CustomRequest } from '../express_helpers';
 
 type TaskState = MesosTaskState | 'UNKNOWN';
 
@@ -91,15 +91,15 @@ const sandboxCache = cacheSandboxDescriptor(async (taskID) => {
 });
 
 export default function (app: Express.Application) {
-    app.get('/api/sandbox/*', async function (req: Request, res: Express.Response, next: Express.NextFunction) {
+    app.get('/api/sandbox/*', async function (req: CustomRequest, res: Express.Response, next: Express.NextFunction) {
         try {
             if (req.user == undefined)
                 console.log(`Anonymous connection to ${req.query.taskID}: ${req.query.path}`);
             else
                 console.log(`Connection attempt from ${req.user.cn} for ${req.query.taskID}: ${req.query.path}`);
             if (env.AUTHORIZATIONS_ENABLED && !env.AUTHORIZE_ALL_SANDBOXES) {
-                const sandbox = await sandboxCache(req.query.taskID);
-                await CheckTaskAuthorization(req, sandbox.task, req.query.access_token);
+                const sandbox = await sandboxCache(req.query.taskID as string);
+                await CheckTaskAuthorization(req, sandbox.task, req.query.access_token as string);
             }
         }
         catch (err) {
@@ -128,9 +128,9 @@ export default function (app: Express.Application) {
 
     app.get('/api/sandbox/browse', async function (req: Express.Request, res: Express.Response) {
         try {
-            const sandbox = await sandboxCache(req.query.taskID);
+            const sandbox = await sandboxCache(req.query.taskID as string);
             const files = await browseSandbox(sandbox.agentURL, sandbox.workDir, sandbox.slaveID, sandbox.frameworkID,
-                req.query.taskID, sandbox.containerID, req.query.path);
+                req.query.taskID as string, sandbox.containerID, req.query.path as string);
             res.send(files);
         }
         catch (err) {
@@ -165,9 +165,9 @@ export default function (app: Express.Application) {
 
     app.get('/api/sandbox/read', async function (req: Express.Request, res: Express.Response) {
         try {
-            const sandbox = await sandboxCache(req.query.taskID);
+            const sandbox = await sandboxCache(req.query.taskID as string);
             const files = await readSandboxFile(sandbox.agentURL, sandbox.workDir, sandbox.slaveID, sandbox.frameworkID,
-                req.query.taskID, sandbox.containerID, req.query.path, req.query.offset, req.query.size);
+                req.query.taskID as string, sandbox.containerID, req.query.path as string, +req.query.offset, +req.query.size);
             if (!(sandbox.last_status === 'TASK_RUNNING' || sandbox.last_status === 'TASK_STARTING')) {
                 files.eof = true;
             }
@@ -203,17 +203,17 @@ export default function (app: Express.Application) {
 
     app.get('/api/sandbox/download', async function (req: Express.Request, res: Express.Response) {
         try {
-            const sandbox = await sandboxCache(req.query.taskID);
+            const sandbox = await sandboxCache(req.query.taskID as string);
             res.set('Content-Type', 'application/octet-stream');
             res.set('Content-Disposition', 'attachment; filename=' + req.query.filename);
 
             if (req.query.directory === 'true') {
                 await downloadSandboxDirectory(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
-                    sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path, res);
+                    sandbox.frameworkID, req.query.taskID as string, sandbox.containerID, req.query.path as string, res);
             }
             else {
                 await downloadSandboxFileAsStream(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
-                    sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path, res);
+                    sandbox.frameworkID, req.query.taskID as string, sandbox.containerID, req.query.path as string, res);
             }
             res.end();
         }

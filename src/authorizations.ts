@@ -1,6 +1,6 @@
 import * as Jwt from 'jsonwebtoken';
 import { TaskInfo } from './mesos';
-import { Request } from './express_helpers';
+import { CustomRequest } from './express_helpers';
 import { env } from './env_vars';
 
 export class UnauthorizedAccessError extends Error {
@@ -123,7 +123,7 @@ export function isSuperAdmin(
 }
 
 export async function CheckTaskAuthorization(
-  req: Request,
+  req: CustomRequest,
   task: TaskInfo,
   accessToken: string) {
 
