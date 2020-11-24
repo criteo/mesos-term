@@ -14,7 +14,7 @@ interface Props {
     onFileDoubleClick: (fd: FileDescription) => void;
 }
 
-export default function (props: Props) {
+export default function FileBrowserGrid(props: Props) {
     const classes = useStyles();
     const fileItems = props.files ? props.files.map((f, i) => {
         const handleDoubleClick = (ev: MouseEvent<HTMLDivElement>, fd: FileDescription) => {

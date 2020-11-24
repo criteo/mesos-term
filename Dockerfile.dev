@@ -5,16 +5,11 @@ RUN npm install -g ts-node@9.0.0 nodemon@2.0.6 && \
 
 WORKDIR /usr/app
 
-COPY ./src /usr/app/src
-COPY package.json package.json
-COPY package-lock.json package-lock.json
+COPY ./ /usr/app/
 RUN npm ci
 
 RUN pip3 install setuptools
 RUN if [ -f src/python/requirements.txt ]; then pip3 install -r src/python/requirements.txt; fi
-
-COPY nodemon.json nodemon.json
-COPY tsconfig.json tsconfig.json
 
 ENV PORT=3000
 

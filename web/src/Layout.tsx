@@ -5,7 +5,7 @@ import { Route, Redirect, Switch, useRouteMatch } from "react-router";
 import TerminalView from "./views/TerminalView";
 import SandboxView from "./views/SandboxView/SandboxView";
 
-export default function () {
+export default function Layout() {
     const classes = useStyles();
     const match = useRouteMatch<{ taskID: string }>();
 

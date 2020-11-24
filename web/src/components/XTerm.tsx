@@ -23,7 +23,7 @@ export interface Props extends React.DOMAttributes<{}> {
     onClose: () => void;
 }
 
-export default function (props: Props) {
+export default function XTerm(props: Props) {
     const [isFocused,] = useState(false);
     const terminalDivRef = useRef<HTMLDivElement>(null);
     const timer = useRef<NodeJS.Timeout | null>(null);

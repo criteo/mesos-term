@@ -11,7 +11,7 @@ interface FileReaderProps {
     path: string;
 }
 
-export default function (props: FileReaderProps) {
+export default function FileReader(props: FileReaderProps) {
     const classes = useFileReaderStyles();
     const fileReaderRef = useRef<HTMLDivElement | null>(null);
     const { lines, contentRef, follow, setFollow, lineRange, readPreviousPortion, buffer } = useFileReader(

@@ -42,9 +42,13 @@ export function useNotifications() {
     }
 
     const resetNotification = () => useNotificationsProps.setNotification(null);
+    // eslint-disable-next-line
     const createInfoNotification = useCallback(notificationBuilder("info"), []);
+    // eslint-disable-next-line
     const createSuccessNotification = useCallback(notificationBuilder("success"), []);
+    // eslint-disable-next-line
     const createWarnNotification = useCallback(notificationBuilder("warning"), []);
+    // eslint-disable-next-line
     const createErrorNotification = useCallback(notificationBuilder("error"), []);
     const isActive = useNotificationsProps.notification !== null;
 

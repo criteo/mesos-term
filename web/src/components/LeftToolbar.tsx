@@ -9,7 +9,7 @@ export interface Props {
     taskID: string;
 }
 
-export default function (props: Props) {
+export default function LeftToolbar(props: Props) {
     const classes = useStyles();
     const history = useHistory();
 

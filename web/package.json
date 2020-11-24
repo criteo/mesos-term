@@ -17,6 +17,7 @@
     "@types/react-virtualized-auto-sizer": "latest",
     "@types/classnames": "latest",
     "axios": "latest",
+    "callback": "latest",
     "classnames": "latest",
     "moment": "latest",
     "query-string": "latest",

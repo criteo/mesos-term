@@ -15,7 +15,7 @@ interface Props {
     onFileDownloadClick: (fd: FileDescription) => void;
 }
 
-export default function (props: Props) {
+export default function FileBrowser(props: Props) {
     return props.layout === Layout.Grid
         ? <FileBrowserGrid
             files={props.files}

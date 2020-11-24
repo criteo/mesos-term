@@ -121,7 +121,7 @@ services:
       MESOS_TERM_SESSION_SECRET: DUMB
       MESOS_TERM_JWT_SECRET: DUMB
       MESOS_TERM_MESOS_STATE_CACHE_TIME: 40
-      MESOS_TERM_MESOS_MASTER_URL: http://172.16.130.3:5050/
+      MESOS_TERM_MESOS_MASTER_URL: http://172.16.130.3:5050
       PORT: 3000
     networks:
       mesos_command_modules_net:

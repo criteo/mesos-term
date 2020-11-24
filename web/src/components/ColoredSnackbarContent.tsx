@@ -31,7 +31,7 @@ export interface Props extends SnackbarContentProps {
     message: string;
 }
 
-export default function (props: Props) {
+export default function ColoredSnackbarContent(props: Props) {
     const classes = useStyles();
     const Icon = variantIcon[props.level];
 

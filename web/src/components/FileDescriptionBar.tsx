@@ -22,7 +22,7 @@ export enum Layout {
     List,
 }
 
-export default function (props: FileDescriptionBarProps) {
+export default function FileDescriptionBar(props: FileDescriptionBarProps) {
     const classes = useFileDescriptionBarStyles();
     const filename = props.fd ? props.fd.path.split('/').pop() : '-';
     const size = props.fd ? (props.fd.size / 1000).toFixed(2) : '-';

@@ -30,7 +30,7 @@ enum Status {
     Unauthorized = 5,
 }
 
-export default function () {
+export default function TerminalView() {
     const classes = useStyles();
     const match = useRouteMatch<{ taskID: string }>();
     const [termToken, setTermToken] = useState(null as string | null);

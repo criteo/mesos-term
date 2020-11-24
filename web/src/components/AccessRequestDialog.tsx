@@ -12,7 +12,7 @@ export interface Props {
     onAccessRequest: (token: string) => void;
 }
 
-export default function (props: Props) {
+export default function AccessRequestDialog(props: Props) {
     const [token, setToken] = useState("");
     const handleOK = () => {
         props.onAccessRequest(token);
