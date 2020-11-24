@@ -34,7 +34,9 @@
     "passport": "latest",
     "passport-ldapauth": "latest",
     "request": "latest",
-    "request-promise": "latest"
+    "request-promise": "latest",
+    "node-pty": "latest",
+    "parse-duration": "latest"
   },
   "devDependencies": {
     "@types/basic-auth": "latest",

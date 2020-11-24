@@ -114,13 +114,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
     ports:
       - "3000:3000"
     environment:
-      - HOST=0.0.0.0
+      HOST: 0.0.0.0
+      MESOS_TERM_SESSION_SECRET: DUMB
+      MESOS_TERM_JWT_SECRET: DUMB
+      MESOS_TERM_MESOS_STATE_CACHE_TIME: 40
+      MESOS_TERM_MESOS_MASTER_URL: http://172.16.130.3:5050/
+      PORT: 3000
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.7
@@ -146,17 +148,13 @@ services:
 
   mesos-term-ui:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
+      context: ./web
+      dockerfile: ../Dockerfile.dev
     volumes:
       - ./web:/usr/app
-    working_dir: /usr/app
     ports:
       - 5000:3000
-    command: /bin/bash -c 'npm ci && npm run start'
+    command: npm run start
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.13

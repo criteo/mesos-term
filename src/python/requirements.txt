@@ -1,4 +1,4 @@
-requests==2.22.0
-ujson==1.35
-tenacity==4.7.0
-jsonschema==2.6.0
+requests
+ujson
+tenacity
+jsonschema

@@ -34,31 +34,30 @@ async function VerifyBearer(req: CustomRequest) {
     throw new Error('Unauthorized due to missing bearer.');
   }
 
-  // const decoded = Jwt.verify(req.query[BEARER_KEY], env.JWT_SECRET) as any;
-  // const decoded = Jwt.verify(req.query[BEARER_KEY], env.JWT_SECRET) as any;
-  // const pid = decoded.pid;
+  const decoded = Jwt.verify(req.query[BEARER_KEY] as string, env.JWT_SECRET) as any;
+  const pid = decoded.pid;
 
-  // if (!pid) {
-  //   throw new Error('No terminal PID in bearer');
-  // }
+  if (!pid) {
+    throw new Error('No terminal PID in bearer');
+  }
 
-  // if (!(pid in taskByPid)) {
-  //   throw new Error(`No PID ${pid} in tasks repository.`);
-  // }
+  if (!(pid in taskByPid)) {
+    throw new Error(`No PID ${pid} in tasks repository.`);
+  }
 
-  // if (!(pid in terminalsByPid)) {
-  //   throw new Error(`No PID ${pid} in terminals repository.`);
-  // }
+  if (!(pid in terminalsByPid)) {
+    throw new Error(`No PID ${pid} in terminals repository.`);
+  }
 
-  // if (!(pid in logsByPid)) {
-  //   throw new Error(`No PID ${pid} in logs repository.`);
-  // }
+  if (!(pid in logsByPid)) {
+    throw new Error(`No PID ${pid} in logs repository.`);
+  }
 
-  // req.term = {
-  //   task: taskByPid[decoded.pid],
-  //   terminal: terminalsByPid[decoded.pid],
-  //   logs: logsByPid[decoded.pid]
-  // };
+  req.term = {
+    task: taskByPid[decoded.pid],
+    terminal: terminalsByPid[decoded.pid],
+    logs: logsByPid[decoded.pid]
+  };
 }
 
 async function TerminalBearer(
