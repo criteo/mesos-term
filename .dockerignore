@@ -1,13 +1,7 @@
 node_modules
-
-node_modules/
-
 .env
-
 mesos-term-*.tgz
-
 dist/
-
 .vscode/
-
 private/
+/web/

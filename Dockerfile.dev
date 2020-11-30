@@ -1,7 +1,8 @@
-FROM zachdeibert/typescript
+FROM node:15.3.0-buster-slim
 
-RUN npm install -g ts-node@9.0.0 nodemon@2.0.6 && \
-    apt-get update && apt-get install --no-install-recommends -y python3-pip
+ENV PATH $PATH:/usr/lib/node_modules/bin
+RUN npm install -g ts-node@9.0.0 nodemon@2.0.6 typescript@4.0.3 && \
+    apt-get update && apt-get install --no-install-recommends -y python3-pip make build-essential
 
 WORKDIR /usr/app
 

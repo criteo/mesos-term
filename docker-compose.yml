@@ -118,11 +118,11 @@ services:
       - "3000:3000"
     environment:
       HOST: 0.0.0.0
-      MESOS_TERM_SESSION_SECRET: DUMB
-      MESOS_TERM_JWT_SECRET: DUMB
-      MESOS_TERM_MESOS_STATE_CACHE_TIME: 40
-      MESOS_TERM_MESOS_MASTER_URL: http://172.16.130.3:5050
       PORT: 3000
+      MESOS_TERM_LDAP_URL: ldap://openldap
+      MESOS_TERM_MESOS_MASTER_URL: http://mesos-master:5050
+    env_file:
+      - .env.local
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.7
