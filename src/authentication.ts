@@ -23,11 +23,11 @@ export function BasicAuth(app: Express.Application) {
   app.use((req: CustomRequest, res, next) => {
     // If user already has user account details, it means it has already been authenticated
     // and we don't need to do it again. We rather skip to the next middleware.
-    // if (req.session.user) {
-    //   req.user = req.session.user;
-    //   next();
-    //   return;
-    // }
+    if (req.session.user) {
+      req.user = req.session.user;
+      next();
+      return;
+    }
 
     passport.authenticate('ldapauth', { session: true }, (err: Error, user: any, info: any) => {
       if (err) {
@@ -43,9 +43,9 @@ export function BasicAuth(app: Express.Application) {
       }
 
       // save the user into the session.
-      // req.session.user = user;
+      req.session.user = user;
       // And make it available in the request for the following middlewares.
-      // req.user = req.session.user;
+      req.user = user
       next();
     })(req, res, next);
   });

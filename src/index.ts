@@ -14,9 +14,15 @@ import { DelegateGet, DelegatePost } from './controllers/delegate';
 import config from './controllers/config';
 import sandbox from './controllers/sandbox';
 
-import { setup, SuperAdminsOnly } from './express_helpers';
+import { setup, SuperAdminsOnly, User } from './express_helpers';
 import { BasicAuth } from './authentication';
 import { AuthenticatedLogger, AnonymousLogger } from './logger';
+
+declare module "express-session" {
+    interface Session {
+        user: User;
+    }
+}
 
 const app = Express();
 const expressWs = ExpressWs(app);
