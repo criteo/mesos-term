@@ -1,6 +1,6 @@
-language: node_js
-node_js:
-  - "11"
+---
+
+language: minimal
 services:
   - docker
   - ntp
@@ -12,40 +12,7 @@ jobs:
   include:
     - stage: test
       script:
-        - source bootstrap.sh
-        - docker-compose pull
-        - docker pull mbentley/ldap-utils
-        - ./tests/resources/run_suite.sh $SUITE
-      env:
-        - SUITE=standard
-    - stage: test
-      script:
-        - source bootstrap.sh
-        - docker-compose pull
-        - docker pull mbentley/ldap-utils
-        - ./tests/resources/run_suite.sh $SUITE
-      env:
-        - SUITE=noauth
-    - stage: test
-      script:
-        - source bootstrap.sh
-        - docker-compose pull
-        - docker pull mbentley/ldap-utils
-        - ./tests/resources/run_suite.sh $SUITE
-      env:
-        - SUITE=noadmin
-    - stage: test
-      script:
-        - source bootstrap.sh
-        - docker-compose pull
-        - docker pull mbentley/ldap-utils
-        - ./tests/resources/run_suite.sh $SUITE
-      env:
-        - SUITE=taskadmins
-    - stage: build
-      script:
-        - source bootstrap.sh
-        - ./scripts/build.sh
+        - ./tests/resources/run_all_suites.sh
 
 after_success:
   - ./scripts/deploy_dockerhub.sh

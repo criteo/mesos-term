@@ -2,7 +2,6 @@
 
 set -e
 
-./tests/resources/run_suite.sh standard
-./tests/resources/run_suite.sh noauth
-./tests/resources/run_suite.sh noadmin
-./tests/resources/run_suite.sh taskadmins
+for suite in standard noauth noadmin taskadmins; do
+  ./tests/resources/run_suite.sh $suite
+done
