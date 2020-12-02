@@ -14,7 +14,7 @@ export interface Props {
     onClose: () => void;
 }
 
-export default function (props: Props) {
+export default function DelegationFormDialog(props: Props) {
     const [duration, setDuration] = useState("1h");
     const [username, setUsername] = useState("");
     const [token, setToken] = useState("");

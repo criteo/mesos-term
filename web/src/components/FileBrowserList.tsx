@@ -18,7 +18,7 @@ interface Props {
     onFileDoubleClick: (fd: FileDescription) => void;
 }
 
-export default function (props: Props) {
+export default function FileBrowserList(props: Props) {
     const classes = useStyles();
     const directories = props.files ? props.files.filter(f => f.mode.slice(0, 1) === 'd') : [];
     const files = props.files ? props.files.filter(f => f.mode.slice(0, 1) !== 'd') : [];

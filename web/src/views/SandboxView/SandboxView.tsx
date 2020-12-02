@@ -20,7 +20,7 @@ function buildURL(taskID: string, path: string, layout: Layout) {
     return `/task/${taskID}/sandbox?path=${encodeURIComponent(path)}&layout=${lay}`;
 }
 
-export default function () {
+export default function SandboxView() {
     const match = useRouteMatch<{ taskID: string }>();
     const classes = useStyles();
     const location = useLocation();
