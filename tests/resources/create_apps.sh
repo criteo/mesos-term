@@ -1,11 +1,14 @@
 #!/bin/bash
 
-script_dir=`dirname "$0"`
+script_dir=$(dirname "$0")
 
-$script_dir/create_app.sh $script_dir/apps/app1.json
-$script_dir/create_app.sh $script_dir/apps/app2.json
-$script_dir/create_app.sh $script_dir/apps/app3.json
-$script_dir/create_app.sh $script_dir/apps/app4.json
-$script_dir/create_app.sh $script_dir/apps/app5.json
-$script_dir/create_app.sh $script_dir/apps/app6.json
-$script_dir/create_pod.sh $script_dir/apps/pod1.json
+for ressource_name in app pod; do
+  for ressource in "$script_dir"/apps/"$ressource_name"*.json; do
+    curl \
+      -XPOST \
+      -H 'Content-Type: application/json' \
+      -H 'Accept: application/json' \
+      -d @"$ressource" \
+      http://localhost:8080/v2/${ressource_name}s/
+  done
+done

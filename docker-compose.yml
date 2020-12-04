@@ -114,13 +114,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
     ports:
       - "3000:3000"
     environment:
-      - HOST=0.0.0.0
+      HOST: 0.0.0.0
+      PORT: 3000
+      MESOS_TERM_LDAP_URL: ldap://openldap
+      MESOS_TERM_MESOS_MASTER_URL: http://mesos-master:5050
+    env_file:
+      - .env.local
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.7
@@ -131,7 +133,7 @@ services:
       - mesos-master
       - openldap
     volumes:
-      - ./src:/usr/app/src
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
 
   openldap-admin:
     image: osixia/phpldapadmin:0.6.11
@@ -146,17 +148,13 @@ services:
 
   mesos-term-ui:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
+      context: ./web
+      dockerfile: ../Dockerfile.dev
     volumes:
       - ./web:/usr/app
-    working_dir: /usr/app
     ports:
       - 5000:3000
-    command: /bin/bash -c 'npm ci && npm run start'
+    command: npm run start
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.13

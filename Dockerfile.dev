@@ -1,29 +1,18 @@
-FROM node:11.15.0
+FROM node:11.15.0 as dev
 
-ARG USER_ID
-ARG GROUP_ID
-
-RUN userdel node && \
-    groupadd --gid ${GROUP_ID} dev && \
-    useradd --uid ${USER_ID} -g dev -m dev && \
-    mkdir -p /usr/app && chown dev:dev /usr/app && \
-    npm install -g ts-node nodemon && \
-    apt-get update && apt-get install -y python3-pip
-
-USER dev
+ENV PATH $PATH:/usr/lib/node_modules/bin
+RUN apt-get update && apt-get install --no-install-recommends -y python3-pip make build-essential python3-dev
 
 WORKDIR /usr/app
 
-ADD package.json package.json
-ADD package-lock.json package-lock.json
+COPY ./ /usr/app/
 RUN npm ci
 
-ADD tests/resources/entrypoint.sh /entrypoint.sh
-ADD src/python/requirements.txt requirements.txt
+RUN pip3 install setuptools
+RUN if [ -f src/python/requirements.txt ]; then pip3 install -r src/python/requirements.txt; fi
 
-RUN pip3 install -r requirements.txt
+ENV PORT=3000
 
-ADD nodemon.json nodemon.json
-ADD tsconfig.json tsconfig.json
+ENV DISPLAY=:0
 
-CMD ["/entrypoint.sh"]
+CMD ["npx", "nodemon"]
