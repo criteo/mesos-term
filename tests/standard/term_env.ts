@@ -14,7 +14,7 @@ describe('custom environment variables', function () {
             this.timeout(20000);
             const instanceId = this.mesosTaskIds[appName];
             await helpers.withChrome(async function (driver) {
-                await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+                await driver.get(`http://${user}:password@${helpers.getMesosTermUiUrl()}/task/${instanceId}/terminal?screenReaderMode=true`);
                 return AppsHelpers.testAnswerToCommand(driver, 'echo $TOTO', 'tata');
             });
         });
@@ -25,7 +25,7 @@ describe('custom environment variables', function () {
             this.timeout(20000);
             const instanceId = this.mesosTaskIds[appName];
             await helpers.withChrome(async function (driver) {
-                await driver.get(`http://${user}:password@localhost:5000/task/${instanceId}/terminal?screenReaderMode=true`);
+                await driver.get(`http://${user}:password@${helpers.getMesosTermUiUrl()}/task/${instanceId}/terminal?screenReaderMode=true`);
                 return AppsHelpers.testAnswerToCommand(driver, 'echo ${Bad-not set}', 'not set');
             });
         });

@@ -45,9 +45,17 @@ export function getDelegation(from: string, to: string, instanceId: string) {
     'duration': '1h',
   };
   return Request({
-    uri: `http://${from}:password@localhost:5000/api/delegate`,
+    uri: `http://${from}:password@${getMesosTermUiUrl()}/api/delegate`,
     body: body,
     json: true,
     method: 'POST'
   });
+}
+
+export function getMesosTermUiUrl() {
+  return process.env.MESOS_TERM_MESOS_TERM_UI_URL
+}
+
+export function getMesosTermApiUrl() {
+  return process.env.MESOS_TERM_MESOS_TERM_API_URL
 }

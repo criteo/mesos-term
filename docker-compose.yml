@@ -120,7 +120,14 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - HOST=0.0.0.0
+      HOST: 0.0.0.0
+      PORT: 3000
+      MESOS_TERM_LDAP_URL: ldap://openldap
+      MESOS_TERM_MESOS_MASTER_URL: http://mesos-master:5050
+      MESOS_TERM_MESOS_TERM_UI_URL: mesos-term:5000
+      MESOS_TERM_MESOS_TERM_API_URL: mesos-term:3000
+    env_file:
+      - .env.local
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.7

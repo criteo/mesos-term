@@ -9,7 +9,7 @@ describe('basic routes', function () {
 
     it('should access to /ping', function () {
         return helpers.withChrome(async function (driver) {
-            await driver.get(`http://john:password@localhost:3000/ping`);
+            await driver.get(`http://john:password@${helpers.getMesosTermApiUrl()}/ping`);
             const el = await driver.wait(webdriver.until.elementLocated(webdriver.By.css("p")), 5000);
             await driver.wait(webdriver.until.elementTextContains(el, 'pong'), 5000);
         });
@@ -18,7 +18,7 @@ describe('basic routes', function () {
     describe('should access to /delegate', async function () {
         it('get', function () {
             return helpers.withChrome(async function (driver) {
-                await driver.get(`http://john:password@localhost:3000/api/delegate`);
+                await driver.get(`http://john:password@${helpers.getMesosTermApiUrl()}/api/delegate`);
                 const el = await driver.wait(webdriver.until.elementLocated(webdriver.By.css("p")), 5000);
                 await driver.wait(webdriver.until.elementTextContains(el, 'This endpoint'), 5000);
             });
@@ -26,7 +26,7 @@ describe('basic routes', function () {
 
         it('post', function () {
             return helpers.withChrome(async function (driver) {
-                const res = await Axios.post('http://john:password@localhost:3000/api/delegate', null, { validateStatus: () => true });
+                const res = await Axios.post(`http://john:password@${helpers.getMesosTermApiUrl()}/api/delegate`, null, { validateStatus: () => true });
                 equal(res.status, 406);
             });
         });

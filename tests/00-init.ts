@@ -3,11 +3,11 @@ import BluebirdPromise = require('bluebird');
 import Assert = require('assert');
 
 function getMesosState() {
-  return Request({ uri: 'http://localhost:5050/master/state.json', json: true });
+  return Request({ uri: `${process.env.MESOS_TERM_MESOS_MASTER_URL}/master/state.json`, json: true });
 }
 
 function getMesosTasks() {
-  return Request({ uri: 'http://localhost:5050/master/tasks.json', json: true });
+  return Request({ uri: `${process.env.MESOS_TERM_MESOS_MASTER_URL}/master/tasks.json`, json: true });
 }
 
 export function setupSuite() {

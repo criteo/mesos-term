@@ -11,7 +11,7 @@ describe('access delegation', function () {
 
   it('should allow access to super admin', function () {
     return helpers.withChrome(async function (driver) {
-      await driver.get(`http://john:password@localhost:3000/api/delegate`);
+      await driver.get(`http://john:password@${helpers.getMesosTermApiUrl()}/api/delegate`);
       const el = await driver.wait(webdriver.until.elementLocated(webdriver.By.css("p")), 5000);
       return driver.wait(webdriver.until.elementTextContains(el, 'This endpoint allows'), 5000);
     });
@@ -19,7 +19,7 @@ describe('access delegation', function () {
 
   it('should deny access to non super admin', function () {
     return helpers.withChrome(async function (driver) {
-      await driver.get(`http://harry:password@localhost:3000/api/delegate`);
+      await driver.get(`http://harry:password@${helpers.getMesosTermApiUrl()}/api/delegate`);
       const el = await driver.wait(webdriver.until.elementLocated(webdriver.By.css(".error-code")), 5000);
       return driver.wait(webdriver.until.elementTextContains(el, 'HTTP ERROR 403'), 5000);
     });

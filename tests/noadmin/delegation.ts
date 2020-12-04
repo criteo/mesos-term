@@ -8,7 +8,7 @@ describe('basic routes', function () {
     it('endpoint should not be present', function () {
         return helpers.withChrome(async function (driver) {
             try {
-                await Request({ uri: 'http://john:password@localhost:3000/api/delegate', json: true, method: 'POST' });
+                await Request({ uri: `http://john:password@${helpers.getMesosTermApiUrl()}/api/delegate`, json: true, method: 'POST' });
                 throw new Error("Should not be here");
             } catch (err) {
                 if (err.statusCode == 404) {
