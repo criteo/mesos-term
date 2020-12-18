@@ -113,10 +113,7 @@ services:
   mesos-term:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
+      dockerfile: Dockerfile.build
     ports:
       - "3000:3000"
     environment:
@@ -147,10 +144,7 @@ services:
   mesos-term-ui:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
+      dockerfile: Dockerfile.build
     volumes:
       - ./web:/usr/app
     working_dir: /usr/app

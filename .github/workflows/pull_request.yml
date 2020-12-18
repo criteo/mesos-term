@@ -1,10 +1,18 @@
 name: PreSubmit
 on: pull_request
 jobs:
-  test:
-    name: Run tests
+  build:
+    name: Run linting and build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - run: docker build . -f Dockerfile.build
         name: lint & build
+  integration_tests:
+    name: Run integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: docker-compose up -d
+        name: launch testing env
+
