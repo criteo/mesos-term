@@ -26,5 +26,5 @@ RUN npm ci --production
 ADD scripts/entrypoint.sh /entrypoint.sh
 WORKDIR /app/dist/python
 RUN pip3 install -r requirements.txt
-WORKDIR /app/dist
+WORKDIR /app
 CMD ["/entrypoint.sh"]

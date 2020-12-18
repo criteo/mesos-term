@@ -12,6 +12,7 @@ export async function withChrome<T>(
   const chromeOptions = new Options();
   const driver = new webdriver.Builder()
     .forBrowser('chrome')
+    .usingServer('http://localhost:4444/wd/hub')
     .setLoggingPrefs(pref)
     .setChromeOptions(chromeOptions)
     .build();
@@ -45,7 +46,7 @@ export function getDelegation(from: string, to: string, instanceId: string) {
     'duration': '1h',
   };
   return Request({
-    uri: `http://${from}:password@localhost:5000/api/delegate`,
+    uri: `http://${from}:password@localhost:3000/api/delegate`,
     body: body,
     json: true,
     method: 'POST'

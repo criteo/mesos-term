@@ -17,4 +17,7 @@ jobs:
         name: launch testing env
       - name: prepare test env
         run: tests/resources/setup.sh
-
+      - name: Launch chromedriver
+        run: docker run -d --network host -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome:4.0.0-beta-1-prerelease-20201208
+      - name: Run standard test suite
+        run: docker run --network=host --rm -t $(docker build -q . -f Dockerfile.test)
