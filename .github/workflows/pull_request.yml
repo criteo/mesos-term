@@ -15,4 +15,6 @@ jobs:
       - uses: actions/checkout@v2
       - run: docker-compose up -d
         name: launch testing env
+      - name: prepare test env
+        run: tests/resources/setup.sh
 
