@@ -2,4 +2,4 @@ FROM node:11.15.0
 COPY . /test
 WORKDIR /test
 RUN npm install
-CMD ["/test/tests/resources/run_tests.sh", "noauth"]
+CMD ["/bin/bash", "-c", "/test/tests/resources/run_tests.sh"]
