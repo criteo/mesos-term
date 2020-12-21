@@ -6,7 +6,7 @@ FROM run AS build
 COPY . /app/
 WORKDIR /app/
 
-RUN npm install
+RUN npm ci
 RUN npm run-script lint
 RUN npm run-script compile
 

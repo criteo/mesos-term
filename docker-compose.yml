@@ -118,6 +118,7 @@ services:
       - "3000:3000"
     environment:
       - HOST=0.0.0.0
+      - MESOS_TERM_COMMAND=/bin/bash
       - MESOS_TERM_SESSION_SECRET=supersecret
       - MESOS_TERM_JWT_SECRET=superjwt
       - MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050

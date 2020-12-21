@@ -11,13 +11,18 @@ jobs:
   integration_tests:
     name: Run integration tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        suite: [standard, noauth, noadmin, taskadmins]
     steps:
       - uses: actions/checkout@v2
+      - name: Prepare docker compose override if any
+        run:  "cp tests/${{ matrix.suite }}/docker-compose.yml docker-compose.override.yml"
       - run: docker-compose up -d
         name: launch testing env
       - name: prepare test env
         run: tests/resources/setup.sh
       - name: Launch chromedriver
         run: docker run -d --network host -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome:4.0.0-beta-1-prerelease-20201208
-      - name: Run standard test suite
-        run: docker run --network=host --rm -t $(docker build -q . -f Dockerfile.test)
+      - name: Run ${{ matrix.suite }} test suite
+        run: docker run -e "SUITE_NAME=${{ matrix.suite }}" --network=host --rm -t $(docker build -q . -f Dockerfile.test)

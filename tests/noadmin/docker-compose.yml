@@ -3,17 +3,11 @@ services:
   # Task admins have been disabled here. Labels in tasks are not taken into account.
   mesos-term:
     environment:
-      - MESOS_TERM_COMMAND=/bin/bash
       - MESOS_TERM_ENABLE_PER_APP_ADMINS=false
       - MESOS_TERM_ENABLE_RIGHTS_DELEGATION=false
       - MESOS_TERM_LDAP_URL=ldap://openldap
       - MESOS_TERM_LDAP_BASE_DN=dc=example,dc=com
       - MESOS_TERM_LDAP_USER=cn=admin,dc=example,dc=com
       - MESOS_TERM_LDAP_PASSWORD=password
-      - MESOS_TERM_JWT_SECRET=abcd
-      - MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050
-      - MESOS_TERM_MESOS_STATE_CACHE_TIME=60
-      - MESOS_TERM_MESOS_AGENT_PRINCIPAL=admin
-      - MESOS_TERM_MESOS_AGENT_PASSWORD=password
-      - MESOS_TERM_SESSION_SECRET=abcd
       - MESOS_TERM_SUPER_ADMINS=admins
+      - SUITE=noadmin
