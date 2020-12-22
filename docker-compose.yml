@@ -113,14 +113,20 @@ services:
   mesos-term:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
+      dockerfile: Dockerfile.build
     ports:
       - "3000:3000"
     environment:
       - HOST=0.0.0.0
+      - MESOS_TERM_COMMAND=/bin/bash
+      - MESOS_TERM_SESSION_SECRET=supersecret
+      - MESOS_TERM_JWT_SECRET=superjwt
+      - MESOS_TERM_MESOS_MASTER_URL=http://mesos-master:5050
+      - MESOS_TERM_MESOS_STATE_CACHE_TIME=1
+      - MESOS_TERM_NODE_ENV=production
+      - MESOS_TERM_MESOS_AGENT_PRINCIPAL=admin
+      - MESOS_TERM_MESOS_AGENT_PASSWORD=password
+
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.7
@@ -130,8 +136,6 @@ services:
     depends_on:
       - mesos-master
       - openldap
-    volumes:
-      - ./src:/usr/app/src
 
   openldap-admin:
     image: osixia/phpldapadmin:0.6.11
@@ -143,23 +147,6 @@ services:
     networks:
       mesos_command_modules_net:
         ipv4_address: 172.16.130.12
-
-  mesos-term-ui:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-      args:
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
-    volumes:
-      - ./web:/usr/app
-    working_dir: /usr/app
-    ports:
-      - 5000:3000
-    command: /bin/bash -c 'npm ci && npm run start'
-    networks:
-      mesos_command_modules_net:
-        ipv4_address: 172.16.130.13
 
 networks:
   mesos_command_modules_net:
