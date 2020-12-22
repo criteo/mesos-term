@@ -1,5 +1,10 @@
-name: PreSubmit
-on: pull_request
+name: Validation
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
 jobs:
   build:
     name: Run linting and build
