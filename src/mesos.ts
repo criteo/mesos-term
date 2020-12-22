@@ -1,7 +1,7 @@
 import { env } from './env_vars';
 import Request = require('request-promise');
 import Constants = require('./constants');
-import Axios, { AxiosRequestConfig } from 'axios';
+import Axios, { AxiosRequestConfig, AxiosBasicCredentials } from 'axios';
 import { promises as Fs } from 'fs';
 import JSZip = require('jszip');
 import * as https from 'https';
@@ -327,7 +327,15 @@ export function findTaskInSlaveState(state: MesosSlaveState, taskID: string) {
 }
 
 export async function getMesosSlaveState(mesosSlaveURL: string) {
-  const res = await Axios.get<MesosSlaveState>(`${mesosSlaveURL}/state`);
+  const axiosConfig: AxiosRequestConfig = {};
+  if (env.MESOS_AGENT_CREDENTIALS) {
+    const axiosBasicCreds: AxiosBasicCredentials = {
+      username: env.MESOS_AGENT_CREDENTIALS.principal,
+      password: env.MESOS_AGENT_CREDENTIALS.password
+    };
+    axiosConfig['auth'] = axiosBasicCreds;
+  }
+  const res = await Axios.get<MesosSlaveState>(`${mesosSlaveURL}/state`, axiosConfig);
   return res.data;
 }
 
@@ -346,9 +354,17 @@ export async function browseSandbox(
   relativePath: string) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
-  const res = await Axios.get<FileDescription[]>(`${mesosSlaveURL}/files/browse?path=${fullPath}`, {
+  const axiosConfig: AxiosRequestConfig = {
     validateStatus: (code: number) => code === 404 || code === 200,
-  });
+  };
+  if (env.MESOS_AGENT_CREDENTIALS) {
+    const axiosBasicCreds: AxiosBasicCredentials = {
+      username: env.MESOS_AGENT_CREDENTIALS.principal,
+      password: env.MESOS_AGENT_CREDENTIALS.password
+    };
+    axiosConfig['auth'] = axiosBasicCreds;
+  }
+  const res = await Axios.get<FileDescription[]>(`${mesosSlaveURL}/files/browse?path=${fullPath}`, axiosConfig);
 
   if (res.status === 404) {
     throw new FileNotFoundError(relativePath);
@@ -370,9 +386,17 @@ export async function readSandboxFile(
   relativePath: string, offset: number, size: number) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
-  const res = await Axios.get<FileData>(`${mesosSlaveURL}/files/read?path=${fullPath}&offset=${offset}&length=${size}`, {
+  const axiosConfig: AxiosRequestConfig = {
     validateStatus: (code: number) => code === 404 || code === 200,
-  });
+  };
+  if (env.MESOS_AGENT_CREDENTIALS) {
+    const axiosBasicCreds: AxiosBasicCredentials = {
+      username: env.MESOS_AGENT_CREDENTIALS.principal,
+      password: env.MESOS_AGENT_CREDENTIALS.password
+    };
+    axiosConfig['auth'] = axiosBasicCreds;
+  }
+  const res = await Axios.get<FileData>(`${mesosSlaveURL}/files/read?path=${fullPath}&offset=${offset}&length=${size}`, axiosConfig);
 
   if (res.status === 404) {
     throw new FileNotFoundError(relativePath);
@@ -396,10 +420,18 @@ export async function downloadSandboxFileAsStream(
   relativePath: string, res: any) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
-  const fileContentRes = await Axios.get(`${mesosSlaveURL}/files/download?path=${fullPath}`, {
+  const axiosConfig: AxiosRequestConfig = {
     validateStatus: (code: number) => code === 400 || code === 200,
     responseType: 'stream',
-  });
+  };
+  if (env.MESOS_AGENT_CREDENTIALS) {
+    const axiosBasicCreds: AxiosBasicCredentials = {
+      username: env.MESOS_AGENT_CREDENTIALS.principal,
+      password: env.MESOS_AGENT_CREDENTIALS.password
+    };
+    axiosConfig['auth'] = axiosBasicCreds;
+  }
+  const fileContentRes = await Axios.get(`${mesosSlaveURL}/files/download?path=${fullPath}`, axiosConfig);
   if (fileContentRes.status === 400 && (fileContentRes as any).data === 'Cannot download a directory.\n') {
     throw new DownloadDirectoryError();
   }
@@ -423,10 +455,18 @@ export async function downloadSandboxFileAsNodeArray(
   relativePath: string) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
-  const fileContentRes = await Axios.get(`${mesosSlaveURL}/files/download?path=${fullPath}`, {
+  const axiosConfig: AxiosRequestConfig = {
     validateStatus: (code: number) => code === 400 || code === 200,
     responseType: 'arraybuffer',
-  });
+  };
+  if (env.MESOS_AGENT_CREDENTIALS) {
+    const axiosBasicCreds: AxiosBasicCredentials = {
+      username: env.MESOS_AGENT_CREDENTIALS.principal,
+      password: env.MESOS_AGENT_CREDENTIALS.password
+    };
+    axiosConfig['auth'] = axiosBasicCreds;
+  }
+  const fileContentRes = await Axios.get(`${mesosSlaveURL}/files/download?path=${fullPath}`, axiosConfig);
   if (fileContentRes.status === 400 && (fileContentRes as any).data === 'Cannot download a directory.\n') {
     throw new DownloadDirectoryError();
   }

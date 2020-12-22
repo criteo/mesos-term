@@ -1,0 +1,9 @@
+{
+  "permissive": true,
+  "access_sandboxes": [
+    {
+      "principals": { "values": ["admin"] },
+      "users": { "type": "ANY" }
+    }
+  ]
+}

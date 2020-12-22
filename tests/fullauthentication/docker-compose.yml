@@ -1,0 +1,18 @@
+version: "3"
+services:
+  mesos-term:
+    environment:
+      - MESOS_TERM_ENABLE_PER_APP_ADMINS=true
+      - MESOS_TERM_ENABLE_RIGHTS_DELEGATION=true
+      - MESOS_TERM_LDAP_URL=ldap://openldap
+      - MESOS_TERM_LDAP_BASE_DN=dc=example,dc=com
+      - MESOS_TERM_LDAP_USER=cn=admin,dc=example,dc=com
+      - MESOS_TERM_LDAP_PASSWORD=password
+      - MESOS_TERM_SUPER_ADMINS=admins
+      - SUITE=fullauthentication
+  mesos-slave:
+    environment:
+      MESOS_ACLS_PATH: "file:///etc/mesos/slave_acls.json"
+      MESOS_AUTHENTICATE_HTTP_READONLY: "true"
+    volumes:
+      - ./tests/resources/slave_acls.json:/etc/mesos/slave_acls.json
