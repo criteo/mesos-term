@@ -37,7 +37,7 @@
     "node-pty": "^0.9.0",
     "parse-duration": "^0.4.4",
     "passport": "^0.4.1",
-    "passport-ldapauth": "^2.1.4",
+    "passport-ldapauth": "^3.0.1",
     "query-string": "^6.13.8",
     "readable-stream": "^3.6.0",
     "request": "^2.88.2",
