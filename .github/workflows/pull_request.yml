@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        suite: [standard, noauth, noadmin, taskadmins]
+        suite: [standard, noauth, noadmin, taskadmins, fullauthentication]
     steps:
       - uses: actions/checkout@v2
       - name: Prepare docker compose override if any
