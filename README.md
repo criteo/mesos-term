@@ -133,7 +133,7 @@ Here are the details of available options.
 | MESOS\_TERM\_ENVIRONMENT                | List of environment variable to enrich the shell with (NAME=value, colon separated)      |
 | MESOS\_TERM\_ENABLE\_PER\_APP\_ADMINS   | If 'true', application administrators can be declared with the Mesos label MESOS\_TERM\_DEBUG\_GRANTED\_TO label. It means those users can log into the application containers. An example is provided below. (Default: false) |
 | MESOS\_TERM\_ALLOWED\_TASK\_ADMINS      | White list of application administrators (users or groups) allowed to override application configuration through Mesos label |
-| MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', super administrators can delegate rights to log into one specific container to one person for a certain amount of time. (Default: false) |
+| MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', users with access can delegate rights to log into one specific container to one person for a certain amount of time. (Default: false) |
 | MESOS\_TERM\_JWT\_SECRET                | Secret used to generate and validate JWT tokens.                                         |
 | MESOS\_TERM\_LDAP\_BASE\_DN             | Base distinguished name from which to search users for authentication.                   |
 | MESOS\_TERM\_LDAP\_PASSWORD             | Password of the LDAP user to bind against LDAP server.                                   |

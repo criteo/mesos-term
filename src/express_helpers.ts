@@ -42,3 +42,18 @@ export function SuperAdminsOnly(
   }
   res.status(403).send();
 }
+
+// middleware to allow anyone logged
+export function AllowAnyOne(
+  req: Request,
+  res: Express.Response,
+  next: Express.NextFunction) {
+
+  const user = req.user as User;
+
+  if (user.cn && user.memberOf) {
+    next();
+    return;
+  }
+  res.status(403).send();
+}
