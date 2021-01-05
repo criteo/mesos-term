@@ -14,10 +14,10 @@ The solution is to upgrade Mesos to a version higher or equal to 1.5.1.
 
 ## Features
 
-* Web-based container terminal.
-* Authentication against LDAP.
-* Authorizations based on Mesos labels.
-* Permissions delegation.
+- Web-based container terminal.
+- Authentication against LDAP.
+- Authorizations based on Mesos labels.
+- Permissions delegation.
 
 ## Getting started
 
@@ -121,34 +121,32 @@ docker run --name mesos-term --rm -p 3000:3000 -it \
   clems4ever/mesos-term
 ```
 
-
-
 ## Option details
 
 Here are the details of available options.
 
-| Parameter                               | Description                                                                              |
-|-----------------------------------------|------------------------------------------------------------------------------------------|
-| MESOS\_TERM\_COMMAND                    | The command to be run in the container when a user logs in. (Default: /bin/sh)           |
-| MESOS\_TERM\_ENVIRONMENT                | List of environment variable to enrich the shell with (NAME=value, colon separated)      |
-| MESOS\_TERM\_ENABLE\_PER\_APP\_ADMINS   | If 'true', application administrators can be declared with the Mesos label MESOS\_TERM\_DEBUG\_GRANTED\_TO label. It means those users can log into the application containers. An example is provided below. (Default: false) |
-| MESOS\_TERM\_ALLOWED\_TASK\_ADMINS      | White list of application administrators (users or groups) allowed to override application configuration through Mesos label |
-| MESOS\_TERM\_ENABLE\_RIGHTS\_DELEGATION | If 'true', super administrators can delegate rights to log into one specific container to one person for a certain amount of time. (Default: false) |
-| MESOS\_TERM\_JWT\_SECRET                | Secret used to generate and validate JWT tokens.                                         |
-| MESOS\_TERM\_LDAP\_BASE\_DN             | Base distinguished name from which to search users for authentication.                   |
-| MESOS\_TERM\_LDAP\_PASSWORD             | Password of the LDAP user to bind against LDAP server.                                   |
-| MESOS\_TERM\_LDAP\_URL                  | Url of the LDAP server. Authorizations are disabled if this env variable is not set.     |
-| MESOS\_TERM\_LDAP\_USER                 | User DN of the LDAP user to bind against LDAP server.                                    |
-| MESOS\_TERM\_MESOS\_MASTER\_URL         | Url of the Mesos master to fetch the state from.                                         |
-| MESOS\_TERM\_MESOS\_STATE\_CACHE\_TIME  | Time in seconds before invalidating the cache containing Mesos state.                    |
-| MESOS\_TERM\_NODE\_ENV                  | Must be "production" for express to run in production mode.                              |
-| MESOS\_TERM\_SESSION\_SECRET            | Secret used to encrypt session cookie.                                                   |
-| MESOS\_TERM\_SESSION\_MAX_AGE_SEC       | The session cookie will expire after this amount of time. (default: 3h)                  |
-| MESOS\_TERM\_SUPER\_ADMINS              | Comma-separated list of LDAP users and groups having all rights on all containers.       |
-| MESOS\_TERM\_CA\_FILE                   | CA file to connect to Mesos agent  in pem format.                                        |
-| MESOS\_TERM\_MESOS\_AGENT\_PRINCIPAL    | The principal Mesos term uses to connect to the Mesos agent.                             |
-| MESOS\_TERM\_MESOS\_AGENT\_PASSWORD     | The password Mesos term uses to connect to the Mesos agent.                              |
-| MESOS\_TERM\_AUTHORIZE\_ALL\_SANDBOXES  | If `true`, all authenticated users can read all sandboxes. Otherwise the permissions are granted according to the same strategy as for terminals   |
+| Parameter                           | Description                                                                                                                                                                                                                |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MESOS_TERM_COMMAND                  | The command to be run in the container when a user logs in. (Default: /bin/sh)                                                                                                                                             |
+| MESOS_TERM_ENVIRONMENT              | List of environment variable to enrich the shell with (NAME=value, colon separated)                                                                                                                                        |
+| MESOS_TERM_ENABLE_PER_APP_ADMINS    | If 'true', application administrators can be declared with the Mesos label MESOS_TERM_DEBUG_GRANTED_TO label. It means those users can log into the application containers. An example is provided below. (Default: false) |
+| MESOS_TERM_ALLOWED_TASK_ADMINS      | White list of application administrators (users or groups) allowed to override application configuration through Mesos label                                                                                               |
+| MESOS_TERM_ENABLE_RIGHTS_DELEGATION | If 'true', super administrators can delegate rights to log into one specific container to one person for a certain amount of time. (Default: false)                                                                        |
+| MESOS_TERM_JWT_SECRET               | Secret used to generate and validate JWT tokens.                                                                                                                                                                           |
+| MESOS_TERM_LDAP_BASE_DN             | Base distinguished name from which to search users for authentication.                                                                                                                                                     |
+| MESOS_TERM_LDAP_PASSWORD            | Password of the LDAP user to bind against LDAP server.                                                                                                                                                                     |
+| MESOS_TERM_LDAP_URL                 | Url of the LDAP server. Authorizations are disabled if this env variable is not set.                                                                                                                                       |
+| MESOS_TERM_LDAP_USER                | User DN of the LDAP user to bind against LDAP server.                                                                                                                                                                      |
+| MESOS_TERM_MESOS_MASTER_URL         | Url of the Mesos master to fetch the state from.                                                                                                                                                                           |
+| MESOS_TERM_MESOS_STATE_CACHE_TIME   | Time in seconds before invalidating the cache containing Mesos state.                                                                                                                                                      |
+| MESOS_TERM_NODE_ENV                 | Must be "production" for express to run in production mode.                                                                                                                                                                |
+| MESOS_TERM_SESSION_SECRET           | Secret used to encrypt session cookie.                                                                                                                                                                                     |
+| MESOS_TERM_SESSION_MAX_AGE_SEC      | The session cookie will expire after this amount of time. (default: 3h)                                                                                                                                                    |
+| MESOS_TERM_SUPER_ADMINS             | Comma-separated list of LDAP users and groups having all rights on all containers.                                                                                                                                         |
+| MESOS_TERM_CA_FILE                  | CA file to connect to Mesos agent in pem format.                                                                                                                                                                           |
+| MESOS_TERM_MESOS_AGENT_PRINCIPAL    | The principal Mesos term uses to connect to the Mesos agent.                                                                                                                                                               |
+| MESOS_TERM_MESOS_AGENT_PASSWORD     | The password Mesos term uses to connect to the Mesos agent.                                                                                                                                                                |
+| MESOS_TERM_AUTHORIZE_ALL_SANDBOXES  | If `true`, all authenticated users can read all sandboxes. Otherwise the permissions are granted according to the same strategy as for terminals                                                                           |
 
 ## Authorizations model
 
@@ -159,7 +157,7 @@ their own applications.
 
 ### Super administrators
 
-Super administrators must be mentionned in the MESOS\_TERM\_SUPER\_ADMINS
+Super administrators must be mentionned in the MESOS_TERM_SUPER_ADMINS
 environment as a comma-separated list of LDAP users and/or groups. They have
 full permissions in MesosTerm, i.e., they are able to debug any container
 be it root or not. They are also able to produce access tokens to delegate
@@ -169,14 +167,14 @@ rights to log into a container.
 
 Application administrators are able to debug their own applications and
 therefore they must be mentionned as a comma-separated list of LDAP users
-and groups in the MESOS\_TERM\_DEBUG\_GRANTED\_TO task labels. Here is an
+and groups in the MESOS_TERM_DEBUG_GRANTED_TO task labels. Here is an
 example using Marathon.
 
 ![authorized users](doc/images/authorizations.png?raw=true "Authorizations")
 
-If needed, an optional layer of security can be added by using the MESOS\_TERM\_ALLOWED\_TASK\_ADMINS
+If needed, an optional layer of security can be added by using the MESOS_TERM_ALLOWED_TASK_ADMINS
 parameter. This is a comma-separated whitelist of users/groups allowed to use the
-MESOS\_TERM\_DEBUG\_GRANTED_TO label in their Mesos applications. If empty, all users/groups
+MESOS_TERM_DEBUG_GRANTED_TO label in their Mesos applications. If empty, all users/groups
 are allowed to use the label.
 
 For security reasons, it has been decided to not allow administrators of an application
@@ -203,7 +201,7 @@ and get the task information in order to verify the permissions of a user
 to log into a container. In order to improve the user experience,
 the Mesos state is fetched regularly and cached. The cache is invalidated
 after some time defined by the environment variable called
-MESOS\_TERM\_MESOS\_STATE\_CACHE\_TIME and expressed in seconds.
+MESOS_TERM_MESOS_STATE_CACHE_TIME and expressed in seconds.
 
 You can set a big number in order to reduce the load of your Mesos cluster.
 Though, it is important to know that **MesosTerm** automatically invalidate
@@ -231,7 +229,7 @@ The list of available suite is:
 - noadmin / task admins are disabled, only super admins can have access to containers.
 - noauth / authentication and authorization is completely disabled.
 - standard / authentication and authorization is enabled with standard features.
-- taskadmins / task admins are enabled to restrict the set of administrators of tasks (see MESOS\_TERM\_ALLOWED\_TASK\_ADMINS above).
+- taskadmins / task admins are enabled to restrict the set of administrators of tasks (see MESOS_TERM_ALLOWED_TASK_ADMINS above).
 
 You can then run the corresponding set of tests once you're happy with you changes with
 
@@ -240,6 +238,7 @@ You can then run the corresponding set of tests once you're happy with you chang
 Enjoy!
 
 ## License
+
 **MesosTerm** is **licensed** under the **[MIT License]**. The terms of the license are as follows:
 
     The MIT License (MIT)
@@ -263,4 +262,4 @@ Enjoy!
     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[MIT License]: https://opensource.org/licenses/MIT
+[mit license]: https://opensource.org/licenses/MIT

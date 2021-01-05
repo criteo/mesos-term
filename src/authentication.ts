@@ -1,10 +1,10 @@
-import Express = require('express');
-import passport = require('passport');
-import LdapStrategy = require('passport-ldapauth');
-import basicAuth = require('basic-auth');
-import { Request } from './express_helpers';
+import Express = require("express");
+import passport = require("passport");
+import LdapStrategy = require("passport-ldapauth");
+import basicAuth = require("basic-auth");
+import { Request } from "./express_helpers";
 
-import { env } from './env_vars';
+import { env } from "./env_vars";
 
 export function BasicAuth(app: Express.Application) {
   const options = {
@@ -13,10 +13,10 @@ export function BasicAuth(app: Express.Application) {
       bindDN: env.LDAP_USER,
       bindCredentials: env.LDAP_PASSWORD,
       searchBase: env.LDAP_BASE_DN,
-      searchFilter: 'cn={{username}}',
-      searchAttributes: ['memberof', 'cn']
+      searchFilter: "cn={{username}}",
+      searchAttributes: ["memberof", "cn"],
     },
-    credentialsLookup: basicAuth
+    credentialsLookup: basicAuth,
   };
 
   app.use(passport.initialize());
@@ -29,25 +29,29 @@ export function BasicAuth(app: Express.Application) {
       return;
     }
 
-    passport.authenticate('ldapauth', { session: true }, (err: Error, user: any, info: any) => {
-      if (err) {
-        return next(err);
-      }
+    passport.authenticate(
+      "ldapauth",
+      { session: true },
+      (err: Error, user: any, info: any) => {
+        if (err) {
+          return next(err);
+        }
 
-      if (!user) {
-        console.log(`ldap auth for ${req.method} ${req.path}`);
-        res.status(401);
-        res.header('WWW-Authenticate', 'Basic realm="mesos-term"');
-        res.send('Unauthenticated');
-        return;
-      }
+        if (!user) {
+          console.log(`ldap auth for ${req.method} ${req.path}`);
+          res.status(401);
+          res.header("WWW-Authenticate", 'Basic realm="mesos-term"');
+          res.send("Unauthenticated");
+          return;
+        }
 
-      // save the user into the session.
-      req.session.user = user;
-      // And make it available in the request for the following middlewares.
-      req.user = req.session.user;
-      next();
-    })(req, res, next);
+        // save the user into the session.
+        req.session.user = user;
+        // And make it available in the request for the following middlewares.
+        req.user = req.session.user;
+        next();
+      }
+    )(req, res, next);
   });
 
   passport.use(new LdapStrategy(options));

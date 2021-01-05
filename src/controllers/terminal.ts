@@ -1,17 +1,23 @@
-import Express = require('express');
-import NodePty = require('node-pty');
-import * as Ws from 'ws';
-import Path = require('path');
-import Bluebird = require('bluebird');
-import * as Jwt from 'jsonwebtoken';
+import Express = require("express");
+import NodePty = require("node-pty");
+import * as Ws from "ws";
+import Path = require("path");
+import Bluebird = require("bluebird");
+import * as Jwt from "jsonwebtoken";
 
-import { env } from '../env_vars';
-import { getLogger } from '../express_helpers';
-import { TaskNotFoundError, getRunningTaskInfo, TaskInfo, TaskNotRunningError, MesosAgentNotFoundError } from '../mesos';
-import Authorizations = require('../authorizations');
-import { Request } from '../express_helpers';
+import { env } from "../env_vars";
+import { getLogger } from "../express_helpers";
+import {
+  TaskNotFoundError,
+  getRunningTaskInfo,
+  TaskInfo,
+  TaskNotRunningError,
+  MesosAgentNotFoundError,
+} from "../mesos";
+import Authorizations = require("../authorizations");
+import { Request } from "../express_helpers";
 
-const BEARER_KEY = 'token';
+const BEARER_KEY = "token";
 
 const taskByPid: { [pid: string]: TaskInfo } = {};
 const terminalsByPid: { [pid: number]: NodePty.IPty } = {};
@@ -31,14 +37,14 @@ declare global {
 
 async function VerifyBearer(req: Request) {
   if (!(BEARER_KEY in req.query)) {
-    throw new Error('Unauthorized due to missing bearer.');
+    throw new Error("Unauthorized due to missing bearer.");
   }
 
   const decoded = Jwt.verify(req.query[BEARER_KEY], env.JWT_SECRET) as any;
   const pid = decoded.pid;
 
   if (!pid) {
-    throw new Error('No terminal PID in bearer');
+    throw new Error("No terminal PID in bearer");
   }
 
   if (!(pid in taskByPid)) {
@@ -56,91 +62,83 @@ async function VerifyBearer(req: Request) {
   req.term = {
     task: taskByPid[decoded.pid],
     terminal: terminalsByPid[decoded.pid],
-    logs: logsByPid[decoded.pid]
+    logs: logsByPid[decoded.pid],
   };
 }
 
 async function TerminalBearer(
   req: Request,
   res: Express.Response,
-  next: Express.NextFunction) {
-
+  next: Express.NextFunction
+) {
   try {
     await VerifyBearer(req);
     await next();
-  }
-  catch (err) {
-    console.error('Cannot verify bearer for http connections', err);
+  } catch (err) {
+    console.error("Cannot verify bearer for http connections", err);
     res.status(403);
-    res.send('Cannot verify bearer for http connections');
+    res.send("Cannot verify bearer for http connections");
   }
 }
 
 export async function WsTerminalBearer(
   ws: Ws,
   req: Request,
-  next: Express.NextFunction) {
-
+  next: Express.NextFunction
+) {
   try {
     await VerifyBearer(req);
     await next();
-  }
-  catch (err) {
-    console.error('Cannot verify bearer for ws connections', err);
+  } catch (err) {
+    console.error("Cannot verify bearer for ws connections", err);
   }
 }
 
-function spawnTerminal(
-  req: Request,
-  task: TaskInfo) {
-
+function spawnTerminal(req: Request, task: TaskInfo) {
   const params = [
-    Path.resolve(__dirname, '..', 'python/terminal.py'),
+    Path.resolve(__dirname, "..", "python/terminal.py"),
     task.agent_url,
     task.container_id,
-    '--cmd',
-    env.COMMAND
+    "--cmd",
+    env.COMMAND,
   ];
 
   if (task.user) {
-    params.push('--user');
+    params.push("--user");
     params.push(task.user);
   }
 
   if (task.parent_container_id) {
-    params.push('--parent');
+    params.push("--parent");
     params.push(task.parent_container_id);
   }
 
   if (env.MESOS_AGENT_CREDENTIALS) {
-    params.push('--http_principal');
+    params.push("--http_principal");
     params.push(env.MESOS_AGENT_CREDENTIALS.principal);
-    params.push('--http_password');
+    params.push("--http_password");
     params.push(env.MESOS_AGENT_CREDENTIALS.password);
   }
 
   if (env.EXTRA_ENV) {
-    params.push('--env');
+    params.push("--env");
     params.push(env.EXTRA_ENV);
   }
 
   const options: NodePty.IPtyForkOptions = {
-    name: 'bash'
+    name: "bash",
   };
 
-  const term = NodePty.spawn(
-    'python3',
-    params,
-    options);
+  const term = NodePty.spawn("python3", params, options);
 
   const taskId = req.params.task_id;
   getLogger(req).openContainer(req, taskId, term.pid);
 
   terminalsByPid[term.pid] = term;
-  logsByPid[term.pid] = '';
+  logsByPid[term.pid] = "";
   taskByPid[term.pid] = task;
 
-  term.on('data', function (data) {
+  term.on("data", function (data) {
     logsByPid[term.pid] += data;
   });
 
@@ -150,23 +148,24 @@ function spawnTerminal(
 async function tryRequestTerminal(
   req: Request,
   res: Express.Response,
-  task: TaskInfo) {
-
+  task: TaskInfo
+) {
   if (env.AUTHORIZATIONS_ENABLED) {
-    await Authorizations.CheckTaskAuthorization(req, task, req.query.access_token);
+    await Authorizations.CheckTaskAuthorization(
+      req,
+      task,
+      req.query.access_token
+    );
   }
   const pid = await spawnTerminal(req, task);
   return Jwt.sign({ pid }, env.JWT_SECRET, { expiresIn: 60 * 60 });
 }
 
-async function createTerminal(
-  req: Request,
-  res: Express.Response) {
-
+async function createTerminal(req: Request, res: Express.Response) {
   const taskId = req.params.task_id;
   if (!taskId) {
     res.status(400);
-    res.send('No task ID provided.');
+    res.send("No task ID provided.");
     return;
   }
 
@@ -177,29 +176,25 @@ async function createTerminal(
     res.send({
       token: token,
       task: task,
-      master_url: env.MESOS_MASTER_URL
+      master_url: env.MESOS_MASTER_URL,
     });
-  }
-  catch (err) {
+  } catch (err) {
     console.error(`Cannot create terminal for task ${taskId}`, err);
     if (err instanceof Authorizations.UnauthorizedAccessError) {
       res.status(403);
       res.send();
       return;
-    }
-    else if (err instanceof TaskNotFoundError) {
+    } else if (err instanceof TaskNotFoundError) {
       res.status(404);
       res.send();
       return;
-    }
-    else if (err instanceof TaskNotRunningError) {
+    } else if (err instanceof TaskNotRunningError) {
       res.status(400);
-      res.send('Task not running');
+      res.send("Task not running");
       return;
-    }
-    else if (err instanceof MesosAgentNotFoundError) {
+    } else if (err instanceof MesosAgentNotFoundError) {
       res.status(400);
-      res.send('Mesos agent not found');
+      res.send("Mesos agent not found");
       return;
     }
     // returning 400 allow to display response body to the user
@@ -222,7 +217,7 @@ export function connectTerminal(ws: Ws, req: Request) {
   const term = req.term.terminal;
   const logs = req.term.logs;
 
-  term.on('exit', function () {
+  term.on("exit", function () {
     getLogger(req).connectionClosed(req, term.pid);
     ws.close();
   });
@@ -235,7 +230,7 @@ export function connectTerminal(ws: Ws, req: Request) {
     term.write(event.data.toString());
   };
 
-  ws.onclose = (event: { code: number, reason: string }) => {
+  ws.onclose = (event: { code: number; reason: string }) => {
     term.kill();
     getLogger(req).disconnect(req, term.pid);
 
@@ -248,21 +243,18 @@ export function connectTerminal(ws: Ws, req: Request) {
   getLogger(req).connect(req, term.pid);
   ws.send(logs);
 
-  term.on('data', function (data) {
+  term.on("data", function (data) {
     try {
       ws.send(data);
-    }
-    catch (ex) {
-      console.error('Cannot send data to websocket for terminal %s.', term.pid);
+    } catch (ex) {
+      console.error("Cannot send data to websocket for terminal %s.", term.pid);
       // The WebSocket is not open, ignore
     }
   });
 }
 
-export default function (
-  app: Express.Application) {
-
-  app.post('/api/terminals/create/:task_id', createTerminal);
-  app.post('/api/terminals/resize', TerminalBearer, resizeTerminal);
-  (app as any).ws('/api/terminals/ws', WsTerminalBearer, connectTerminal);
+export default function (app: Express.Application) {
+  app.post("/api/terminals/create/:task_id", createTerminal);
+  app.post("/api/terminals/resize", TerminalBearer, resizeTerminal);
+  (app as any).ws("/api/terminals/ws", WsTerminalBearer, connectTerminal);
 }

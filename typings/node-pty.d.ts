@@ -2,7 +2,7 @@
  * Copyright (c) 2017, Daniel Imms (MIT License).
  */
 
-declare module 'node-pty' {
+declare module "node-pty" {
   /**
    * Forks a process as a pseudoterminal.
    * @param file The file to launch.
@@ -14,7 +14,11 @@ declare module 'node-pty' {
    * @see Parsing C++ Comamnd-Line Arguments https://msdn.microsoft.com/en-us/library/17w5ykft.aspx
    * @see GetCommandLine https://msdn.microsoft.com/en-us/library/windows/desktop/ms683156.aspx
    */
-  export function spawn(file: string, args: string[] | string, options: IPtyForkOptions): IPty;
+  export function spawn(
+    file: string,
+    args: string[] | string,
+    options: IPtyForkOptions
+  ): IPty;
 
   export interface IPtyForkOptions {
     name?: string;
@@ -46,7 +50,7 @@ declare module 'node-pty' {
      * @param event The name of the event.
      * @param listener The callback function.
      */
-    on(event: 'data', listener: (data: string) => void): void;
+    on(event: "data", listener: (data: string) => void): void;
 
     /**
      * Adds a listener to the exit event, fired when the pty exits.
@@ -54,7 +58,10 @@ declare module 'node-pty' {
      * @param listener The callback function, exitCode is the exit code of the process and signal is
      * the signal that triggered the exit. signal is not supported on Windows.
      */
-    on(event: 'exit', listener: (exitCode: number, signal?: number) => void): void;
+    on(
+      event: "exit",
+      listener: (exitCode: number, signal?: number) => void
+    ): void;
 
     /**
      * Resizes the dimensions of the pty.
@@ -74,7 +81,7 @@ declare module 'node-pty' {
      * @param signal The signal to use, defaults to SIGHUP. If the TIOCSIG/TIOCSIGNAL ioctl is not
      * supported then the process will be killed instead. This parameter is not supported on
      * Windows.
-     * @throws Will throw when signal is used on Windows. 
+     * @throws Will throw when signal is used on Windows.
      */
     kill(signal?: string): void;
   }

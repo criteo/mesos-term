@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Prepare docker compose override if any
-        run:  "cp tests/${{ matrix.suite }}/docker-compose.yml docker-compose.override.yml"
+        run: "cp tests/${{ matrix.suite }}/docker-compose.yml docker-compose.override.yml"
       - run: docker-compose up -d
         name: launch testing env
       - name: prepare test env

@@ -1,2 +1,1 @@
-
-declare module 'xterm-webfont';
+declare module "xterm-webfont";

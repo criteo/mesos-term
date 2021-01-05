@@ -1,10 +1,10 @@
-import { env } from './env_vars';
-import Request = require('request-promise');
-import Constants = require('./constants');
-import Axios, { AxiosRequestConfig, AxiosBasicCredentials } from 'axios';
-import { promises as Fs } from 'fs';
-import JSZip = require('jszip');
-import * as https from 'https';
+import { env } from "./env_vars";
+import Request = require("request-promise");
+import Constants = require("./constants");
+import Axios, { AxiosRequestConfig, AxiosBasicCredentials } from "axios";
+import { promises as Fs } from "fs";
+import JSZip = require("jszip");
+import * as https from "https";
 
 type Labels = { [key: string]: string };
 
@@ -13,7 +13,7 @@ interface MesosLabel {
   value: string;
 }
 
-export type MesosTaskState = 'TASK_RUNNING' | 'TASK_STARTING' | 'TASK_KILLED';
+export type MesosTaskState = "TASK_RUNNING" | "TASK_STARTING" | "TASK_KILLED";
 
 interface MesosStatus {
   state: MesosTaskState;
@@ -22,15 +22,15 @@ interface MesosStatus {
       value: string;
       parent: {
         value: string;
-      }
-    }
+      };
+    };
   };
 }
 
 interface MesosTask {
   labels: MesosLabel[];
   id: string;
-  state: 'TASK_RUNNING' | 'TASK_STARTING' | 'TASK_KILLED';
+  state: "TASK_RUNNING" | "TASK_STARTING" | "TASK_KILLED";
   user: string;
   slave_id: string;
   framework_id: string;
@@ -71,10 +71,13 @@ export interface TaskInfo extends TaskContainer {
   slave_hostname: string;
   admins: string[];
   task_id: string;
-  statuses: ('TASK_STARTING' | 'TASK_RUNNING' | 'TASK_KILLED')[];
+  statuses: ("TASK_STARTING" | "TASK_RUNNING" | "TASK_KILLED")[];
 }
 
-const mesosStateCache = cacheMesosState(env.MESOS_MASTER_URL, env.MESOS_STATE_CACHE_TIME);
+const mesosStateCache = cacheMesosState(
+  env.MESOS_MASTER_URL,
+  env.MESOS_STATE_CACHE_TIME
+);
 
 function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
   if (!mesosLabels) {
@@ -83,14 +86,14 @@ function fromMesosLabels(mesosLabels: MesosLabel[]): Labels {
 
   const labels: Labels = {};
   for (let i = 0; i < mesosLabels.length; ++i) {
-    labels[mesosLabels[i]['key']] = mesosLabels[i]['value'];
+    labels[mesosLabels[i]["key"]] = mesosLabels[i]["value"];
   }
   return labels;
 }
 
 export class TaskNotFoundError extends Error {
   constructor(m: string) {
-    super('Task not found: ' + m);
+    super("Task not found: " + m);
 
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, TaskNotFoundError.prototype);
@@ -99,7 +102,7 @@ export class TaskNotFoundError extends Error {
 
 export class FileNotFoundError extends Error {
   constructor(m: string) {
-    super('File not found: ' + m);
+    super("File not found: " + m);
 
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, FileNotFoundError.prototype);
@@ -108,7 +111,7 @@ export class FileNotFoundError extends Error {
 
 export class TaskNotRunningError extends Error {
   constructor(m: string) {
-    super('Task not running: ' + m);
+    super("Task not running: " + m);
 
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, TaskNotRunningError.prototype);
@@ -117,7 +120,7 @@ export class TaskNotRunningError extends Error {
 
 export class MesosAgentNotFoundError extends Error {
   constructor(m: string) {
-    super('Mesos agent not found: ' + m);
+    super("Mesos agent not found: " + m);
 
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, MesosAgentNotFoundError.prototype);
@@ -125,10 +128,12 @@ export class MesosAgentNotFoundError extends Error {
 }
 
 function findTaskInMasterState(state: MesosState, taskID: string) {
-  const mesosTasks = state.frameworks
-    .reduce((acc: MesosTask[], framework: MesosFramework) =>
-      acc.concat(framework.tasks).concat(framework.completed_tasks), []);
-  return mesosTasks.filter(task => task.id === taskID);
+  const mesosTasks = state.frameworks.reduce(
+    (acc: MesosTask[], framework: MesosFramework) =>
+      acc.concat(framework.tasks).concat(framework.completed_tasks),
+    []
+  );
+  return mesosTasks.filter((task) => task.id === taskID);
 }
 
 async function getMesosTasksFromMaster(taskID: string) {
@@ -159,11 +164,14 @@ function taskStatusToTaskContainer(status: MesosStatus): TaskContainer {
 function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
   const labels = fromMesosLabels(task.labels);
 
-  const slaves = state.slaves
-    .reduce(function (acc: SlaveById, slave: MesosSlave) {
-      acc[slave.id] = slave;
-      return acc;
-    }, {} as SlaveById);
+  const slaves = state.slaves.reduce(function (
+    acc: SlaveById,
+    slave: MesosSlave
+  ) {
+    acc[slave.id] = slave;
+    return acc;
+  },
+  {} as SlaveById);
 
   if (!(task.slave_id in slaves)) {
     throw new MesosAgentNotFoundError(task.slave_id);
@@ -171,20 +179,23 @@ function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
 
   const slave = slaves[task.slave_id];
   const slave_pid = slave.pid;
-  const address = slave_pid.split('@')[1];
-  const slave_url = (env.MESOS_MASTER_URL.indexOf('https') === 0)
-    ? `https://${address}`
-    : `http://${address}`;
+  const address = slave_pid.split("@")[1];
+  const slave_url =
+    env.MESOS_MASTER_URL.indexOf("https") === 0
+      ? `https://${address}`
+      : `http://${address}`;
   const slave_hostname = slave.hostname;
   let admins: string[] = [];
 
   if (Constants.DEBUG_ALLOWED_TO_KEY in labels) {
     const allowed: string = labels[Constants.DEBUG_ALLOWED_TO_KEY];
-    admins = allowed.split(',') as string[];
+    admins = allowed.split(",") as string[];
   }
 
   // Ensure the task has run.
-  const runningStatuses = task.statuses.filter(s => s.state === 'TASK_RUNNING');
+  const runningStatuses = task.statuses.filter(
+    (s) => s.state === "TASK_RUNNING"
+  );
 
   if (runningStatuses.length === 0) {
     console.log(`Cannot find running task status for task ${task.id}`);
@@ -192,12 +203,14 @@ function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
 
   if (runningStatuses.length > 1) {
     console.log(task); // log full task detail to allow further investigation
-    throw new Error(`Multiple running statuses has been found for the task ${task.id}`);
+    throw new Error(
+      `Multiple running statuses has been found for the task ${task.id}`
+    );
   }
 
   let taskContainer = {
-    container_id: 'unknown',
-    parent_container_id: 'unknown',
+    container_id: "unknown",
+    parent_container_id: "unknown",
   };
   if (runningStatuses.length > 0) {
     // extract container id (and its parent container id) to allow later to spawn a terminal
@@ -213,7 +226,7 @@ function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
     slave_hostname: slave_hostname,
     admins: admins,
     task_id: task.id,
-    statuses: task.statuses.map(s => s.state),
+    statuses: task.statuses.map((s) => s.state),
     ...taskContainer,
   };
 }
@@ -235,7 +248,7 @@ export async function getTaskInfo(taskID: string): Promise<TaskInfo> {
 
 export async function getRunningTaskInfo(taskID: string): Promise<TaskInfo> {
   const tasks = await getMesosTasksFromMaster(taskID);
-  const runningTasks = tasks.filter(t => t.state === 'TASK_RUNNING');
+  const runningTasks = tasks.filter((t) => t.state === "TASK_RUNNING");
 
   if (tasks.length > 0 && runningTasks.length === 0) {
     throw new TaskNotRunningError(taskID);
@@ -262,9 +275,12 @@ function cacheMesosState(mesosMasterURL: string, refreshSeconds: number) {
       const httpsAgent = new https.Agent({
         ca: await Fs.readFile(env.CA_FILE),
       });
-      axiosConfig['httpsAgent'] = httpsAgent;
+      axiosConfig["httpsAgent"] = httpsAgent;
     }
-    const res = await Axios.get<MesosState>(`${mesosMasterURL}/master/state`, axiosConfig);
+    const res = await Axios.get<MesosState>(
+      `${mesosMasterURL}/master/state`,
+      axiosConfig
+    );
     cache = res.data;
     return cache;
   }
@@ -312,18 +328,24 @@ interface MesosSlaveFramework {
 }
 
 export function findTaskInSlaveState(state: MesosSlaveState, taskID: string) {
-  const aggExecutorTasks = (acc2: MesosTask[], executor: MesosSlaveExecutor) => {
+  const aggExecutorTasks = (
+    acc2: MesosTask[],
+    executor: MesosSlaveExecutor
+  ) => {
     const allExecutorTasks = executor.tasks.concat(executor.completed_tasks);
-    allExecutorTasks.forEach(task => task.container = executor.container);
+    allExecutorTasks.forEach((task) => (task.container = executor.container));
     return acc2.concat(allExecutorTasks);
   };
 
-  const mesosTasks = state.frameworks
-    .reduce((acc: MesosTask[], framework: MesosSlaveFramework) => acc
-      .concat(framework.executors.reduce(aggExecutorTasks, []))
-      .concat(framework.completed_executors.reduce(aggExecutorTasks, [])), []);
+  const mesosTasks = state.frameworks.reduce(
+    (acc: MesosTask[], framework: MesosSlaveFramework) =>
+      acc
+        .concat(framework.executors.reduce(aggExecutorTasks, []))
+        .concat(framework.completed_executors.reduce(aggExecutorTasks, [])),
+    []
+  );
 
-  return mesosTasks.filter(task => task.id === taskID);
+  return mesosTasks.filter((task) => task.id === taskID);
 }
 
 export async function getMesosSlaveState(mesosSlaveURL: string) {
@@ -331,11 +353,14 @@ export async function getMesosSlaveState(mesosSlaveURL: string) {
   if (env.MESOS_AGENT_CREDENTIALS) {
     const axiosBasicCreds: AxiosBasicCredentials = {
       username: env.MESOS_AGENT_CREDENTIALS.principal,
-      password: env.MESOS_AGENT_CREDENTIALS.password
+      password: env.MESOS_AGENT_CREDENTIALS.password,
     };
-    axiosConfig['auth'] = axiosBasicCreds;
+    axiosConfig["auth"] = axiosBasicCreds;
   }
-  const res = await Axios.get<MesosSlaveState>(`${mesosSlaveURL}/state`, axiosConfig);
+  const res = await Axios.get<MesosSlaveState>(
+    `${mesosSlaveURL}/state`,
+    axiosConfig
+  );
   return res.data;
 }
 
@@ -349,9 +374,14 @@ interface FileDescription {
 }
 
 export async function browseSandbox(
-  mesosSlaveURL: string, workDir: string, slaveID: string,
-  frameworkID: string, executorID: string, containerID: string,
-  relativePath: string) {
+  mesosSlaveURL: string,
+  workDir: string,
+  slaveID: string,
+  frameworkID: string,
+  executorID: string,
+  containerID: string,
+  relativePath: string
+) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
   const axiosConfig: AxiosRequestConfig = {
@@ -360,17 +390,23 @@ export async function browseSandbox(
   if (env.MESOS_AGENT_CREDENTIALS) {
     const axiosBasicCreds: AxiosBasicCredentials = {
       username: env.MESOS_AGENT_CREDENTIALS.principal,
-      password: env.MESOS_AGENT_CREDENTIALS.password
+      password: env.MESOS_AGENT_CREDENTIALS.password,
     };
-    axiosConfig['auth'] = axiosBasicCreds;
+    axiosConfig["auth"] = axiosBasicCreds;
   }
-  const res = await Axios.get<FileDescription[]>(`${mesosSlaveURL}/files/browse?path=${fullPath}`, axiosConfig);
+  const res = await Axios.get<FileDescription[]>(
+    `${mesosSlaveURL}/files/browse?path=${fullPath}`,
+    axiosConfig
+  );
 
   if (res.status === 404) {
     throw new FileNotFoundError(relativePath);
   }
 
-  const files = res.data.map(f => ({ ...f, path: f.path.replace(basePath, '') }));
+  const files = res.data.map((f) => ({
+    ...f,
+    path: f.path.replace(basePath, ""),
+  }));
   return files;
 }
 
@@ -381,9 +417,16 @@ export interface FileData {
 }
 
 export async function readSandboxFile(
-  mesosSlaveURL: string, workDir: string, slaveID: string,
-  frameworkID: string, executorID: string, containerID: string,
-  relativePath: string, offset: number, size: number) {
+  mesosSlaveURL: string,
+  workDir: string,
+  slaveID: string,
+  frameworkID: string,
+  executorID: string,
+  containerID: string,
+  relativePath: string,
+  offset: number,
+  size: number
+) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
   const axiosConfig: AxiosRequestConfig = {
@@ -392,11 +435,14 @@ export async function readSandboxFile(
   if (env.MESOS_AGENT_CREDENTIALS) {
     const axiosBasicCreds: AxiosBasicCredentials = {
       username: env.MESOS_AGENT_CREDENTIALS.principal,
-      password: env.MESOS_AGENT_CREDENTIALS.password
+      password: env.MESOS_AGENT_CREDENTIALS.password,
     };
-    axiosConfig['auth'] = axiosBasicCreds;
+    axiosConfig["auth"] = axiosBasicCreds;
   }
-  const res = await Axios.get<FileData>(`${mesosSlaveURL}/files/read?path=${fullPath}&offset=${offset}&length=${size}`, axiosConfig);
+  const res = await Axios.get<FileData>(
+    `${mesosSlaveURL}/files/read?path=${fullPath}&offset=${offset}&length=${size}`,
+    axiosConfig
+  );
 
   if (res.status === 404) {
     throw new FileNotFoundError(relativePath);
@@ -406,99 +452,148 @@ export async function readSandboxFile(
 
 export class DownloadDirectoryError extends Error {
   constructor() {
-    super('Cannot download a directory');
+    super("Cannot download a directory");
 
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, DownloadDirectoryError.prototype);
   }
 }
 
-
 export async function downloadSandboxFileAsStream(
-  mesosSlaveURL: string, workDir: string, slaveID: string,
-  frameworkID: string, executorID: string, containerID: string,
-  relativePath: string, res: any) {
+  mesosSlaveURL: string,
+  workDir: string,
+  slaveID: string,
+  frameworkID: string,
+  executorID: string,
+  containerID: string,
+  relativePath: string,
+  res: any
+) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
   const axiosConfig: AxiosRequestConfig = {
     validateStatus: (code: number) => code === 400 || code === 200,
-    responseType: 'stream',
+    responseType: "stream",
   };
   if (env.MESOS_AGENT_CREDENTIALS) {
     const axiosBasicCreds: AxiosBasicCredentials = {
       username: env.MESOS_AGENT_CREDENTIALS.principal,
-      password: env.MESOS_AGENT_CREDENTIALS.password
+      password: env.MESOS_AGENT_CREDENTIALS.password,
     };
-    axiosConfig['auth'] = axiosBasicCreds;
+    axiosConfig["auth"] = axiosBasicCreds;
   }
-  const fileContentRes = await Axios.get(`${mesosSlaveURL}/files/download?path=${fullPath}`, axiosConfig);
-  if (fileContentRes.status === 400 && (fileContentRes as any).data === 'Cannot download a directory.\n') {
+  const fileContentRes = await Axios.get(
+    `${mesosSlaveURL}/files/download?path=${fullPath}`,
+    axiosConfig
+  );
+  if (
+    fileContentRes.status === 400 &&
+    (fileContentRes as any).data === "Cannot download a directory.\n"
+  ) {
     throw new DownloadDirectoryError();
   }
 
   return new Promise((resolve, reject) => {
-    fileContentRes.data.on('data', (chunk: ArrayBuffer) => {
+    fileContentRes.data.on("data", (chunk: ArrayBuffer) => {
       res.write(chunk);
     });
-    fileContentRes.data.on('end', () => {
+    fileContentRes.data.on("end", () => {
       resolve();
     });
-    fileContentRes.data.on('error', (err: Error) => {
+    fileContentRes.data.on("error", (err: Error) => {
       reject(err);
     });
   });
 }
 
 export async function downloadSandboxFileAsNodeArray(
-  mesosSlaveURL: string, workDir: string, slaveID: string,
-  frameworkID: string, executorID: string, containerID: string,
-  relativePath: string) {
+  mesosSlaveURL: string,
+  workDir: string,
+  slaveID: string,
+  frameworkID: string,
+  executorID: string,
+  containerID: string,
+  relativePath: string
+) {
   const basePath = `${workDir}/slaves/${slaveID}/frameworks/${frameworkID}/executors/${executorID}/runs/${containerID}`;
   const fullPath = encodeURIComponent(`${basePath}${relativePath}`);
   const axiosConfig: AxiosRequestConfig = {
     validateStatus: (code: number) => code === 400 || code === 200,
-    responseType: 'arraybuffer',
+    responseType: "arraybuffer",
   };
   if (env.MESOS_AGENT_CREDENTIALS) {
     const axiosBasicCreds: AxiosBasicCredentials = {
       username: env.MESOS_AGENT_CREDENTIALS.principal,
-      password: env.MESOS_AGENT_CREDENTIALS.password
+      password: env.MESOS_AGENT_CREDENTIALS.password,
     };
-    axiosConfig['auth'] = axiosBasicCreds;
+    axiosConfig["auth"] = axiosBasicCreds;
   }
-  const fileContentRes = await Axios.get(`${mesosSlaveURL}/files/download?path=${fullPath}`, axiosConfig);
-  if (fileContentRes.status === 400 && (fileContentRes as any).data === 'Cannot download a directory.\n') {
+  const fileContentRes = await Axios.get(
+    `${mesosSlaveURL}/files/download?path=${fullPath}`,
+    axiosConfig
+  );
+  if (
+    fileContentRes.status === 400 &&
+    (fileContentRes as any).data === "Cannot download a directory.\n"
+  ) {
     throw new DownloadDirectoryError();
   }
   return fileContentRes.data;
 }
 
-async function downloadFileToDisk(mesosSlaveURL: string, workDir: string, slaveID: string,
-  frameworkID: string, executorID: string, containerID: string,
-  relativePath: string, basePath: string, zip: any) {
-  const content = await downloadSandboxFileAsNodeArray(mesosSlaveURL, workDir, slaveID,
-    frameworkID, executorID, containerID, relativePath);
+async function downloadFileToDisk(
+  mesosSlaveURL: string,
+  workDir: string,
+  slaveID: string,
+  frameworkID: string,
+  executorID: string,
+  containerID: string,
+  relativePath: string,
+  basePath: string,
+  zip: any
+) {
+  const content = await downloadSandboxFileAsNodeArray(
+    mesosSlaveURL,
+    workDir,
+    slaveID,
+    frameworkID,
+    executorID,
+    containerID,
+    relativePath
+  );
   // slice(1) strips the first slash.
-  const path = relativePath.slice(basePath.length + ((basePath === '/') ? 0 : 1));
+  const path = relativePath.slice(basePath.length + (basePath === "/" ? 0 : 1));
   zip.file(path, content);
 }
 
 export async function downloadSandboxDirectory(
-  mesosSlaveURL: string, workDir: string, slaveID: string,
-  frameworkID: string, executorID: string, containerID: string,
-  relativePath: string, res: any) {
+  mesosSlaveURL: string,
+  workDir: string,
+  slaveID: string,
+  frameworkID: string,
+  executorID: string,
+  containerID: string,
+  relativePath: string,
+  res: any
+) {
   const directories = [relativePath] as string[];
   const files = [] as string[];
 
   while (directories.length > 0) {
     const dir = directories.pop();
-    const fds = await browseSandbox(mesosSlaveURL, workDir, slaveID,
-      frameworkID, executorID, containerID, dir);
+    const fds = await browseSandbox(
+      mesosSlaveURL,
+      workDir,
+      slaveID,
+      frameworkID,
+      executorID,
+      containerID,
+      dir
+    );
     for (let i = 0; i < fds.length; i++) {
-      if (fds[i].mode.slice(0, 1) === 'd') {
+      if (fds[i].mode.slice(0, 1) === "d") {
         directories.push(fds[i].path);
-      }
-      else {
+      } else {
         files.push(fds[i].path);
       }
     }
@@ -507,14 +602,26 @@ export async function downloadSandboxDirectory(
   const zip = new JSZip();
   const promises = [] as Promise<void>[];
   for (let i = 0; i < files.length; i++) {
-    promises.push(downloadFileToDisk(mesosSlaveURL, workDir, slaveID,
-      frameworkID, executorID, containerID, files[i], relativePath, zip));
+    promises.push(
+      downloadFileToDisk(
+        mesosSlaveURL,
+        workDir,
+        slaveID,
+        frameworkID,
+        executorID,
+        containerID,
+        files[i],
+        relativePath,
+        zip
+      )
+    );
   }
   await Promise.all(promises);
   return new Promise((resolve, reject) => {
-    zip.generateNodeStream({ streamFiles: true })
+    zip
+      .generateNodeStream({ streamFiles: true })
       .pipe(res)
-      .on('finish', resolve)
-      .on('error', reject);
+      .on("finish", resolve)
+      .on("error", reject);
   });
 }

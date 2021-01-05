@@ -1,18 +1,24 @@
-import Request = require('request-promise');
-import BluebirdPromise = require('bluebird');
-import Assert = require('assert');
+import Request = require("request-promise");
+import BluebirdPromise = require("bluebird");
+import Assert = require("assert");
 
 function getMesosState() {
-  return Request({ uri: 'http://localhost:5050/master/state.json', json: true });
+  return Request({
+    uri: "http://localhost:5050/master/state.json",
+    json: true,
+  });
 }
 
 function getMesosTasks() {
-  return Request({ uri: 'http://localhost:5050/master/tasks.json', json: true });
+  return Request({
+    uri: "http://localhost:5050/master/tasks.json",
+    json: true,
+  });
 }
 
 export function setupSuite() {
   before(function () {
-    console.log('Set up suite');
+    console.log("Set up suite");
     const that = this;
 
     const p1 = getMesosState().then(function (s) {
@@ -22,8 +28,8 @@ export function setupSuite() {
       that.mesosTasks = s;
       that.mesosTaskIds = {} as any;
       s.tasks.forEach(function (value: any) {
-        if (value['state'] === 'TASK_RUNNING') {
-          that.mesosTaskIds[value['name']] = value['id'];
+        if (value["state"] === "TASK_RUNNING") {
+          that.mesosTaskIds[value["name"]] = value["id"];
         }
       });
     });
@@ -32,19 +38,21 @@ export function setupSuite() {
   });
 
   after(function () {
-    console.log('Clean up suite');
+    console.log("Clean up suite");
   });
 
-  describe('mesos', function () {
-    ['app1', 'app2', 'app3', 'app4', 'app5', 'app6'].forEach((value: string) => {
-      describe(`application ${value}`, () => {
-        it('should have an instance', function () {
-          Assert(this.mesosTaskIds[value]);
+  describe("mesos", function () {
+    ["app1", "app2", "app3", "app4", "app5", "app6"].forEach(
+      (value: string) => {
+        describe(`application ${value}`, () => {
+          it("should have an instance", function () {
+            Assert(this.mesosTaskIds[value]);
+          });
         });
-      });
-    });
+      }
+    );
 
-    it('should have a state', function () {
+    it("should have a state", function () {
       Assert(this.mesosState);
     });
   });
