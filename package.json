@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --colors --require ts-node/register --recursive src/**/*.spec.ts",
-    "lint": "./node_modules/.bin/tslint -c tslint.json -p tsconfig.json",
+    "lint": "./node_modules/.bin/prettier --check .",
     "compile": "./node_modules/.bin/tsc -p tsconfig.json",
     "dist": "cp -r src/views src/python dist && cp -r web/build dist/public_html"
   },
@@ -71,8 +71,6 @@
     "selenium-webdriver": "^4.0.0-alpha.7",
     "sinon": "^9.0.2",
     "ts-node": "^6.0.3",
-    "tslint": "^5.20.1",
-    "tslint-eslint-rules": "^5.3.1",
     "typescript": "^3.8.3"
   }
 }
