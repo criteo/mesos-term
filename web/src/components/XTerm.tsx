@@ -72,7 +72,7 @@ export default function (props: Props) {
     (socket: WebSocket, e: Event) => {
       const self = socket;
       function keepAlive() {
-        var timeout = 2000;
+        const timeout = 2000;
         if (self.readyState === self.OPEN) {
           self.send("");
         }

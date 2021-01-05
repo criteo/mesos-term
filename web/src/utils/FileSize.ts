@@ -1,4 +1,4 @@
-export function formatFileSize(size: number, precision: number = 3) {
+export function formatFileSize(size: number, precision = 3) {
   if (size > 10 ** 9) {
     return `${(size / 10 ** 9).toFixed(precision)} GB`;
   } else if (size > 10 ** 6) {

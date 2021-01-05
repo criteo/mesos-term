@@ -24,7 +24,7 @@ const NotificationsContext = createContext<NotificationContextProps>({
 export default NotificationsContext;
 
 export function useNotifications() {
-  let useNotificationsProps = useContext(NotificationsContext);
+  const useNotificationsProps = useContext(NotificationsContext);
 
   const notificationBuilder = (level: Level) => {
     return (message: string, timeout?: number) => {

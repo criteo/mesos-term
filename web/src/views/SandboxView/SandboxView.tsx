@@ -108,7 +108,7 @@ export default function () {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout]);
 
-  let breadCrumbRoot = (
+  const breadCrumbRoot = (
     <Link
       href={buildURL(match.params.taskID, "/", layout)}
       key={`path-item-root`}
