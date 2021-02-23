@@ -1,7 +1,8 @@
 import Express = require('express');
 import { EnvVars, env } from './env_vars';
 import { Logger } from './logger';
-import { isSuperAdmin } from './authorizations';
+import { isSuperAdmin, CheckTaskAuthorization } from './authorizations';
+import { getTaskInfo } from './mesos';
 
 const ENV_VARS_KEY = 'env_vars';
 const LOGGER_KEY = 'logger';
@@ -43,8 +44,8 @@ export function SuperAdminsOnly(
   res.status(403).send();
 }
 
-// middleware to allow anyone logged
-export function AllowAnyOne(
+// middleware to allow legit users (properly accepted by DEBUG_GRANTED_TO label) to use api endpoint
+export async function AllowConfiguredUsers(
   req: Request,
   res: Express.Response,
   next: Express.NextFunction) {
@@ -52,6 +53,15 @@ export function AllowAnyOne(
   const user = req.user as User;
 
   if (user.cn && user.memberOf) {
+    try {
+      const task_info = await getTaskInfo(req.body['task_id']);
+      await CheckTaskAuthorization(req, task_info, undefined);
+    }
+    catch (err) {
+      console.log(err);
+      res.status(403).send();
+      return;
+    }
     next();
     return;
   }
