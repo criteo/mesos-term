@@ -14,7 +14,7 @@ import { DelegateGet, DelegatePost } from './controllers/delegate';
 import config from './controllers/config';
 import sandbox from './controllers/sandbox';
 
-import { setup, SuperAdminsOnly, AllowAnyOne } from './express_helpers';
+import { setup, SuperAdminsOnly, AllowConfiguredUsers } from './express_helpers';
 import { BasicAuth } from './authentication';
 import { AuthenticatedLogger, AnonymousLogger } from './logger';
 
@@ -60,8 +60,8 @@ sandbox(app);
 app.get('/api/config', config);
 
 if (env.AUTHORIZATIONS_ENABLED && env.ENABLE_RIGHTS_DELEGATION) {
-  app.get('/api/delegate', AllowAnyOne, DelegateGet);
-  app.post('/api/delegate', AllowAnyOne, DelegatePost);
+  app.get('/api/delegate', DelegateGet); // endpoint does not need authentication
+  app.post('/api/delegate', AllowConfiguredUsers, DelegatePost);
 }
 
 app.get('*', (req, res) => {

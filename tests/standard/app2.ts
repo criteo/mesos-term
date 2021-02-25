@@ -17,10 +17,6 @@ describe('app2 (label GRANTED_TO harry, no root)', function () {
         AppsHelpers.testShouldSeeGrantAccessButton('john', 'app2');
     })
 
-    describe('grant access button is not displayed to harry', function () {
-        AppsHelpers.testShouldNotSeeGrantAccessButton('harry', 'app2');
-    })
-
     describe('user james is unauthorized', function () {
         AppsHelpers.testUnauthorizedUser('james', 'app2');
     });
