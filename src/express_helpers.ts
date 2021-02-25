@@ -54,6 +54,10 @@ export async function AllowConfiguredUsers(
 
   if (user.cn && user.memberOf) {
     try {
+      if (!req.body.task_id) {
+        res.status(406).send('Request must contain key `task_id`.');
+        return;
+      }
       const task_info = await getTaskInfo(req.body['task_id']);
       await CheckTaskAuthorization(req, task_info, undefined);
     }

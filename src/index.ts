@@ -60,7 +60,7 @@ sandbox(app);
 app.get('/api/config', config);
 
 if (env.AUTHORIZATIONS_ENABLED && env.ENABLE_RIGHTS_DELEGATION) {
-  app.get('/api/delegate', AllowConfiguredUsers, DelegateGet);
+  app.get('/api/delegate', DelegateGet); // endpoint does not need authentication
   app.post('/api/delegate', AllowConfiguredUsers, DelegatePost);
 }
 
