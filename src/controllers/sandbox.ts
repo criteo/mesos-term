@@ -68,6 +68,7 @@ const sandboxCache = cacheSandboxDescriptor(async (taskID) => {
     const slaveTaskInfos = await findTaskInSlaveState(slaveState, taskID);
 
     if (slaveTaskInfos.length === 0) {
+        console.log(`Task not found in slave state ${taskInfo.task_id}`);
         throw new TaskNotFoundError(taskID);
     }
 

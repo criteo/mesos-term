@@ -290,6 +290,7 @@ interface MesosSlaveState {
     work_dir: string;
   };
   frameworks: MesosSlaveFramework[];
+  completed_frameworks: MesosSlaveFramework[];
 }
 
 interface MesosSlaveExecutor {
@@ -318,10 +319,12 @@ export function findTaskInSlaveState(state: MesosSlaveState, taskID: string) {
     return acc2.concat(allExecutorTasks);
   };
 
-  const mesosTasks = state.frameworks
-    .reduce((acc: MesosTask[], framework: MesosSlaveFramework) => acc
+  const aggFrameworkTasks = (acc: MesosTask[], framework: MesosSlaveFramework) => acc
       .concat(framework.executors.reduce(aggExecutorTasks, []))
-      .concat(framework.completed_executors.reduce(aggExecutorTasks, [])), []);
+      .concat(framework.completed_executors.reduce(aggExecutorTasks, []));
+
+  const mesosTasks = state.frameworks.reduce(aggFrameworkTasks, [])
+    .concat(state.completed_frameworks.reduce(aggFrameworkTasks, []));
 
   return mesosTasks.filter(task => task.id === taskID);
 }
