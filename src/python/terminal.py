@@ -49,11 +49,13 @@ class TaskIO(object):
     HEARTBEAT_INTERVAL_NANOSECONDS = HEARTBEAT_INTERVAL * 1000000000
 
     def __init__(self, agent_url, container_id, parent_container_id=None, user=None, cmd=None,
-                 env=None, http_principal=None, http_password=None,
+                 env=None, env_separator=':',
+                 http_principal=None, http_password=None,
                  args=None, interactive=False, tty=False):
         # Store relevant parameters of the call for later.
         self.cmd = cmd
         self.env = env
+        self.env_separator = env_separator
         self.interactive = interactive
         self.tty = tty
         self.args = args
@@ -244,7 +246,7 @@ class TaskIO(object):
         if self.env is not None:
             env_vars = []
             env_var_regex = re.compile('^([A-Z_][A-Z0-9_]*)=(.*)$')
-            for env_var in self.env.split(':'):
+            for env_var in self.env.split(self.env_separator):
                 matches = env_var_regex.match(env_var)
                 if matches and len(matches.groups()) == 2:
                     env_vars.append({
@@ -522,7 +524,8 @@ if __name__ == '__main__':
   parser.add_argument('container_id', type=str, help='The container id to connect to.')
   parser.add_argument('--user', type=str, help='The user to run the command as.')
   parser.add_argument('--cmd', type=str, default="/bin/sh", help='The command to run in the container.')
-  parser.add_argument('--env', type=str, help='List of environment variable to enrich the shell with (NAME=value, colon separated).')
+  parser.add_argument('--env', type=str, help='List of environment variable to enrich the shell with (NAME=value, colon separated by default).')
+  parser.add_argument('--env-separator', type=str, help='Separator for --env argument (default :)')
   parser.add_argument('--parent', type=str, help='The parent container id if the container id to connect to is nested (task groups)')
   parser.add_argument('--http_principal', type=str, help='The principal to connect to API v1 of the Mesos agent.')
   parser.add_argument('--http_password', type=str, help='The password to connect to API v1 of the Mesos agent.')
@@ -531,7 +534,8 @@ if __name__ == '__main__':
   t = TaskIO(agent_url=args.agent_url, container_id=args.container_id,
              parent_container_id=args.parent,
              tty=True, user=args.user, interactive=True, cmd=args.cmd,
-             env=args.env, http_principal=args.http_principal,
+             env=args.env, env_separator=args.env_separator,
+             http_principal=args.http_principal,
              http_password=args.http_password, args=[])
   t.run()
 

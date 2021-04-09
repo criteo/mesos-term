@@ -40,6 +40,7 @@ export interface EnvVars {
   ENABLE_PER_APP_ADMINS?: boolean;
   ENABLE_RIGHTS_DELEGATION?: boolean;
   EXTRA_ENV: string;
+  ENV_SEPARATOR: string;
   COMMAND: string;
   CA_FILE?: string;
   MESOS_AGENT_CREDENTIALS?: { principal: string, password: string };
@@ -71,6 +72,7 @@ export const env: EnvVars = {
   AUTHORIZATIONS_ENABLED: authorizations_enabled,
   MESOS_STATE_CACHE_TIME: parseFloat(getOrExit('MESOS_TERM_MESOS_STATE_CACHE_TIME')),
   EXTRA_ENV: getOrElse('MESOS_TERM_ENVIRONMENT', ''),
+  ENV_SEPARATOR: getOrElse('MESOS_TERM_ENV_SEPARATOR', ':'),
   COMMAND: getOrElse('MESOS_TERM_COMMAND', '/bin/sh'),
   AUTHORIZE_ALL_SANDBOXES: false,
 };
