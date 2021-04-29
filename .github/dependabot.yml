@@ -1,0 +1,31 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: monthly
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: selenium-webdriver
+    versions:
+    - 4.0.0-alpha.8
+  - dependency-name: archiver
+    versions:
+    - 5.1.0
+    - 5.2.0
+  - dependency-name: "@types/request-promise"
+    versions:
+    - 4.1.47
+  - dependency-name: "@types/express-session"
+    versions:
+    - 1.17.3
+  - dependency-name: sinon
+    versions:
+    - 9.2.3
+  - dependency-name: passport-ldapauth
+    versions:
+    - 3.0.1
+  - dependency-name: "@types/express-serve-static-core"
+    versions:
+    - 4.17.17
