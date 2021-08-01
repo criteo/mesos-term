@@ -34,7 +34,7 @@
     "jsonwebtoken": "^8.2.1",
     "jszip": "^3.6.0",
     "moment": "^2.27.0",
-    "node-pty": "^0.10.0",
+    "node-pty": "^0.10.1",
     "parse-duration": "^0.4.4",
     "passport": "^0.4.1",
     "passport-ldapauth": "^2.1.4",
