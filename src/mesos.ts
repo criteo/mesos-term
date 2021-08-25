@@ -320,8 +320,8 @@ export function findTaskInSlaveState(state: MesosSlaveState, taskID: string) {
   };
 
   const aggFrameworkTasks = (acc: MesosTask[], framework: MesosSlaveFramework) => acc
-      .concat(framework.executors.reduce(aggExecutorTasks, []))
-      .concat(framework.completed_executors.reduce(aggExecutorTasks, []));
+    .concat(framework.executors.reduce(aggExecutorTasks, []))
+    .concat(framework.completed_executors.reduce(aggExecutorTasks, []));
 
   const mesosTasks = state.frameworks.reduce(aggFrameworkTasks, [])
     .concat(state.completed_frameworks.reduce(aggFrameworkTasks, []));
@@ -439,16 +439,14 @@ export async function downloadSandboxFileAsStream(
     throw new DownloadDirectoryError();
   }
 
-  return new Promise((resolve, reject) => {
-    fileContentRes.data.on('data', (chunk: ArrayBuffer) => {
-      res.write(chunk);
-    });
+  return new Promise((resolve: Function, reject) => {
     fileContentRes.data.on('end', () => {
       resolve();
     });
     fileContentRes.data.on('error', (err: Error) => {
       reject(err);
     });
+    fileContentRes.data.pipe(res);
   });
 }
 
