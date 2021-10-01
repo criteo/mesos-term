@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/clems4ever/mesos-term#readme",
   "dependencies": {
-    "@types/compression": "^1.7.0",
+    "@types/compression": "^1.7.2",
     "archiver": "^4.0.1",
     "axios": "^0.21.2",
     "basic-auth": "^2.0.0",
