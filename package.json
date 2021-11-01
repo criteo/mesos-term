@@ -63,7 +63,7 @@
     "@types/request-promise": "^4.1.48",
     "@types/selenium-webdriver": "^4.0.15",
     "@types/sinon": "^9.0.0",
-    "@types/stream-buffers": "^3.0.3",
+    "@types/stream-buffers": "^3.0.4",
     "chai": "^4.3.4",
     "chromedriver": "*",
     "mocha": "^9.1.2",
