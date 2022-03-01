@@ -68,7 +68,7 @@
     "chromedriver": "*",
     "mocha": "^9.1.2",
     "selenium-webdriver": "^4.0.0-rc-2",
-    "sinon": "^9.2.4",
+    "sinon": "^13.0.1",
     "ts-node": "^10.4.0",
     "tslint": "^5.20.1",
     "tslint-eslint-rules": "^5.3.1",
