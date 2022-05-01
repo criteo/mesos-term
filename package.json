@@ -67,7 +67,7 @@
     "chai": "^4.3.4",
     "chromedriver": "*",
     "mocha": "^9.1.2",
-    "selenium-webdriver": "^4.0.0-rc-2",
+    "selenium-webdriver": "^4.1.2",
     "sinon": "^9.2.4",
     "ts-node": "^10.4.0",
     "tslint": "^5.20.1",
