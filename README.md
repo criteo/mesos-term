@@ -140,6 +140,8 @@ Here are the details of available options.
 | MESOS\_TERM\_LDAP\_URL                  | Url of the LDAP server. Authorizations are disabled if this env variable is not set.     |
 | MESOS\_TERM\_LDAP\_USER                 | User DN of the LDAP user to bind against LDAP server.                                    |
 | MESOS\_TERM\_MESOS\_MASTER\_URL         | Url of the Mesos master to fetch the state from.                                         |
+| MESOS\_TERM\_MESOS\_MASTER\_STATE\_PATH | Path leading to the state file on the master. (default: /master/state)                   |
+| MESOS\_TERM\_MESOS\_AGENT\_SSL          | Whether to use SSL to reach the agents. (default: is same as in master url)              |
 | MESOS\_TERM\_MESOS\_STATE\_CACHE\_TIME  | Time in seconds before invalidating the cache containing Mesos state.                    |
 | MESOS\_TERM\_NODE\_ENV                  | Must be "production" for express to run in production mode.                              |
 | MESOS\_TERM\_SESSION\_SECRET            | Secret used to encrypt session cookie.                                                   |

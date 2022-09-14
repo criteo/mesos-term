@@ -172,9 +172,7 @@ function taskToTaskInfo(task: MesosTask, state: MesosState): TaskInfo {
   const slave = slaves[task.slave_id];
   const slave_pid = slave.pid;
   const address = slave_pid.split('@')[1];
-  const slave_url = (env.MESOS_MASTER_URL.indexOf('https') === 0)
-    ? `https://${address}`
-    : `http://${address}`;
+  const slave_url = env.MESOS_AGENT_SSL ? `https://${address}` : `http://${address}`;
   const slave_hostname = slave.hostname;
   let admins: string[] = [];
 
@@ -264,7 +262,7 @@ function cacheMesosState(mesosMasterURL: string, refreshSeconds: number) {
       });
       axiosConfig['httpsAgent'] = httpsAgent;
     }
-    const res = await Axios.get<MesosState>(`${mesosMasterURL}/master/state`, axiosConfig);
+    const res = await Axios.get<MesosState>(`${mesosMasterURL}${env.MESOS_MASTER_STATE_PATH}`, axiosConfig);
     cache = res.data;
     return cache;
   }
