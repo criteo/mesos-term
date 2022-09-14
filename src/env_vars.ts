@@ -26,6 +26,7 @@ export interface EnvVars {
   LDAP_USER?: string;
   LDAP_PASSWORD?: string;
   MESOS_MASTER_URL: string;
+  MESOS_MASTER_STATE_PATH: string;
   MESOS_STATE_CACHE_TIME: number;
   SESSION_SECRET: string;
   SESSION_MAX_AGE_SEC: number;
@@ -44,6 +45,7 @@ export interface EnvVars {
   COMMAND: string;
   CA_FILE?: string;
   MESOS_AGENT_CREDENTIALS?: { principal: string, password: string };
+  MESOS_AGENT_SSL?: boolean;
 }
 
 const authorizations_enabled = (process.env['MESOS_TERM_LDAP_URL']) ? true : false;
@@ -69,6 +71,7 @@ export const env: EnvVars = {
   SUPER_ADMINS: getSuperAdmins(),
   ALLOWED_TASK_ADMINS: parseAllowedTaskAdmins(),
   MESOS_MASTER_URL: getOrExit('MESOS_TERM_MESOS_MASTER_URL'),
+  MESOS_MASTER_STATE_PATH: getOrElse('MESOS_TERM_MESOS_MASTER_STATE_PATH', '/master/state'),
   AUTHORIZATIONS_ENABLED: authorizations_enabled,
   MESOS_STATE_CACHE_TIME: parseFloat(getOrExit('MESOS_TERM_MESOS_STATE_CACHE_TIME')),
   EXTRA_ENV: getOrElse('MESOS_TERM_ENVIRONMENT', ''),
@@ -88,6 +91,9 @@ if ('MESOS_TERM_MESOS_AGENT_PRINCIPAL' in process.env && 'MESOS_TERM_MESOS_AGENT
     password: process.env['MESOS_TERM_MESOS_AGENT_PASSWORD']
   };
 }
+
+const default_agent_ssl = env['MESOS_MASTER_URL'].indexOf('https') === 0 ? 'true' : 'false';
+env['MESOS_AGENT_SSL'] = getOrElse('MESOS_TERM_MESOS_AGENT_SSL', default_agent_ssl) == 'true';
 
 if (authorizations_enabled) {
   env['LDAP_URL'] = getOrExit('MESOS_TERM_LDAP_URL');
