@@ -30,7 +30,7 @@
     "ejs": "^3.1.6",
     "express": "^4.16.2",
     "express-session": "^1.17.2",
-    "express-ws": "^4.0.0",
+    "express-ws": "^5.0.2",
     "jsonwebtoken": "^8.2.1",
     "jszip": "^3.7.1",
     "moment": "^2.29.4",
