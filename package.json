@@ -27,7 +27,7 @@
     "bluebird": "^3.7.2",
     "body-parser": "^1.18.3",
     "compression": "^1.7.4",
-    "ejs": "^3.1.6",
+    "ejs": "^3.1.8",
     "express": "^4.16.2",
     "express-session": "^1.17.2",
     "express-ws": "^5.0.2",
