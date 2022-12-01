@@ -39,7 +39,7 @@
     "passport": "^0.4.1",
     "passport-ldapauth": "^2.1.4",
     "query-string": "^7.1.1",
-    "readable-stream": "^3.6.0",
+    "readable-stream": "^4.2.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "stream-buffers": "^3.0.2"
