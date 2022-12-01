@@ -22,7 +22,7 @@
   "dependencies": {
     "@types/compression": "^1.7.2",
     "archiver": "^5.3.0",
-    "axios": "^0.21.2",
+    "axios": "^1.2.0",
     "basic-auth": "^2.0.0",
     "bluebird": "^3.7.2",
     "body-parser": "^1.18.3",
