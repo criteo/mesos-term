@@ -1,4 +1,4 @@
-FROM node:11.15.0 AS run
+FROM node:12.22.12 AS run
 RUN apt-get update && apt-get install -y python3-pip
 
 
