@@ -19,9 +19,28 @@ require_compose_service_running() {
   fi
 }
 
+wait_for_http() {
+  local name="$1"
+  local url="$2"
+  local attempts="${3:-60}"
+
+  for ((i = 1; i <= attempts; i++)); do
+    if curl -fsS "$url" >/dev/null; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  echo "$name did not become ready at $url."
+  docker ps -a || true
+  dump_compose_logs || true
+  exit 1
+}
+
 # just in case showing docker status
 docker ps -a | head -n10
 require_compose_service_running mesos-slave
+wait_for_http "Mesos master" "http://localhost:5050/master/state.json"
 
 echo "TODO: Wait for LDAP to be ready"
 sleep 5
@@ -31,7 +50,7 @@ sleep 5
 docker run -t --network host -v $(pwd)/tests/resources/ldap/base.ldif:/base.ldif --rm mbentley/ldap-utils ldapadd -H "ldap://172.16.130.6" -D "cn=admin,dc=example,dc=com" -f /base.ldif -w password -x
 
 echo "TODO: Wait for Marathon to be ready"
-sleep 15 # Wait for Marathon to start
+wait_for_http "Marathon" "http://localhost:8080/v2/info"
 
 ./tests/resources/create_apps.sh
 

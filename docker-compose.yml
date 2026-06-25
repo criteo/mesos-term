@@ -49,9 +49,10 @@ services:
       - mesos-master
     environment:
       MESOS_MASTER: zk://zookeeper:2181/mesos
-      # Tests use Mesos/UCR command tasks; DockerContainerizer requires cgroup
-      # mounts that are not available on current GitHub-hosted runners.
+      # Tests use Mesos/UCR command tasks. Keep the agent on the POSIX path so
+      # old Mesos does not require Docker or cgroup-v1 mounts on hosted runners.
       MESOS_CONTAINERIZERS: mesos
+      MESOS_LAUNCHER: posix
       MESOS_PORT: 5051
       MESOS_RESOURCES: ports(*):[11000-11999]
       MESOS_HOSTNAME: localhost
@@ -59,7 +60,7 @@ services:
       MESOS_LOG_DIR: /var/log/mesos
       MESOS_SYSTEMD_ENABLE_SUPPORT: "false"
       MESOS_FRAMEWORKS_HOME: /var/tmp/mesos/frameworks
-      MESOS_ISOLATION: filesystem/linux
+      MESOS_ISOLATION: posix/cpu,posix/mem
       MESOS_AUTHENTICATE_HTTP_READWRITE: "true"
       MESOS_AUTHENTICATE_HTTP_EXECUTORS: "true"
       MESOS_HTTP_CREDENTIALS: /etc/mesos/agent_credential
