@@ -10,6 +10,7 @@ import { useNotifications } from "../../hooks/NotificationContext";
 import FileReader from "./FileReader";
 import FileDescriptionBar, { Layout } from "../../components/FileDescriptionBar";
 import FileBrowser from "../../components/FileBrowser";
+import { errorMessage } from "../../utils/ErrorMessage";
 
 function isDirectory(fd: FileDescription) {
     return fd.mode.slice(0, 1) === 'd';
@@ -59,7 +60,7 @@ export default function () {
             setFiles(files);
             setSelectedFile(null);
         } catch (err) {
-            createErrorNotification(err.message);
+            createErrorNotification(errorMessage(err));
         } finally {
             setLoadingState(false);
         }
@@ -116,7 +117,7 @@ export default function () {
             setDownloadInProgress(true);
             downloadSandboxFile(match.params.taskID, p, isDir, filename);
         } catch (err) {
-            createErrorNotification(err.message);
+            createErrorNotification(errorMessage(err));
         } finally {
             setDownloadInProgress(false);
         }
@@ -232,4 +233,3 @@ const useStyles = makeStyles(theme => ({
         borderTop: '1px solid ' + theme.palette.background.default,
     },
 }));
-

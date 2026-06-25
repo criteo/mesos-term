@@ -6,7 +6,7 @@ import Bluebird = require('bluebird');
 import * as Jwt from 'jsonwebtoken';
 
 import { env } from '../env_vars';
-import { getLogger } from '../express_helpers';
+import { getLogger, optionalQueryParam, queryParam } from '../express_helpers';
 import { TaskNotFoundError, getRunningTaskInfo, TaskInfo, TaskNotRunningError, MesosAgentNotFoundError } from '../mesos';
 import Authorizations = require('../authorizations');
 import { Request } from '../express_helpers';
@@ -34,7 +34,7 @@ async function VerifyBearer(req: Request) {
     throw new Error('Unauthorized due to missing bearer.');
   }
 
-  const decoded = Jwt.verify(req.query[BEARER_KEY], env.JWT_SECRET) as any;
+  const decoded = Jwt.verify(queryParam(req, BEARER_KEY), env.JWT_SECRET) as any;
   const pid = decoded.pid;
 
   if (!pid) {
@@ -158,7 +158,7 @@ async function tryRequestTerminal(
   task: TaskInfo) {
 
   if (env.AUTHORIZATIONS_ENABLED) {
-    await Authorizations.CheckTaskAuthorization(req, task, req.query.access_token);
+    await Authorizations.CheckTaskAuthorization(req, task, optionalQueryParam(req, 'access_token'));
   }
   const pid = await spawnTerminal(req, task);
   return Jwt.sign({ pid }, env.JWT_SECRET, { expiresIn: 60 * 60 });
@@ -216,8 +216,8 @@ async function createTerminal(
 
 export function resizeTerminal(req: Request, res: Express.Response) {
   const term = req.term.terminal;
-  const cols = parseInt(req.query.cols);
-  const rows = parseInt(req.query.rows);
+  const cols = parseInt(queryParam(req, 'cols'));
+  const rows = parseInt(queryParam(req, 'rows'));
 
   term.resize(cols, rows);
   res.end();

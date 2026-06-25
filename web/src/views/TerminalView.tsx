@@ -14,6 +14,7 @@ import DelegationDialog from "../components/DelegationFormDialog";
 import AccessRequestDialog from "../components/AccessRequestDialog";
 import { UnauthorizedAccessError, TaskNotFoundError } from "../errors";
 import queryString from "query-string";
+import { errorMessage } from "../utils/ErrorMessage";
 
 
 interface Context {
@@ -61,7 +62,7 @@ export default function () {
             if (err instanceof UnauthorizedAccessError) {
                 setStatus(Status.Unauthorized);
                 if (accessToken) {
-                    createErrorNotification(err.message);
+                    createErrorNotification(errorMessage(err));
                 }
                 return;
             } else if (err instanceof TaskNotFoundError) {
@@ -69,7 +70,7 @@ export default function () {
                 createErrorNotification("Task not found");
                 return;
             }
-            createErrorNotification(err.message, -1);
+            createErrorNotification(errorMessage(err), -1);
             setStatus(Status.Failed);
         }
     }, [taskID, createErrorNotification, accessToken]);
@@ -79,7 +80,7 @@ export default function () {
             const res = await getConfig();
             setConfig(res);
         } catch (err) {
-            createErrorNotification(`Unable to retrieve configuration: ${err.message}`);
+            createErrorNotification(`Unable to retrieve configuration: ${errorMessage(err)}`);
         }
     }, [createErrorNotification]);
 

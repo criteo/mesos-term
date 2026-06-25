@@ -1,6 +1,5 @@
-require('chromedriver');
 import webdriver = require('selenium-webdriver');
-import Request = require('request-promise');
+import Axios from 'axios';
 import { Options } from 'selenium-webdriver/chrome';
 
 export async function withChrome<T>(
@@ -45,10 +44,6 @@ export function getDelegation(from: string, to: string, instanceId: string) {
     'delegate_to': to,
     'duration': '1h',
   };
-  return Request({
-    uri: `http://${from}:password@localhost:3000/api/delegate`,
-    body: body,
-    json: true,
-    method: 'POST'
-  });
+  return Axios.post(`http://${from}:password@localhost:3000/api/delegate`, body)
+    .then(res => res.data);
 }

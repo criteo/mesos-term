@@ -16,6 +16,28 @@ export interface Request extends Express.Request {
   user: User;
 }
 
+export function optionalQueryParam(req: Express.Request, key: string): string | undefined {
+  const value = req.query[key];
+  if (value === undefined) {
+    return undefined;
+  }
+  if (Array.isArray(value)) {
+    return optionalQueryValue(value[0]);
+  }
+  return optionalQueryValue(value);
+}
+
+export function queryParam(req: Express.Request, key: string): string {
+  return optionalQueryParam(req, key) || '';
+}
+
+function optionalQueryValue(value: any): string | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  return String(value);
+}
+
 export function setup(app: Express.Application, logger: Logger) {
   app.set(ENV_VARS_KEY, env);
   app.set(LOGGER_KEY, logger);

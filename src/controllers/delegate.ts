@@ -1,12 +1,8 @@
 import Express = require('express');
-import Bluebird = require('bluebird');
 import Jwt = require('jsonwebtoken');
+import ms = require('ms');
 import { env } from '../env_vars';
 import { Request } from '../express_helpers';
-
-const ParseDuration = require('parse-duration');
-
-const JwtAsync: any = Bluebird.promisifyAll(Jwt);
 
 export function DelegateGet(
   req: Request,
@@ -37,7 +33,8 @@ export function DelegatePost(
   }
 
   const duration = req.body.duration;
-  const expiresIn = ParseDuration(duration) / 1000;
+  const parsedDuration = ms(duration);
+  const expiresIn = (typeof parsedDuration === 'number') ? parsedDuration / 1000 : undefined;
 
   if (!expiresIn) {
     console.error(`Unable to parse duration ${req.body.duration}`);
@@ -56,12 +53,11 @@ export function DelegatePost(
     issuer: req.user.cn
   };
 
-  JwtAsync.signAsync(payload, env.JWT_SECRET, options)
-    .then(function (token: string) {
-      res.send(token);
-    })
-    .catch(function (err: Error) {
-      console.error(`Unable to generate delegation token: ${err}`);
-      res.status(503);
-    });
+  try {
+    const token = Jwt.sign(payload, env.JWT_SECRET, options);
+    res.send(token);
+  } catch (err) {
+    console.error(`Unable to generate delegation token: ${err}`);
+    res.status(503).send('Unable to generate delegation token');
+  }
 }

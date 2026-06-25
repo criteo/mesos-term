@@ -1,5 +1,4 @@
 import { env } from './env_vars';
-import Request = require('request-promise');
 import Constants = require('./constants');
 import Axios, { AxiosRequestConfig, AxiosBasicCredentials } from 'axios';
 import { promises as Fs } from 'fs';

@@ -1,5 +1,5 @@
-FROM node:11.15.0
+FROM node:20-bookworm
 COPY . /test
 WORKDIR /test
-RUN npm install
+RUN npm ci
 CMD ["/bin/bash", "-c", "/test/tests/resources/run_tests.sh"]

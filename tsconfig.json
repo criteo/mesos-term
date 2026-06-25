@@ -6,6 +6,7 @@
         "noImplicitAny": true,
         "sourceMap": true,
         "removeComments": true,
+        "skipLibCheck": true,
         "outDir": "dist",
         "baseUrl": ".",
         "paths": {
@@ -15,7 +16,8 @@
         }
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "typings/**/*"
     ],
     "exclude": [
         "test/**/*"

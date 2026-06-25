@@ -7,7 +7,7 @@ import {
 import { env } from '../env_vars';
 import * as Moment from 'moment';
 import { CheckTaskAuthorization, UnauthorizedAccessError } from '../authorizations';
-import { Request } from '../express_helpers';
+import { optionalQueryParam, queryParam, Request } from '../express_helpers';
 
 type TaskState = MesosTaskState | 'UNKNOWN';
 
@@ -93,18 +93,20 @@ const sandboxCache = cacheSandboxDescriptor(async (taskID) => {
 
 export default function (app: Express.Application) {
     app.get('/api/sandbox/*', async function (req: Request, res: Express.Response, next: Express.NextFunction) {
+        const taskID = queryParam(req, 'taskID');
+        const path = queryParam(req, 'path');
         try {
             if (req.user == undefined)
-                console.log(`Anonymous connection to ${req.query.taskID}: ${req.query.path}`);
+                console.log(`Anonymous connection to ${taskID}: ${path}`);
             else
-                console.log(`Connection attempt from ${req.user.cn} for ${req.query.taskID}: ${req.query.path}`);
+                console.log(`Connection attempt from ${req.user.cn} for ${taskID}: ${path}`);
             if (env.AUTHORIZATIONS_ENABLED && !env.AUTHORIZE_ALL_SANDBOXES) {
-                const sandbox = await sandboxCache(req.query.taskID);
-                await CheckTaskAuthorization(req, sandbox.task, req.query.access_token);
+                const sandbox = await sandboxCache(taskID);
+                await CheckTaskAuthorization(req, sandbox.task, optionalQueryParam(req, 'access_token'));
             }
         }
         catch (err) {
-            console.error(`Cannot authorize user ${req.user.cn} to access to sandbox of task ${req.query.taskID}`, err);
+            console.error(`Cannot authorize user ${req.user.cn} to access to sandbox of task ${taskID}`, err);
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
                 res.send('Mesos agent not found');
@@ -128,14 +130,16 @@ export default function (app: Express.Application) {
     });
 
     app.get('/api/sandbox/browse', async function (req: Express.Request, res: Express.Response) {
+        const taskID = queryParam(req, 'taskID');
+        const path = queryParam(req, 'path');
         try {
-            const sandbox = await sandboxCache(req.query.taskID);
+            const sandbox = await sandboxCache(taskID);
             const files = await browseSandbox(sandbox.agentURL, sandbox.workDir, sandbox.slaveID, sandbox.frameworkID,
-                req.query.taskID, sandbox.containerID, req.query.path);
+                taskID, sandbox.containerID, path);
             res.send(files);
         }
         catch (err) {
-            console.error(`Cannot browse files in ${req.query.path} from sandbox of task ${req.query.taskID}`, err);
+            console.error(`Cannot browse files in ${path} from sandbox of task ${taskID}`, err);
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
                 res.send('Mesos agent not found');
@@ -165,17 +169,21 @@ export default function (app: Express.Application) {
     });
 
     app.get('/api/sandbox/read', async function (req: Express.Request, res: Express.Response) {
+        const taskID = queryParam(req, 'taskID');
+        const path = queryParam(req, 'path');
+        const offset = Number(queryParam(req, 'offset'));
+        const size = Number(queryParam(req, 'size'));
         try {
-            const sandbox = await sandboxCache(req.query.taskID);
+            const sandbox = await sandboxCache(taskID);
             const files = await readSandboxFile(sandbox.agentURL, sandbox.workDir, sandbox.slaveID, sandbox.frameworkID,
-                req.query.taskID, sandbox.containerID, req.query.path, req.query.offset, req.query.size);
+                taskID, sandbox.containerID, path, offset, size);
             if (!(sandbox.last_status === 'TASK_RUNNING' || sandbox.last_status === 'TASK_STARTING')) {
                 files.eof = true;
             }
             res.send(files);
         }
         catch (err) {
-            console.error(`Cannot read file ${req.query.path} from sandbox of task ${req.query.taskID}`, err);
+            console.error(`Cannot read file ${path} from sandbox of task ${taskID}`, err);
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
                 res.send('Mesos agent not found');
@@ -203,23 +211,27 @@ export default function (app: Express.Application) {
     });
 
     app.get('/api/sandbox/download', async function (req: Express.Request, res: Express.Response) {
+        const taskID = queryParam(req, 'taskID');
+        const path = queryParam(req, 'path');
+        const filename = queryParam(req, 'filename');
+        const directory = queryParam(req, 'directory');
         try {
-            const sandbox = await sandboxCache(req.query.taskID);
+            const sandbox = await sandboxCache(taskID);
             res.set('Content-Type', 'application/octet-stream');
-            res.set('Content-Disposition', 'attachment; filename=' + req.query.filename);
+            res.set('Content-Disposition', 'attachment; filename=' + filename);
 
-            if (req.query.directory === 'true') {
+            if (directory === 'true') {
                 await downloadSandboxDirectory(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
-                    sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path, res);
+                    sandbox.frameworkID, taskID, sandbox.containerID, path, res);
             }
             else {
                 await downloadSandboxFileAsStream(sandbox.agentURL, sandbox.workDir, sandbox.slaveID,
-                    sandbox.frameworkID, req.query.taskID, sandbox.containerID, req.query.path, res);
+                    sandbox.frameworkID, taskID, sandbox.containerID, path, res);
             }
             res.end();
         }
         catch (err) {
-            console.error(`Cannot download file(s) ${req.query.path} from sandbox of task ${req.query.taskID}`, err);
+            console.error(`Cannot download file(s) ${path} from sandbox of task ${taskID}`, err);
             if (err instanceof MesosAgentNotFoundError) {
                 res.status(400);
                 res.send('Mesos agent not found');

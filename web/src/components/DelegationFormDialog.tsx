@@ -6,6 +6,7 @@ import {
 import { postGenerateDelegationToken } from "../services/MesosTerm";
 import { useNotifications } from "../hooks/NotificationContext";
 import classnames from "classnames";
+import { errorMessage } from "../utils/ErrorMessage";
 
 export interface Props {
     open: boolean;
@@ -38,7 +39,7 @@ export default function (props: Props) {
             });
             setToken(token);
         } catch (err) {
-            createErrorNotification(err.message);
+            createErrorNotification(errorMessage(err));
         }
     }
 

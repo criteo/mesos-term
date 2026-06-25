@@ -51,7 +51,7 @@ export default function (props: FileReaderProps) {
             </div>
             <div className={classes.root} ref={fileReaderRef}>
                 <AutoSizer>
-                    {({ height, width }) =>
+                    {({ height, width }: { height: number, width: number }) =>
                         <FileContent
                             width={width}
                             height={height}

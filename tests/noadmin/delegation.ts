@@ -1,5 +1,5 @@
 import helpers = require('../helpers');
-import Request = require('request-promise');
+import Axios from 'axios';
 
 describe('basic routes', function () {
     this.timeout(30000);
@@ -7,15 +7,13 @@ describe('basic routes', function () {
 
     it('endpoint should not be present', function () {
         return helpers.withChrome(async function (driver) {
-            try {
-                await Request({ uri: 'http://john:password@localhost:3000/api/delegate', json: true, method: 'POST' });
-                throw new Error("Should not be here");
-            } catch (err) {
-                if (err.statusCode == 404) {
-                    return
-                }
-                throw new Error('bad error');
+            const res = await Axios.post('http://john:password@localhost:3000/api/delegate', null, {
+                validateStatus: () => true,
+            });
+            if (res.status === 404) {
+                return;
             }
+            throw new Error('bad error');
         });
     });
 });

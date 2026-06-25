@@ -1,13 +1,13 @@
-import Request = require('request-promise');
+import Axios from 'axios';
 import BluebirdPromise = require('bluebird');
 import Assert = require('assert');
 
 function getMesosState() {
-  return Request({ uri: 'http://localhost:5050/master/state.json', json: true });
+  return Axios.get('http://localhost:5050/master/state.json').then(res => res.data);
 }
 
 function getMesosTasks() {
-  return Request({ uri: 'http://localhost:5050/master/tasks.json', json: true });
+  return Axios.get('http://localhost:5050/master/tasks.json').then(res => res.data);
 }
 
 export function setupSuite() {
