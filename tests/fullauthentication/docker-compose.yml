@@ -12,7 +12,7 @@ services:
       - SUITE=fullauthentication
   mesos-slave:
     environment:
-      MESOS_ACLS_PATH: "file:///etc/mesos/slave_acls.json"
+      MESOS_ACLS: "file:///etc/mesos/slave_acls.json"
       MESOS_AUTHENTICATE_HTTP_READONLY: "true"
     volumes:
       - ./tests/resources/slave_acls.json:/etc/mesos/slave_acls.json

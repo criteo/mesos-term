@@ -47,3 +47,20 @@ If Docker is available locally, also verify the container build:
 ```bash
 docker build -f Dockerfile.build .
 ```
+
+## Local integration presubmit
+
+The GitHub integration job runs one suite at a time. To reproduce the
+`fullauthentication` suite locally with Docker Compose v2:
+
+```bash
+cp tests/fullauthentication/docker-compose.yml docker-compose.override.yml
+docker compose up -d
+tests/resources/setup.sh
+docker run -d --network host -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome:4.0.0-beta-1-prerelease-20201208
+docker run -e "SUITE_NAME=fullauthentication" --network=host --rm -t $(docker build -q . -f Dockerfile.test)
+tests/resources/cleanup.sh
+```
+
+Replace `fullauthentication` with `standard`, `noauth`, `noadmin`, or
+`taskadmins` to run another matrix entry.

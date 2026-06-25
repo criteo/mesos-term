@@ -2,8 +2,26 @@
 
 set -e
 
+dump_compose_logs() {
+  docker compose logs --no-color mesos-slave mesos-master marathon mesos-term
+}
+
+require_compose_service_running() {
+  local service="$1"
+  local container_id
+
+  container_id="$(docker compose ps -q "$service")"
+  if [[ -z "$container_id" || "$(docker inspect -f '{{.State.Running}}' "$container_id")" != "true" ]]; then
+    echo "Service '$service' is not running."
+    docker ps -a || true
+    dump_compose_logs || true
+    exit 1
+  fi
+}
+
 # just in case showing docker status
 docker ps -a | head -n10
+require_compose_service_running mesos-slave
 
 echo "TODO: Wait for LDAP to be ready"
 sleep 5

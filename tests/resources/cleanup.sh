@@ -2,7 +2,7 @@
 
 script_dir=`dirname "$0"`
 
-pushd $script_dir
+pushd "$script_dir/../.."
 
 if docker compose version >/dev/null 2>&1; then
   docker compose down -v

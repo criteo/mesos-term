@@ -26,3 +26,11 @@ jobs:
         run: docker run -d --network host -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome:4.0.0-beta-1-prerelease-20201208
       - name: Run ${{ matrix.suite }} test suite
         run: docker run -e "SUITE_NAME=${{ matrix.suite }}" --network=host --rm -t $(docker build -q . -f Dockerfile.test)
+      - name: Dump Docker diagnostics
+        if: failure()
+        run: |
+          docker ps -a || true
+          docker compose logs --no-color mesos-slave mesos-master marathon mesos-term openldap || true
+      - name: Stop testing env
+        if: always()
+        run: tests/resources/cleanup.sh || true
