@@ -266,12 +266,18 @@ function cacheMesosState(mesosMasterURL: string, refreshSeconds: number) {
     return cache;
   }
 
+  function refreshCacheInBackground() {
+    refreshCache().catch((err: Error) => {
+      console.error('Cannot refresh Mesos state cache', err);
+    });
+  }
+
   // Setup the auto refresh
   setInterval(function () {
-    refreshCache();
+    refreshCacheInBackground();
   }, 1000 * refreshSeconds);
   // Do the first fetch
-  refreshCache();
+  refreshCacheInBackground();
 
   return async (update: boolean) => {
     if (!update && cache !== undefined) {

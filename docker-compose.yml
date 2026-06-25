@@ -49,7 +49,9 @@ services:
       - mesos-master
     environment:
       MESOS_MASTER: zk://zookeeper:2181/mesos
-      MESOS_CONTAINERIZERS: mesos,docker
+      # Tests use Mesos/UCR command tasks; DockerContainerizer requires cgroup
+      # mounts that are not available on current GitHub-hosted runners.
+      MESOS_CONTAINERIZERS: mesos
       MESOS_PORT: 5051
       MESOS_RESOURCES: ports(*):[11000-11999]
       MESOS_HOSTNAME: localhost
@@ -57,15 +59,13 @@ services:
       MESOS_LOG_DIR: /var/log/mesos
       MESOS_SYSTEMD_ENABLE_SUPPORT: "false"
       MESOS_FRAMEWORKS_HOME: /var/tmp/mesos/frameworks
-      MESOS_IMAGE_PROVIDERS: docker
-      MESOS_ISOLATION: filesystem/linux,docker/runtime
+      MESOS_ISOLATION: filesystem/linux
       MESOS_AUTHENTICATE_HTTP_READWRITE: "true"
       MESOS_AUTHENTICATE_HTTP_EXECUTORS: "true"
       MESOS_HTTP_CREDENTIALS: /etc/mesos/agent_credential
       MESOS_JWT_SECRET_KEY: /etc/mesos/secret_key
       LIBPROCESS_IP: 172.16.130.4
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ./tests/resources/agent_credential:/etc/mesos/agent_credential
       - ./tests/resources/secret_key:/etc/mesos/secret_key
 
