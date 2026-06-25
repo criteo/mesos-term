@@ -19,8 +19,8 @@ fi
 #     echo "Test failed"
 
 #     docker ps -a
-#     docker-compose logs mesos-term
-#     docker-compose logs mesos-slave
-#     docker-compose logs mesos-master
+#     docker compose logs mesos-term
+#     docker compose logs mesos-slave
+#     docker compose logs mesos-master
 #     exit 1
 # fi

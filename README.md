@@ -21,7 +21,7 @@ The solution is to upgrade Mesos to a version higher or equal to 1.5.1.
 
 ## Getting started
 
-To set up a complete environment for testing, ensure docker and docker-compose
+To set up a complete environment for testing, ensure docker and Docker Compose
 are installed on your machine and run:
 
 ```
